@@ -4,6 +4,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -48,7 +49,7 @@ public class UserController {
         return ResponseEntity.ok(userService.update(updatedUserDto, id));
     }
 
-    @org.springframework.web.bind.annotation.DeleteMapping("/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         log.info("Processing request to delete user with ID: {}", id);
         userService.delete(id);

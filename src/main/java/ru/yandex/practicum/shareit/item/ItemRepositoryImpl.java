@@ -2,6 +2,7 @@ package ru.yandex.practicum.shareit.item;
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import org.springframework.stereotype.Repository;
 
@@ -35,6 +36,12 @@ public class ItemRepositoryImpl implements ItemRepository {
     }
 
     @Override
+    public Optional<Item> getById(Long id) {
+        return Optional.ofNullable(items.get(id)).map(Item::new);
+
+    }
+
+    @Override
     public java.util.Optional<Item> update(Item updatedItem) {
         Long itemId = updatedItem.getId();
         if (items.containsKey(itemId)) {
@@ -48,7 +55,7 @@ public class ItemRepositoryImpl implements ItemRepository {
             if (updatedItem.getStatus() != null) {
                 existingItem.setStatus(updatedItem.getStatus());
             }
-            return java.util.Optional.of(existingItem);
+            return java.util.Optional.of(new Item(existingItem));
         }
         return java.util.Optional.empty();
     }
@@ -60,8 +67,9 @@ public class ItemRepositoryImpl implements ItemRepository {
 
     @Override
     public java.util.List<Item> search(String query) {
-        return items.values().stream().filter(
-            i -> (i.getName().contains(query) || i.getDescription().contains(query))
-                && i.getStatus() == ItemStatus.AVAILABLE).toList();
+        String lowerCaseQuery = query.toLowerCase();
+        return items.values().stream().filter(i ->
+            (i.getName().toLowerCase().contains(lowerCaseQuery) || i.getDescription().toLowerCase()
+                .contains(lowerCaseQuery)) && i.getStatus() == ItemStatus.AVAILABLE).toList();
     }
 }

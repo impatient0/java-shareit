@@ -1,6 +1,5 @@
 package ru.yandex.practicum.shareit.item;
 
 public enum ItemStatus {
-    AVAILABLE,
-    BOOKED
+    AVAILABLE, UNAVAILABLE
 }
