@@ -13,12 +13,4 @@ public class Item {
     private String description;
     private User owner;
     private ItemStatus status;
-
-    public Item(Item item) {
-        this.id = item.getId();
-        this.name = item.getName();
-        this.description = item.getDescription();
-        this.owner = new User(item.getOwner());
-        this.status = item.getStatus();
-    }
 }

@@ -1,11 +1,11 @@
 package ru.practicum.shareit.user;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exception.EmailAlreadyExistsException;
 
@@ -23,7 +23,7 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public List<User> getAll() {
-        return users.values().stream().map(User::new).collect(Collectors.toList());
+        return new ArrayList<>(users.values());
     }
 
     @Override
@@ -39,7 +39,7 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public Optional<User> getById(Long id) {
-        return Optional.ofNullable(users.get(id)).map(User::new);
+        return Optional.ofNullable(users.get(id));
     }
 
     @Override

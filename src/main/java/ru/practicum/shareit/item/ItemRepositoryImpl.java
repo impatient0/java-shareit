@@ -39,7 +39,7 @@ public class ItemRepositoryImpl implements ItemRepository {
 
     @Override
     public Optional<Item> getById(Long id) {
-        return Optional.ofNullable(items.get(id)).map(Item::new);
+        return Optional.ofNullable(items.get(id));
 
     }
 
