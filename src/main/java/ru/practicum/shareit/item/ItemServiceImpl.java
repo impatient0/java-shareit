@@ -1,15 +1,11 @@
 package ru.practicum.shareit.item;
 
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validator;
 import java.util.List;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.AccessDeniedException;
 import ru.practicum.shareit.exception.ItemNotFoundException;
-import ru.practicum.shareit.exception.ItemValidationException;
 import ru.practicum.shareit.exception.UserNotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemMapper;
@@ -26,7 +22,6 @@ public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
     private final ItemMapper itemMapper;
-    private final Validator validator;
 
     @Override
     public List<ItemDto> getAllItems() {

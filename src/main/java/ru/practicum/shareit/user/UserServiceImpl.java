@@ -1,14 +1,10 @@
 package ru.practicum.shareit.user;
 
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validator;
 import java.util.List;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.UserNotFoundException;
-import ru.practicum.shareit.exception.UserValidationException;
 import ru.practicum.shareit.user.dto.NewUserDto;
 import ru.practicum.shareit.user.dto.UpdateUserDto;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -22,7 +18,6 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
-    private final Validator validator;
 
     @Override
     public List<UserDto> getAllUsers() {

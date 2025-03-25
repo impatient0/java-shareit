@@ -1,6 +1,5 @@
 package ru.practicum.shareit.exception;
 
-import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;

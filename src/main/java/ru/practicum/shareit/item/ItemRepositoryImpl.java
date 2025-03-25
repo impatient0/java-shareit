@@ -1,6 +1,8 @@
 package ru.practicum.shareit.item;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
@@ -14,7 +16,7 @@ public class ItemRepositoryImpl implements ItemRepository {
     private final AtomicLong nextId;
 
     public ItemRepositoryImpl() {
-        items = new java.util.HashMap<>();
+        items = new HashMap<>();
         nextId = new AtomicLong(1);
     }
 
@@ -26,12 +28,12 @@ public class ItemRepositoryImpl implements ItemRepository {
     }
 
     @Override
-    public java.util.List<Item> getAll() {
+    public List<Item> getAll() {
         return new ArrayList<>(items.values());
     }
 
     @Override
-    public java.util.List<Item> getByOwner(long ownerId) {
+    public List<Item> getByOwner(long ownerId) {
         return items.values().stream().filter(i -> i.getOwner().getId() == ownerId).toList();
     }
 
@@ -42,7 +44,7 @@ public class ItemRepositoryImpl implements ItemRepository {
     }
 
     @Override
-    public java.util.Optional<Item> update(Item updatedItem) {
+    public Optional<Item> update(Item updatedItem) {
         Long itemId = updatedItem.getId();
         if (items.containsKey(itemId)) {
             Item existingItem = items.get(itemId);
@@ -55,9 +57,9 @@ public class ItemRepositoryImpl implements ItemRepository {
             if (updatedItem.getStatus() != null) {
                 existingItem.setStatus(updatedItem.getStatus());
             }
-            return java.util.Optional.of(new Item(existingItem));
+            return Optional.of(new Item(existingItem));
         }
-        return java.util.Optional.empty();
+        return Optional.empty();
     }
 
     @Override
@@ -66,7 +68,7 @@ public class ItemRepositoryImpl implements ItemRepository {
     }
 
     @Override
-    public java.util.List<Item> search(String query) {
+    public List<Item> search(String query) {
         String lowerCaseQuery = query.toLowerCase();
         return items.values().stream().filter(i ->
             (i.getName().toLowerCase().contains(lowerCaseQuery) || i.getDescription().toLowerCase()
