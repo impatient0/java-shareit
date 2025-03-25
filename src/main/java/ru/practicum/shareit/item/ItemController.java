@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item;
 
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,14 +43,14 @@ public class ItemController {
 
     @PostMapping
     public ResponseEntity<ItemDto> saveItem(@RequestHeader(USER_ID_HEADER) Long userId,
-        @RequestBody NewItemDto newItemDto) {
+        @RequestBody @Valid NewItemDto newItemDto) {
         log.info("Processing request to save a new item...");
         return ResponseEntity.ok(itemService.saveItem(newItemDto, userId));
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<ItemDto> update(@RequestHeader(USER_ID_HEADER) Long userId,
-        @PathVariable Long id, @RequestBody UpdateItemDto updatedItemDto) {
+        @PathVariable Long id, @RequestBody @Valid UpdateItemDto updatedItemDto) {
         log.info("Processing request to update item with ID: {}", id);
         return ResponseEntity.ok(itemService.update(updatedItemDto, userId, id));
     }

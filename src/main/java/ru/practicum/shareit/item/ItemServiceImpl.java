@@ -37,13 +37,6 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto saveItem(NewItemDto newItemDto, Long userId) {
-        Set<ConstraintViolation<NewItemDto>> violations = validator.validate(newItemDto);
-        if (!violations.isEmpty()) {
-            String violationMessage = violations.iterator().next().getMessage();
-            log.warn("Error when saving item: {}", violationMessage);
-            throw new ItemValidationException(
-                violationMessage);
-        }
         if (userRepository.getById(userId).isEmpty()) {
             log.warn("User with id {} not found", userId);
             throw new UserNotFoundException(
@@ -77,13 +70,6 @@ public class ItemServiceImpl implements ItemService {
             log.warn("User with id {} does not own item with id {}", userId, itemId);
             throw new AccessDeniedException(
                 "User with id " + userId + " does not own item with id " + itemId);
-        }
-        Set<ConstraintViolation<UpdateItemDto>> violations = validator.validate(updateItemDto);
-        if (!violations.isEmpty()) {
-            String violationMessage = violations.iterator().next().getMessage();
-            log.warn("Error when updating item: {}", violationMessage);
-            throw new ItemValidationException(
-                violationMessage);
         }
         Item updatedItem = itemMapper.updateItemFields(updateItemDto, item);
         itemRepository.update(updatedItem);

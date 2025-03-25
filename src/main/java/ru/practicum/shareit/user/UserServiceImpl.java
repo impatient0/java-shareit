@@ -33,12 +33,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto saveUser(NewUserDto newUserDto) {
-        Set<ConstraintViolation<NewUserDto>> violations = validator.validate(newUserDto);
-        if (!violations.isEmpty()) {
-            String violationMessage = violations.iterator().next().getMessage();
-            log.warn("Error when saving user: {}", violationMessage);
-            throw new UserValidationException(violationMessage);
-        }
         User user = userMapper.mapToUser(newUserDto);
         Long userId = userRepository.save(user);
         user.setId(userId);
@@ -60,12 +54,6 @@ public class UserServiceImpl implements UserService {
             log.warn("User with id {} not found for update", userId);
             return new UserNotFoundException("User with id " + userId + " not found");
         });
-        Set<ConstraintViolation<UpdateUserDto>> violations = validator.validate(updatedUserDto);
-        if (!violations.isEmpty()) {
-            String violationMessage = violations.iterator().next().getMessage();
-            log.warn("Error when updating user: {}", violationMessage);
-            throw new UserValidationException(violationMessage);
-        }
         User updatedUser = userMapper.updateUserFields(updatedUserDto, user);
         userRepository.update(updatedUser);
         log.debug("Updated user: {}", updatedUser);
