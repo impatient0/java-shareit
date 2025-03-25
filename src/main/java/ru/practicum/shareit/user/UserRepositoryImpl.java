@@ -48,24 +48,13 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public Optional<User> update(User updatedUser) {
+    public void update(User updatedUser) {
         Long userId = updatedUser.getId();
         if (users.containsKey(userId)) {
             User existingUser = users.get(userId);
-            if (updatedUser.getName() != null) {
-                existingUser.setName(updatedUser.getName());
-            }
-            if (updatedUser.getEmail() != null && !updatedUser.getEmail()
-                .equals(existingUser.getEmail())) {
-                if (existsByEmail(updatedUser.getEmail())) {
-                    throw new EmailAlreadyExistsException(
-                        "User with email " + updatedUser.getEmail() + " already exists");
-                }
-                existingUser.setEmail(updatedUser.getEmail());
-            }
-            return Optional.of(new User(existingUser));
+            existingUser.setName(updatedUser.getName());
+            existingUser.setEmail(updatedUser.getEmail());
         }
-        return Optional.empty();
     }
 
     @Override

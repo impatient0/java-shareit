@@ -4,6 +4,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.exception.EmailAlreadyExistsException;
 import ru.practicum.shareit.exception.UserNotFoundException;
 import ru.practicum.shareit.user.dto.NewUserDto;
 import ru.practicum.shareit.user.dto.UpdateUserDto;
@@ -49,6 +50,11 @@ public class UserServiceImpl implements UserService {
             log.warn("User with id {} not found for update", userId);
             return new UserNotFoundException("User with id " + userId + " not found");
         });
+        if (updatedUserDto.getEmail() != null && !updatedUserDto.getEmail().equals(user.getEmail())
+            && userRepository.existsByEmail(updatedUserDto.getEmail())) {
+            throw new EmailAlreadyExistsException(
+                "User with email " + updatedUserDto.getEmail() + " already exists");
+        }
         User updatedUser = userMapper.updateUserFields(updatedUserDto, user);
         userRepository.update(updatedUser);
         log.debug("Updated user: {}", updatedUser);

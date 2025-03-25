@@ -13,7 +13,7 @@ public interface ItemRepository {
 
     Optional<Item> getById(Long id);
 
-    Optional<Item> update(Item updatedItem);
+    void update(Item updatedItem);
 
     void delete(Long id);
 

@@ -44,22 +44,14 @@ public class ItemRepositoryImpl implements ItemRepository {
     }
 
     @Override
-    public Optional<Item> update(Item updatedItem) {
+    public void update(Item updatedItem) {
         Long itemId = updatedItem.getId();
         if (items.containsKey(itemId)) {
             Item existingItem = items.get(itemId);
-            if (updatedItem.getName() != null) {
-                existingItem.setName(updatedItem.getName());
-            }
-            if (updatedItem.getDescription() != null) {
-                existingItem.setDescription(updatedItem.getDescription());
-            }
-            if (updatedItem.getStatus() != null) {
-                existingItem.setStatus(updatedItem.getStatus());
-            }
-            return Optional.of(new Item(existingItem));
+            existingItem.setName(updatedItem.getName());
+            existingItem.setDescription(updatedItem.getDescription());
+            existingItem.setStatus(updatedItem.getStatus());
         }
-        return Optional.empty();
     }
 
     @Override
