@@ -8,6 +8,7 @@ import ru.yandex.practicum.shareit.item.ItemStatus;
 @Data
 @AllArgsConstructor
 public class ItemDto {
+
     private Long id;
     private String name;
     private String description;

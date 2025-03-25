@@ -24,8 +24,9 @@ import ru.yandex.practicum.shareit.item.dto.UpdateItemDto;
 @Slf4j
 @SuppressWarnings("unused")
 public class ItemController {
+
     private final ItemService itemService;
-    private final String USER_ID_HEADER = "X-Sharer-User-Id";
+    private static final String USER_ID_HEADER = "X-Sharer-User-Id";
 
     @GetMapping
     public ResponseEntity<List<ItemDto>> getUserItems(@RequestHeader(USER_ID_HEADER) Long userId) {
@@ -40,25 +41,29 @@ public class ItemController {
     }
 
     @PostMapping
-    public ResponseEntity<ItemDto> saveItem(@RequestHeader(USER_ID_HEADER) Long userId, @RequestBody NewItemDto newItemDto) {
+    public ResponseEntity<ItemDto> saveItem(@RequestHeader(USER_ID_HEADER) Long userId,
+        @RequestBody NewItemDto newItemDto) {
         log.info("Processing request to save a new item...");
         return ResponseEntity.ok(itemService.saveItem(newItemDto, userId));
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<ItemDto> update(@RequestHeader(USER_ID_HEADER) Long userId, @PathVariable Long id, @RequestBody UpdateItemDto updatedItemDto) {
+    public ResponseEntity<ItemDto> update(@RequestHeader(USER_ID_HEADER) Long userId,
+        @PathVariable Long id, @RequestBody UpdateItemDto updatedItemDto) {
         log.info("Processing request to update item with ID: {}", id);
         return ResponseEntity.ok(itemService.update(updatedItemDto, userId, id));
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<ItemDto>> searchItems(@RequestHeader(USER_ID_HEADER) Long userId, @RequestParam String text) {
+    public ResponseEntity<List<ItemDto>> searchItems(@RequestHeader(USER_ID_HEADER) Long userId,
+        @RequestParam String text) {
         log.info("Processing request to search items by query: {}", text);
         return ResponseEntity.ok(itemService.searchItems(text, userId));
     }
 
     @DeleteMapping
-    public ResponseEntity<Void> delete(@RequestHeader(USER_ID_HEADER) Long userId, @RequestParam Long id) {
+    public ResponseEntity<Void> delete(@RequestHeader(USER_ID_HEADER) Long userId,
+        @RequestParam Long id) {
         log.info("Processing request to delete item with ID: {}", id);
         itemService.delete(id, userId);
         return ResponseEntity.noContent().build();

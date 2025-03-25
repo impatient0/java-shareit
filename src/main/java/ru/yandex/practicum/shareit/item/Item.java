@@ -7,6 +7,7 @@ import ru.yandex.practicum.shareit.user.User;
 @Data
 @NoArgsConstructor
 public class Item {
+
     private Long id;
     private String name;
     private String description;

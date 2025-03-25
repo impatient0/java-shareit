@@ -133,8 +133,7 @@ public class ItemServiceImpl implements ItemService {
             return List.of();
         }
         // Shouldn't we filter out user's own items when searching?..
-        List<ItemDto> items = itemRepository.search(query).stream()
-            .map(itemMapper::mapToDto)
+        List<ItemDto> items = itemRepository.search(query).stream().map(itemMapper::mapToDto)
             .toList();
         log.debug("Found {} items by query: {}", items.size(), query);
         return items;

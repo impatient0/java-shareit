@@ -9,6 +9,7 @@ import ru.yandex.practicum.shareit.item.ItemStatus;
 @Data
 @AllArgsConstructor
 public class UpdateItemDto {
+
     private String name;
     private String description;
     private ItemStatus status;

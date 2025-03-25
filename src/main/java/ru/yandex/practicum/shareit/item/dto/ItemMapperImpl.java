@@ -1,4 +1,5 @@
 package ru.yandex.practicum.shareit.item.dto;
+
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.shareit.item.Item;
 

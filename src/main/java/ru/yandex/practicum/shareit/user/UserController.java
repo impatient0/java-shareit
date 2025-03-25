@@ -22,6 +22,7 @@ import ru.yandex.practicum.shareit.user.dto.UserDto;
 @Slf4j
 @SuppressWarnings("unused")
 public class UserController {
+
     private final UserService userService;
 
     @GetMapping
@@ -44,7 +45,7 @@ public class UserController {
 
     @PatchMapping("/{id}")
     public ResponseEntity<UserDto> update(@RequestBody UpdateUserDto updatedUserDto,
-                                          @PathVariable Long id) {
+        @PathVariable Long id) {
         log.info("Processing request to update user with ID: {}", id);
         return ResponseEntity.ok(userService.update(updatedUserDto, id));
     }

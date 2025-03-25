@@ -8,6 +8,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class NewUserDto {
+
     @NotBlank(message = "Name cannot be blank")
     private String name;
 
