@@ -27,13 +27,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(409).body(new ErrorMessage(e.getMessage(), 409));
     }
 
-    @ExceptionHandler({UserValidationException.class, ItemValidationException.class})
-    public ResponseEntity<ErrorMessage> handleValidationError(final RuntimeException e) {
-        log.warn("Encountered {} while processing request: returning 400 Bad Request",
-            e.getClass().getSimpleName());
-        return ResponseEntity.status(400).body(new ErrorMessage(e.getMessage(), 400));
-    }
-
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorMessage> handleAccessDenied(final AccessDeniedException e) {
         log.warn("Encountered {} while processing request: returning 403 Forbidden",
