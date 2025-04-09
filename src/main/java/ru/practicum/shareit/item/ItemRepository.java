@@ -5,17 +5,15 @@ import java.util.Optional;
 
 public interface ItemRepository {
 
-    Long save(Item item);
+    Item save(Item item);
 
-    List<Item> getAll();
+    List<Item> findAll();
 
-    List<Item> getByOwner(long ownerId);
+    List<Item> findByOwnerId(long ownerId);
 
-    Optional<Item> getById(Long id);
+    Optional<Item> findById(Long id);
 
-    void update(Item updatedItem);
-
-    void delete(Long id);
+    void deleteById(Long id);
 
     List<Item> search(String query);
 }
