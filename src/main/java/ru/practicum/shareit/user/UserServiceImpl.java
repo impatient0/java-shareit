@@ -3,6 +3,7 @@ package ru.practicum.shareit.user;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.EmailAlreadyExistsException;
 import ru.practicum.shareit.exception.UserNotFoundException;
@@ -30,10 +31,14 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto saveUser(NewUserDto newUserDto) {
         User user = userMapper.mapToUser(newUserDto);
-        Long userId = userRepository.save(user).getId();
-        user.setId(userId);
-        log.debug("Saved new user: {}", user);
-        return userMapper.mapToDto(user);
+        if (userRepository.existsByEmail(user.getEmail())) {
+            log.warn("User with email {} already exists", user.getEmail());
+            throw new EmailAlreadyExistsException(
+                "User with email " + user.getEmail() + " already exists");
+        }
+        User savedUser = userRepository.save(user);
+        log.debug("Saved new user: {}", savedUser);
+        return userMapper.mapToDto(savedUser);
     }
 
     @Override
