@@ -5,15 +5,13 @@ import java.util.Optional;
 
 public interface UserRepository {
 
-    List<User> getAll();
+    List<User> findAll();
 
-    Long save(User user);
+    User save(User user);
 
-    Optional<User> getById(Long id);
+    Optional<User> findById(Long id);
 
     boolean existsByEmail(String email);
 
-    void update(User updatedUser);
-
-    void delete(Long id);
+    void deleteById(Long id);
 }
