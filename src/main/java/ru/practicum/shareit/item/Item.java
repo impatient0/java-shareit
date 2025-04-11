@@ -15,7 +15,6 @@ import java.util.Objects;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 import ru.practicum.shareit.user.User;
 
 @Entity
@@ -23,7 +22,6 @@ import ru.practicum.shareit.user.User;
 @Getter
 @Setter
 @NoArgsConstructor
-@ToString(exclude = {"owner"})
 public class Item {
 
     @Id
@@ -52,7 +50,19 @@ public class Item {
         return id != null && Objects.equals(id, item.getId());
     }
 
+    @Override
     public int hashCode() {
-        return getClass().hashCode();
+        return id != null ? Objects.hash(id) : getClass().hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "Item{" +
+            "id=" + id +
+            ", name='" + name + '\'' +
+            // getId() usually doesn't initialize the proxy
+            ", ownerId=" + (owner != null ? owner.getId() : null) +
+            ", status=" + status +
+            '}';
     }
 }
