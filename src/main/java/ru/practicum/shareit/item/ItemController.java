@@ -45,7 +45,9 @@ public class ItemController {
     public ResponseEntity<ItemDto> saveItem(@RequestHeader(USER_ID_HEADER) Long userId,
         @RequestBody @Valid NewItemDto newItemDto) {
         log.info("Processing request to save a new item...");
-        return ResponseEntity.ok(itemService.saveItem(newItemDto, userId));
+        ItemDto savedItem = itemService.saveItem(newItemDto, userId);
+        return ResponseEntity.created(java.net.URI.create("/items/" + savedItem.getId()))
+            .body(savedItem);
     }
 
     @PatchMapping("/{id}")
