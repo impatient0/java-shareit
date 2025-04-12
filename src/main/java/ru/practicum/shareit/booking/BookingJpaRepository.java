@@ -1,7 +1,7 @@
 package ru.practicum.shareit.booking;
 
-import java.sql.Timestamp;
-import org.springframework.data.domain.Pageable;
+import java.time.LocalDateTime;
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -27,7 +27,7 @@ public interface BookingJpaRepository extends BookingRepository, JpaRepository<B
     Page<Booking> findBookingsByBookerAndState(
         @Param("bookerId") Long bookerId,
         @Param("stateName") String stateName,
-        @Param("now") Timestamp now,
+        @Param("now") LocalDateTime now,
         Pageable pageable
     );
 
@@ -46,7 +46,7 @@ public interface BookingJpaRepository extends BookingRepository, JpaRepository<B
     Page<Booking> findBookingsByItemOwnerAndState(
         @Param("ownerId") Long ownerId,
         @Param("stateName") String stateName,
-        @Param("now") Timestamp now,
+        @Param("now") LocalDateTime now,
         Pageable pageable
     );
 

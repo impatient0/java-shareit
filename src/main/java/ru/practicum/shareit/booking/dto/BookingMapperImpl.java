@@ -18,14 +18,14 @@ public class BookingMapperImpl implements BookingMapper {
     @Override
     public BookingDto mapToDto(Booking booking) {
         return new BookingDto(booking.getId(), itemMapper.mapToDto(booking.getItem()), userMapper.mapToDto(booking.getBooker()),
-                booking.getStartDate().toLocalDateTime(), booking.getEndDate().toLocalDateTime(), booking.getStatus().toString());
+                booking.getStartDate(), booking.getEndDate(), booking.getStatus().toString());
     }
 
     @Override
     public Booking mapToBooking(NewBookingDto newBookingDto) {
         Booking booking = new Booking();
-        booking.setStartDate(java.sql.Timestamp.valueOf(newBookingDto.getStart()));
-        booking.setEndDate(java.sql.Timestamp.valueOf(newBookingDto.getEnd()));
+        booking.setStartDate(newBookingDto.getStart());
+        booking.setEndDate(newBookingDto.getEnd());
         booking.setStatus(BookingStatus.WAITING);
         return booking;
     }

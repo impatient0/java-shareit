@@ -1,6 +1,5 @@
 package ru.practicum.shareit.booking;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -144,9 +143,8 @@ public class BookingServiceImpl implements BookingService {
             throw new UserNotFoundException(
                 "User with id " + bookerId + " not found");
         }
-        Timestamp now = Timestamp.valueOf(LocalDateTime.now());
         Pageable pageable = getPageable(from, size);
-        return bookingRepository.findBookingsByBookerAndState(bookerId, state.name(), now, pageable)
+        return bookingRepository.findBookingsByBookerAndState(bookerId, state.name(), LocalDateTime.now(), pageable)
             .stream()
             .map(bookingMapper::mapToDto)
             .collect(Collectors.toList());
@@ -159,9 +157,8 @@ public class BookingServiceImpl implements BookingService {
             throw new UserNotFoundException(
                 "User with id " + ownerId + " not found");
         }
-        Timestamp now = Timestamp.valueOf(LocalDateTime.now());
         Pageable pageable = getPageable(from, size);
-        return bookingRepository.findBookingsByItemOwnerAndState(ownerId, state.name(), now, pageable)
+        return bookingRepository.findBookingsByItemOwnerAndState(ownerId, state.name(), LocalDateTime.now(), pageable)
             .stream()
             .map(bookingMapper::mapToDto)
             .collect(Collectors.toList());
