@@ -16,8 +16,8 @@ public interface BookingRepository {
 
     void deleteById(Long id);
 
-    Page<Booking> findBookingsByBookerAndState(Long bookerId, BookingState state, Timestamp now, Pageable pageable);
+    Page<Booking> findBookingsByBookerAndState(Long bookerId, String stateName, Timestamp now, Pageable pageable);
 
-    Page<Booking> findBookingsByItemOwnerAndState(Long ownerId, BookingState state, Timestamp now, Pageable pageable);
+    Page<Booking> findBookingsByItemOwnerAndState(Long ownerId, String stateName, Timestamp now, Pageable pageable);
 
 }

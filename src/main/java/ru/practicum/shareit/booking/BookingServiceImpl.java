@@ -15,6 +15,7 @@ import ru.practicum.shareit.booking.dto.NewBookingDto;
 import ru.practicum.shareit.exception.AccessDeniedException;
 import ru.practicum.shareit.exception.BookingBadRequestException;
 import ru.practicum.shareit.exception.BookingNotFoundException;
+import ru.practicum.shareit.exception.ItemNotFoundException;
 import ru.practicum.shareit.exception.UserNotFoundException;
 import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.ItemRepository;
@@ -49,7 +50,7 @@ public class BookingServiceImpl implements BookingService {
         }
         Item item = itemRepository.findById(booking.getItemId()).orElseThrow(() -> {
             log.warn("Item with id {} not found", booking.getItemId());
-            return new BookingBadRequestException(
+            return new ItemNotFoundException(
                 "Item with id " + booking.getItemId() + " not found");
         });
         if (item.getOwner().getId().equals(userId)) {
@@ -73,17 +74,28 @@ public class BookingServiceImpl implements BookingService {
         }
         Booking newBooking = bookingMapper.mapToBooking(booking);
         newBooking.setBooker(userRepository.findById(userId).get());
+        newBooking.setItem(item);
         Booking savedBooking = bookingRepository.save(newBooking);
         log.debug("Saved new booking: {}", savedBooking);
         return bookingMapper.mapToDto(savedBooking);
     }
 
     @Override
-    public BookingDto getById(Long id) {
-        return bookingMapper.mapToDto(bookingRepository.findById(id).orElseThrow(() -> {
+    public BookingDto getById(Long userId, Long id) {
+        if (userRepository.findById(userId).isEmpty()) {
+            log.warn("User with id {} not found", userId);
+            throw new UserNotFoundException("User with id " + userId + " not found");
+        }
+        Booking booking = bookingRepository.findById(id).orElseThrow(() -> {
             log.warn("Booking with id {} not found", id);
             return new BookingNotFoundException("Booking with id " + id + " not found");
-        }));
+        });
+        if (!booking.getBooker().getId().equals(userId) && !booking.getItem().getOwner().getId().equals(userId)) {
+            log.warn("User with id {} is not the booker or owner of booking with id {}", userId, id);
+            throw new AccessDeniedException(
+                "User with id " + userId + " is not the booker or owner of booking with id " + id);
+        }
+        return bookingMapper.mapToDto(booking);
     }
 
     @Override
