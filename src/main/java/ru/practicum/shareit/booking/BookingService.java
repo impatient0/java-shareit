@@ -3,7 +3,6 @@ package ru.practicum.shareit.booking;
 import java.util.List;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.NewBookingDto;
-import ru.practicum.shareit.booking.dto.UpdateBookingDto;
 
 public interface BookingService {
 
@@ -13,11 +12,11 @@ public interface BookingService {
 
     BookingDto getById(Long id);
 
-    BookingDto update(UpdateBookingDto booking, Long userId, Long bookingId);
+    BookingDto approveBooking(Long bookingId, Long userId, Boolean approved);
 
     void delete(Long id, Long userId);
 
-    List<BookingDto> getBookingsByBooker(Long bookerId);
+    List<BookingDto> getBookingsByBooker(Long bookerId, BookingState state, Integer from, Integer size);
 
-    List<BookingDto> getBookingsByOwner(Long ownerId);
+    List<BookingDto> getBookingsByOwner(Long ownerId, BookingState state, Integer from, Integer size);
 }

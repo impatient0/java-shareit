@@ -31,10 +31,10 @@ public class Booking {
     private Long id;
 
     @Column(name = "start_date", nullable = false)
-    private Timestamp start_date;
+    private Timestamp startDate;
 
     @Column(name = "end_date", nullable = false)
-    private Timestamp end_date;
+    private Timestamp endDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_id", nullable = false)
@@ -69,8 +69,8 @@ public class Booking {
     public String toString() {
         return "Booking{" +
             "id=" + id +
-            ", start_date=" + start_date +
-            ", end_date=" + end_date +
+            ", start_date=" + startDate +
+            ", end_date=" + endDate +
             // getId() usually doesn't initialize the proxy
             ", itemId=" + (item != null ? item.getId() : null) +
             // same here

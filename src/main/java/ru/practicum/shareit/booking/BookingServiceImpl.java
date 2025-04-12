@@ -1,14 +1,17 @@
 package ru.practicum.shareit.booking;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingMapper;
 import ru.practicum.shareit.booking.dto.NewBookingDto;
-import ru.practicum.shareit.booking.dto.UpdateBookingDto;
 import ru.practicum.shareit.exception.AccessDeniedException;
 import ru.practicum.shareit.exception.BookingBadRequestException;
 import ru.practicum.shareit.exception.BookingNotFoundException;
@@ -84,9 +87,9 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public BookingDto update(UpdateBookingDto updateBookingDto, Long userId, Long bookingId) {
+    public BookingDto approveBooking(Long bookingId, Long userId, Boolean approved) {
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> {
-            log.warn("Booking with id {} not found for update", bookingId);
+            log.warn("Booking with id {} not found for {}", bookingId, approved ? "approval" : "rejection");
             return new BookingNotFoundException("Booking with id " + bookingId + " not found");
         });
         if (!booking.getItem().getOwner().getId().equals(userId)) {
@@ -96,10 +99,10 @@ public class BookingServiceImpl implements BookingService {
                 "User with id " + userId + " is not the owner of item in booking with id"
                     + bookingId);
         }
-        Booking updatedBooking = bookingMapper.updateBookingFields(updateBookingDto, booking);
-        bookingRepository.save(updatedBooking);
-        log.debug("Updated booking: {}", updatedBooking);
-        return bookingMapper.mapToDto(updatedBooking);
+        booking.setStatus(approved ? BookingStatus.APPROVED : BookingStatus.REJECTED);
+        bookingRepository.save(booking);
+        log.debug("{} booking: {}", approved ? "Approved" : "Rejected", booking);
+        return bookingMapper.mapToDto(booking);
     }
 
     @Override
@@ -123,12 +126,39 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDto> getBookingsByBooker(Long bookerId) {
-        return List.of();
+    public List<BookingDto> getBookingsByBooker(Long bookerId, BookingState state, Integer from, Integer size) {
+        if (userRepository.findById(bookerId).isEmpty()) {
+            log.warn("User with id {} not found", bookerId);
+            throw new UserNotFoundException(
+                "User with id " + bookerId + " not found");
+        }
+        Timestamp now = Timestamp.valueOf(LocalDateTime.now());
+        Pageable pageable = getPageable(from, size);
+        return bookingRepository.findBookingsByBookerAndState(bookerId, state, now, pageable)
+            .stream()
+            .map(bookingMapper::mapToDto)
+            .collect(Collectors.toList());
     }
 
     @Override
-    public List<BookingDto> getBookingsByOwner(Long ownerId) {
-        return List.of();
+    public List<BookingDto> getBookingsByOwner(Long ownerId, BookingState state, Integer from, Integer size) {
+        if (userRepository.findById(ownerId).isEmpty()) {
+            log.warn("User with id {} not found", ownerId);
+            throw new UserNotFoundException(
+                "User with id " + ownerId + " not found");
+        }
+        Timestamp now = Timestamp.valueOf(LocalDateTime.now());
+        Pageable pageable = getPageable(from, size);
+        return bookingRepository.findBookingsByItemOwnerAndState(ownerId, state, now, pageable)
+            .stream()
+            .map(bookingMapper::mapToDto)
+            .collect(Collectors.toList());
+    }
+
+    private Pageable getPageable(Integer from, Integer size) {
+        if (from == null || size == null || from < 0 || size <= 0) {
+            return Pageable.unpaged();
+        }
+        return PageRequest.of(from / size, size);
     }
 }
