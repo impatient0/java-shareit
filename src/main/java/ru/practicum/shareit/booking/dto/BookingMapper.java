@@ -7,6 +7,4 @@ public interface BookingMapper {
     BookingDto mapToDto(Booking booking);
 
     Booking mapToBooking(NewBookingDto newBookingDto);
-
-    Booking updateBookingFields(UpdateBookingDto updateBookingDto, Booking booking);
 }
