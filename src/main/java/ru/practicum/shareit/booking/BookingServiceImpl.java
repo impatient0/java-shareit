@@ -134,7 +134,7 @@ public class BookingServiceImpl implements BookingService {
         }
         Timestamp now = Timestamp.valueOf(LocalDateTime.now());
         Pageable pageable = getPageable(from, size);
-        return bookingRepository.findBookingsByBookerAndState(bookerId, state, now, pageable)
+        return bookingRepository.findBookingsByBookerAndState(bookerId, state.name(), now, pageable)
             .stream()
             .map(bookingMapper::mapToDto)
             .collect(Collectors.toList());
@@ -149,7 +149,7 @@ public class BookingServiceImpl implements BookingService {
         }
         Timestamp now = Timestamp.valueOf(LocalDateTime.now());
         Pageable pageable = getPageable(from, size);
-        return bookingRepository.findBookingsByItemOwnerAndState(ownerId, state, now, pageable)
+        return bookingRepository.findBookingsByItemOwnerAndState(ownerId, state.name(), now, pageable)
             .stream()
             .map(bookingMapper::mapToDto)
             .collect(Collectors.toList());

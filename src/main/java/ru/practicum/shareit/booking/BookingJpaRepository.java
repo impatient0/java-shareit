@@ -16,36 +16,36 @@ public interface BookingJpaRepository extends BookingRepository, JpaRepository<B
     @Query("SELECT b FROM Booking b " +
         "WHERE b.booker.id = :bookerId " +
         "AND (" +
-        "   (:state = ru.practicum.shareit.booking.BookingState.ALL) OR " +
-        "   (:state = ru.practicum.shareit.booking.BookingState.CURRENT AND :now BETWEEN b.start_date AND b.end_date) OR " +
-        "   (:state = ru.practicum.shareit.booking.BookingState.PAST AND b.end_date < :now) OR " +
-        "   (:state = ru.practicum.shareit.booking.BookingState.FUTURE AND b.start_date > :now) OR " +
-        "   (:state = ru.practicum.shareit.booking.BookingState.WAITING AND b.status = ru.practicum.shareit.booking.BookingStatus.WAITING) OR " +
-        "   (:state = ru.practicum.shareit.booking.BookingState.REJECTED AND b.status = ru.practicum.shareit.booking.BookingStatus.REJECTED)" +
+        "   (:stateName = 'ALL') OR " +
+        "   (:stateName = 'CURRENT' AND :now BETWEEN b.startDate AND b.endDate) OR " +
+        "   (:stateName = 'PAST' AND b.endDate < :now) OR " +
+        "   (:stateName = 'FUTURE' AND b.startDate > :now) OR " +
+        "   (:stateName = 'WAITING' AND b.status = ru.practicum.shareit.booking.BookingStatus.WAITING) OR " +
+        "   (:stateName = 'REJECTED' AND b.status = ru.practicum.shareit.booking.BookingStatus.REJECTED)" +
         ") " +
-        "ORDER BY b.start_date DESC")
+        "ORDER BY b.startDate DESC")
     Page<Booking> findBookingsByBookerAndState(
         @Param("bookerId") Long bookerId,
-        @Param("state") BookingState state,
+        @Param("stateName") String stateName,
         @Param("now") Timestamp now,
         Pageable pageable
     );
 
     @Override
     @Query("SELECT b FROM Booking b " +
-        "WHERE b.item.owner.id = :ownerId " + // Filter by the item's owner ID
+        "WHERE b.item.owner.id = :ownerId " +
         "AND (" +
-        "   (:state = ru.practicum.shareit.booking.BookingState.ALL) OR " +
-        "   (:state = ru.practicum.shareit.booking.BookingState.CURRENT AND :now BETWEEN b.start_date AND b.end_date) OR " +
-        "   (:state = ru.practicum.shareit.booking.BookingState.PAST AND b.end_date < :now) OR " +
-        "   (:state = ru.practicum.shareit.booking.BookingState.FUTURE AND b.start_date > :now) OR " +
-        "   (:state = ru.practicum.shareit.booking.BookingState.WAITING AND b.status = ru.practicum.shareit.booking.BookingStatus.WAITING) OR " +
-        "   (:state = ru.practicum.shareit.booking.BookingState.REJECTED AND b.status = ru.practicum.shareit.booking.BookingStatus.REJECTED)" +
+        "   (:stateName = 'ALL') OR " +
+        "   (:stateName = 'CURRENT' AND :now BETWEEN b.startDate AND b.endDate) OR " +
+        "   (:stateName = 'PAST' AND b.endDate < :now) OR " +
+        "   (:stateName = 'FUTURE' AND b.startDate > :now) OR " +
+        "   (:stateName = 'WAITING' AND b.status = ru.practicum.shareit.booking.BookingStatus.WAITING) OR " +
+        "   (:stateName = 'REJECTED' AND b.status = ru.practicum.shareit.booking.BookingStatus.REJECTED)" +
         ") " +
-        "ORDER BY b.start_date DESC")
+        "ORDER BY b.startDate DESC")
     Page<Booking> findBookingsByItemOwnerAndState(
         @Param("ownerId") Long ownerId,
-        @Param("state") BookingState state,
+        @Param("stateName") String stateName,
         @Param("now") Timestamp now,
         Pageable pageable
     );

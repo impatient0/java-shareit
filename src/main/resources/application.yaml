@@ -9,7 +9,7 @@ logging:
         transaction.interceptor: TRACE
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/shareit_db
+    url: jdbc:postgresql://localhost:5432/shareit_db?stringtype=unspecified
     username: user
     password: password
     driver-class-name: org.postgresql.Driver
