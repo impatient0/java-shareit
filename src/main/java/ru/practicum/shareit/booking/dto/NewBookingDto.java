@@ -1,16 +1,17 @@
 package ru.practicum.shareit.booking.dto;
 
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class BookingDto {
-    private Long id;
+public class NewBookingDto {
+    @NotNull(message = "Item ID cannot be null")
     private Long itemId;
-    private Long bookerId;
+    @NotNull(message = "Start date cannot be null")
     private LocalDateTime start;
+    @NotNull(message = "End date cannot be null")
     private LocalDateTime end;
-    private String status;
 }
