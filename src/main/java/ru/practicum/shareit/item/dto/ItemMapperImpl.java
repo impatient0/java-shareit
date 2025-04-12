@@ -13,6 +13,12 @@ public class ItemMapperImpl implements ItemMapper {
     }
 
     @Override
+    public ItemWithBookingInfoDto mapToItemWithBookingInfoDto(Item item) {
+        return new ItemWithBookingInfoDto(item.getId(), item.getName(), item.getDescription(),
+            item.getStatus(), null, null);
+    }
+
+    @Override
     public Item mapToItem(NewItemDto newItemDto) {
         Item item = new Item();
         item.setName(newItemDto.getName());

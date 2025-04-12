@@ -1,14 +1,22 @@
 package ru.practicum.shareit.item;
 
+import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.BookingRepository;
+import ru.practicum.shareit.booking.dto.BookingShortDto;
 import ru.practicum.shareit.exception.AccessDeniedException;
 import ru.practicum.shareit.exception.ItemNotFoundException;
 import ru.practicum.shareit.exception.UserNotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemMapper;
+import ru.practicum.shareit.item.dto.ItemWithBookingInfoDto;
 import ru.practicum.shareit.item.dto.NewItemDto;
 import ru.practicum.shareit.item.dto.UpdateItemDto;
 import ru.practicum.shareit.user.UserRepository;
@@ -21,6 +29,7 @@ public class ItemServiceImpl implements ItemService {
 
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
+    private final BookingRepository bookingRepository;
     private final ItemMapper itemMapper;
 
     @Override
@@ -28,6 +37,52 @@ public class ItemServiceImpl implements ItemService {
         List<ItemDto> items = itemRepository.findAll().stream().map(itemMapper::mapToDto).toList();
         log.debug("Fetched {} items", items.size());
         return items;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ItemWithBookingInfoDto> getAllItemsByOwnerWithBookingInfo(Long userId) {
+        if (userRepository.findById(userId).isEmpty()) {
+            log.warn("User with id {} not found", userId);
+            throw new UserNotFoundException(
+                "User with id " + userId + " not found");
+        }
+        List<Item> items = itemRepository.findByOwnerId(userId);
+        if (items.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<Long> itemIds = items.stream().map(Item::getId).toList();
+        LocalDateTime now = LocalDateTime.now();
+
+        List<BookingShortDto> pastAndCurrentBookings = bookingRepository.findPastAndCurrentApprovedBookingsShortForItems(itemIds, now);
+        List<BookingShortDto> nextBookings = bookingRepository.findNextApprovedBookingsShortForItems(itemIds, now);
+
+        Map<Long, List<BookingShortDto>> bookingsByItemId = pastAndCurrentBookings.stream()
+            .collect(Collectors.groupingBy(BookingShortDto::getItemId));
+
+        Map<Long, List<BookingShortDto>> nextBookingsByItemId = nextBookings.stream()
+            .collect(Collectors.groupingBy(BookingShortDto::getItemId));
+
+        log.debug("Fetched {} items with booking info for user with id {}", items.size(), userId);
+
+        return items.stream().map(item -> {
+            ItemWithBookingInfoDto dto = itemMapper.mapToItemWithBookingInfoDto(item);
+
+            BookingShortDto lastBookingDto = bookingsByItemId.getOrDefault(item.getId(), Collections.emptyList())
+                .stream()
+                .findFirst()
+                .orElse(null);
+
+            BookingShortDto nextBookingDto = nextBookingsByItemId.getOrDefault(item.getId(), Collections.emptyList())
+                .stream()
+                .findFirst()
+                .orElse(null);
+
+            dto.setLastBooking(lastBookingDto);
+            dto.setNextBooking(nextBookingDto);
+
+            return dto;
+        }).toList();
     }
 
     @Override
@@ -45,12 +100,50 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDto getById(Long id) {
+    public ItemDto getItemById(Long id) {
         return itemMapper.mapToDto(itemRepository.findById(id).orElseThrow(() -> {
             log.warn("Item with id {} not found", id);
             return new ItemNotFoundException(
                 "Item with id " + id + " not found");
         }));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ItemWithBookingInfoDto getItemByIdWithBookingInfo(Long itemId, Long userId) {
+        if (userRepository.findById(userId).isEmpty()) {
+            log.warn("User with id {} not found", userId);
+            throw new UserNotFoundException(
+                "User with id " + userId + " not found");
+        }
+        Item item = itemRepository.findById(itemId).orElseThrow(() -> {
+            log.warn("Item with id {} not found when requested by user {}", itemId, userId);
+            return new ItemNotFoundException("Item with id " + itemId + " not found");
+        });
+        ItemWithBookingInfoDto itemDto = itemMapper.mapToItemWithBookingInfoDto(item);
+        if (item.getOwner().getId().equals(userId)) {
+            log.debug("User {} is owner of item {}. Fetching booking info.", userId, itemId);
+
+            LocalDateTime now = LocalDateTime.now();
+            List<BookingShortDto> pastOrCurrentBookings = bookingRepository
+                .findPastAndCurrentApprovedBookingsShortForItems(Collections.singletonList(itemId), now);
+            List<BookingShortDto> nextBookings = bookingRepository
+                .findNextApprovedBookingsShortForItems(Collections.singletonList(itemId), now);
+
+            BookingShortDto lastBookingDto = pastOrCurrentBookings.stream()
+                .findFirst()
+                .orElse(null);
+
+            BookingShortDto nextBookingDto = nextBookings.stream()
+                .findFirst()
+                .orElse(null);
+
+            itemDto.setLastBooking(lastBookingDto);
+            itemDto.setNextBooking(nextBookingDto);
+        } else {
+            log.debug("User {} is not owner of item {}. Skipping booking info.", userId, itemId);
+        }
+        return itemDto;
     }
 
     @Override
@@ -121,6 +214,5 @@ public class ItemServiceImpl implements ItemService {
             .toList();
         log.debug("Found {} items by query: {}", items.size(), query);
         return items;
-
     }
 }

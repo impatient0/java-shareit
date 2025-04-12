@@ -6,6 +6,8 @@ public interface ItemMapper {
 
     ItemDto mapToDto(Item item);
 
+    ItemWithBookingInfoDto mapToItemWithBookingInfoDto(Item item);
+
     Item mapToItem(NewItemDto newItemDto);
 
     Item updateItemFields(UpdateItemDto updateItemDto, Item item);
