@@ -15,8 +15,10 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemWithBookingInfoDto;
+import ru.practicum.shareit.item.dto.NewCommentDto;
 import ru.practicum.shareit.item.dto.NewItemDto;
 import ru.practicum.shareit.item.dto.UpdateItemDto;
 
@@ -31,13 +33,15 @@ public class ItemController {
     private static final String USER_ID_HEADER = "X-Sharer-User-Id";
 
     @GetMapping
-    public ResponseEntity<List<ItemWithBookingInfoDto>> getUserItems(@RequestHeader(USER_ID_HEADER) Long userId) {
+    public ResponseEntity<List<ItemWithBookingInfoDto>> getUserItems(
+        @RequestHeader(USER_ID_HEADER) Long userId) {
         log.info("Processing request to fetch items for user with ID: {}", userId);
         return ResponseEntity.ok(itemService.getAllItemsByOwnerWithBookingInfo(userId));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ItemWithBookingInfoDto> getById(@RequestHeader(USER_ID_HEADER) Long userId, @PathVariable Long id) {
+    public ResponseEntity<ItemWithBookingInfoDto> getById(
+        @RequestHeader(USER_ID_HEADER) Long userId, @PathVariable Long id) {
         log.info("Processing request to fetch item by ID: {}", id);
         return ResponseEntity.ok(itemService.getItemByIdWithBookingInfo(id, userId));
     }
@@ -71,5 +75,13 @@ public class ItemController {
         log.info("Processing request to delete item with ID: {}", id);
         itemService.delete(id, userId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("{itemId}/comment")
+    public ResponseEntity<CommentDto> saveComment(@RequestHeader(USER_ID_HEADER) Long userId,
+        @PathVariable Long itemId, @RequestBody @Valid NewCommentDto newCommentDto) {
+        log.info("Processing request to save a comment for item with ID: {}", itemId);
+        return ResponseEntity.created(java.net.URI.create("/items/" + itemId + "/comment"))
+            .body(itemService.saveComment(newCommentDto, itemId, userId));
     }
 }
