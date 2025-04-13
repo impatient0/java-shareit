@@ -1,11 +1,17 @@
 package ru.practicum.shareit.item.dto;
 
+import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import ru.practicum.shareit.item.Comment;
 import ru.practicum.shareit.item.Item;
 
 @Component
+@RequiredArgsConstructor
 @SuppressWarnings("unused")
 public class ItemMapperImpl implements ItemMapper {
+
+    private final CommentMapper commentMapper;
 
     @Override
     public ItemDto mapToDto(Item item) {
@@ -14,8 +20,11 @@ public class ItemMapperImpl implements ItemMapper {
 
     @Override
     public ItemWithBookingInfoDto mapToItemWithBookingInfoDto(Item item) {
-        return new ItemWithBookingInfoDto(item.getId(), item.getName(), item.getDescription(),
-            item.getStatus(), null, null);
+        ItemWithBookingInfoDto dto = new ItemWithBookingInfoDto(item.getId(), item.getName(),
+            item.getDescription(), item.getStatus(), null, null, null);
+        dto.setComments(
+            item.getComments().stream().map(commentMapper::mapToDto).collect(Collectors.toSet()));
+        return dto;
     }
 
     @Override
