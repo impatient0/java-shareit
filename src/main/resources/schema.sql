@@ -18,8 +18,8 @@ CREATE TABLE IF NOT EXISTS items (
     FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
-DROP TYPE IF EXISTS booking_status_enum CASCADE;
-CREATE TYPE booking_status_enum AS ENUM (
+DROP TYPE IF EXISTS bookingstatus CASCADE;
+CREATE TYPE bookingstatus AS ENUM (
     'WAITING',
     'APPROVED',
     'REJECTED'
@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS bookings (
     end_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     item_id BIGINT NOT NULL,
     booker_id BIGINT NOT NULL,
-    status booking_status_enum NOT NULL,
+    status bookingstatus NOT NULL,
     FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE CASCADE,
     FOREIGN KEY (booker_id) REFERENCES users(id) ON DELETE CASCADE
 );
