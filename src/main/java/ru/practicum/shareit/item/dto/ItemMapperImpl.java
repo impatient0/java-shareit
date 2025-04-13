@@ -3,7 +3,6 @@ package ru.practicum.shareit.item.dto;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import ru.practicum.shareit.item.Comment;
 import ru.practicum.shareit.item.Item;
 
 @Component
