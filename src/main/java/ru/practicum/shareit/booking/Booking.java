@@ -53,7 +53,7 @@ public class Booking {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof Booking)) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
         Booking booking = (Booking) o;
@@ -67,15 +67,10 @@ public class Booking {
 
     @Override
     public String toString() {
-        return "Booking{" +
-            "id=" + id +
-            ", start_date=" + startDate +
-            ", end_date=" + endDate +
+        return "Booking{" + "id=" + id + ", start_date=" + startDate + ", end_date=" + endDate +
             // getId() usually doesn't initialize the proxy
             ", itemId=" + (item != null ? item.getId() : null) +
             // same here
-            ", bookerId=" + (booker != null ? booker.getId() : null) +
-            ", status=" + status +
-            '}';
+            ", bookerId=" + (booker != null ? booker.getId() : null) + ", status=" + status + '}';
     }
 }
