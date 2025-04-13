@@ -14,9 +14,12 @@ import ru.practicum.shareit.booking.dto.BookingShortDto;
 import ru.practicum.shareit.exception.AccessDeniedException;
 import ru.practicum.shareit.exception.ItemNotFoundException;
 import ru.practicum.shareit.exception.UserNotFoundException;
+import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.CommentMapper;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemMapper;
 import ru.practicum.shareit.item.dto.ItemWithBookingInfoDto;
+import ru.practicum.shareit.item.dto.NewCommentDto;
 import ru.practicum.shareit.item.dto.NewItemDto;
 import ru.practicum.shareit.item.dto.UpdateItemDto;
 import ru.practicum.shareit.user.UserRepository;
@@ -30,7 +33,9 @@ public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
+    private final CommentRepository commentRepository;
     private final ItemMapper itemMapper;
+    private final CommentMapper commentMapper;
 
     @Override
     public List<ItemDto> getAllItems() {
@@ -214,5 +219,32 @@ public class ItemServiceImpl implements ItemService {
             .toList();
         log.debug("Found {} items by query: {}", items.size(), query);
         return items;
+    }
+
+    @Override
+    public CommentDto saveComment(NewCommentDto newCommentDto, Long itemId, Long userId) {
+        if (userRepository.findById(userId).isEmpty()) {
+            log.warn("User with id {} not found", userId);
+            throw new UserNotFoundException(
+                "User with id " + userId + " not found");
+        }
+        Item item = itemRepository.findById(itemId).orElseThrow(() -> {
+            log.warn("Item with id {} not found", itemId);
+            return new ItemNotFoundException(
+                "Item with id " + itemId + " not found");
+        });
+        List<BookingShortDto> bookings = bookingRepository.findPastAndCurrentApprovedBookingsShortForItems(
+            List.of(itemId), LocalDateTime.now());
+        if (bookings.stream().noneMatch(b -> b.getBookerId().equals(userId))) {
+            log.warn("User with id {} did not book item with id {}", userId, itemId);
+            throw new IllegalArgumentException(
+                "User with id " + userId + " did not book item with id " + itemId);
+        }
+        Comment comment = commentMapper.mapToComment(newCommentDto);
+        comment.setItem(item);
+        comment.setAuthor(userRepository.findById(userId).get());
+        Comment savedComment = commentRepository.save(comment);
+        log.debug("Saved new comment: {}", savedComment);
+        return commentMapper.mapToDto(savedComment);
     }
 }
