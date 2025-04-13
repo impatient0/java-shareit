@@ -45,7 +45,7 @@ public class Booking {
     private User booker;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, columnDefinition = "booking_status_enum")
+    @Column(name = "status", nullable = false)
     private BookingStatus status;
 
     @Override
