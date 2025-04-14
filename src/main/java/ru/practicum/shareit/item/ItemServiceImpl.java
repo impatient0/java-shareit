@@ -23,6 +23,7 @@ import ru.practicum.shareit.item.dto.ItemWithBookingInfoDto;
 import ru.practicum.shareit.item.dto.NewCommentDto;
 import ru.practicum.shareit.item.dto.NewItemDto;
 import ru.practicum.shareit.item.dto.UpdateItemDto;
+import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
 @Service
@@ -114,7 +115,11 @@ public class ItemServiceImpl implements ItemService {
                 "User with id " + userId + " not found");
         }
         Item item = itemMapper.mapToItem(newItemDto);
-        item.setOwner(userRepository.findById(userId).get());
+        item.setOwner(userRepository.findById(userId).orElseThrow(() -> {
+            log.warn("User with id {} not found", userId);
+            return new UserNotFoundException(
+                "User with id " + userId + " not found");
+            }));
         Item savedItem = itemRepository.save(item);
         log.debug("Saved new item: {}", savedItem);
         return itemMapper.mapToDto(savedItem);
@@ -229,11 +234,11 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public CommentDto saveComment(NewCommentDto newCommentDto, Long itemId, Long userId) {
-        if (userRepository.findById(userId).isEmpty()) {
+        User author = userRepository.findById(userId).orElseThrow(() -> {
             log.warn("User with id {} not found", userId);
-            throw new UserNotFoundException(
+            return new UserNotFoundException(
                 "User with id " + userId + " not found");
-        }
+        });
         Item item = itemRepository.findById(itemId).orElseThrow(() -> {
             log.warn("Item with id {} not found", itemId);
             return new ItemNotFoundException(
@@ -248,7 +253,7 @@ public class ItemServiceImpl implements ItemService {
         }
         Comment comment = commentMapper.mapToComment(newCommentDto);
         comment.setItem(item);
-        comment.setAuthor(userRepository.findById(userId).get());
+        comment.setAuthor(author);
         Comment savedComment = commentRepository.save(comment);
         log.debug("Saved new comment: {}", savedComment);
         return commentMapper.mapToDto(savedComment);
