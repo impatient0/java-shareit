@@ -2,6 +2,7 @@ package ru.practicum.shareit.item;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -37,6 +38,37 @@ public class ItemServiceImpl implements ItemService {
     private final ItemMapper itemMapper;
     private final CommentMapper commentMapper;
 
+    private record LastNextBookingPair(BookingShortDto lastBooking, BookingShortDto nextBooking) {}
+
+    private Map<Long, LastNextBookingPair> getLastAndNextBookingsForItems(List<Long> itemIds, LocalDateTime now) {
+        if (itemIds == null || itemIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        List<BookingShortDto> pastAndCurrentBookings = bookingRepository.findPastAndCurrentApprovedBookingsShortForItems(itemIds, now);
+        List<BookingShortDto> nextBookings = bookingRepository.findNextApprovedBookingsShortForItems(itemIds, now);
+
+        Map<Long, BookingShortDto> lastBookingsMap = pastAndCurrentBookings.stream()
+            .collect(Collectors.groupingBy(
+                BookingShortDto::getItemId,
+                Collectors.collectingAndThen(Collectors.toList(), list -> list.isEmpty() ? null : list.getFirst())
+            ));
+
+        Map<Long, BookingShortDto> nextBookingsMap = nextBookings.stream()
+            .collect(Collectors.groupingBy(
+                BookingShortDto::getItemId,
+                Collectors.collectingAndThen(Collectors.toList(), list -> list.isEmpty() ? null : list.getFirst())
+            ));
+
+        Map<Long, LastNextBookingPair> result = new HashMap<>();
+        for (Long itemId : itemIds) {
+            BookingShortDto last = lastBookingsMap.get(itemId);
+            BookingShortDto next = nextBookingsMap.get(itemId);
+            result.put(itemId, new LastNextBookingPair(last, next));
+        }
+        return result;
+    }
+
     @Override
     public List<ItemDto> getAllItems() {
         List<ItemDto> items = itemRepository.findAll().stream().map(itemMapper::mapToDto).toList();
@@ -49,43 +81,27 @@ public class ItemServiceImpl implements ItemService {
     public List<ItemWithBookingInfoDto> getAllItemsByOwnerWithBookingInfo(Long userId) {
         if (userRepository.findById(userId).isEmpty()) {
             log.warn("User with id {} not found", userId);
-            throw new UserNotFoundException(
-                "User with id " + userId + " not found");
+            throw new UserNotFoundException("User with id " + userId + " not found");
         }
+
         List<Item> items = itemRepository.findByOwnerId(userId);
         if (items.isEmpty()) {
             return Collections.emptyList();
         }
+
         List<Long> itemIds = items.stream().map(Item::getId).toList();
         LocalDateTime now = LocalDateTime.now();
-
-        List<BookingShortDto> pastAndCurrentBookings = bookingRepository.findPastAndCurrentApprovedBookingsShortForItems(itemIds, now);
-        List<BookingShortDto> nextBookings = bookingRepository.findNextApprovedBookingsShortForItems(itemIds, now);
-
-        Map<Long, List<BookingShortDto>> bookingsByItemId = pastAndCurrentBookings.stream()
-            .collect(Collectors.groupingBy(BookingShortDto::getItemId));
-
-        Map<Long, List<BookingShortDto>> nextBookingsByItemId = nextBookings.stream()
-            .collect(Collectors.groupingBy(BookingShortDto::getItemId));
+        Map<Long, LastNextBookingPair> bookingInfoMap = getLastAndNextBookingsForItems(itemIds,
+            now);
 
         log.debug("Fetched {} items with booking info for user with id {}", items.size(), userId);
 
         return items.stream().map(item -> {
             ItemWithBookingInfoDto dto = itemMapper.mapToItemWithBookingInfoDto(item);
-
-            BookingShortDto lastBookingDto = bookingsByItemId.getOrDefault(item.getId(), Collections.emptyList())
-                .stream()
-                .findFirst()
-                .orElse(null);
-
-            BookingShortDto nextBookingDto = nextBookingsByItemId.getOrDefault(item.getId(), Collections.emptyList())
-                .stream()
-                .findFirst()
-                .orElse(null);
-
-            dto.setLastBooking(lastBookingDto);
-            dto.setNextBooking(nextBookingDto);
-
+            LastNextBookingPair bookingPair = bookingInfoMap.getOrDefault(item.getId(),
+                new LastNextBookingPair(null, null));
+            dto.setLastBooking(bookingPair.lastBooking());
+            dto.setNextBooking(bookingPair.nextBooking());
             return dto;
         }).toList();
     }
@@ -125,26 +141,16 @@ public class ItemServiceImpl implements ItemService {
             log.warn("Item with id {} not found when requested by user {}", itemId, userId);
             return new ItemNotFoundException("Item with id " + itemId + " not found");
         });
+
         ItemWithBookingInfoDto itemDto = itemMapper.mapToItemWithBookingInfoDto(item);
+
         if (item.getOwner().getId().equals(userId)) {
             log.debug("User {} is owner of item {}. Fetching booking info.", userId, itemId);
-
             LocalDateTime now = LocalDateTime.now();
-            List<BookingShortDto> pastOrCurrentBookings = bookingRepository
-                .findPastAndCurrentApprovedBookingsShortForItems(Collections.singletonList(itemId), now);
-            List<BookingShortDto> nextBookings = bookingRepository
-                .findNextApprovedBookingsShortForItems(Collections.singletonList(itemId), now);
-
-            BookingShortDto lastBookingDto = pastOrCurrentBookings.stream()
-                .findFirst()
-                .orElse(null);
-
-            BookingShortDto nextBookingDto = nextBookings.stream()
-                .findFirst()
-                .orElse(null);
-
-            itemDto.setLastBooking(lastBookingDto);
-            itemDto.setNextBooking(nextBookingDto);
+            Map<Long, LastNextBookingPair> bookingInfoMap = getLastAndNextBookingsForItems(Collections.singletonList(itemId), now);
+            LastNextBookingPair bookingPair = bookingInfoMap.getOrDefault(itemId, new LastNextBookingPair(null, null));
+            itemDto.setLastBooking(bookingPair.lastBooking());
+            itemDto.setNextBooking(bookingPair.nextBooking());
         } else {
             log.debug("User {} is not owner of item {}. Skipping booking info.", userId, itemId);
         }
