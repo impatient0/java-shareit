@@ -24,8 +24,7 @@ public interface BookingJpaRepository extends BookingRepository, JpaRepository<B
         "   (:stateName = 'FUTURE' AND b.startDate > :now) OR " +
         "   (:stateName = 'WAITING' AND b.status = ru.practicum.shareit.booking.BookingStatus.WAITING) OR " +
         "   (:stateName = 'REJECTED' AND b.status = ru.practicum.shareit.booking.BookingStatus.REJECTED)" +
-        ") " +
-        "ORDER BY b.startDate DESC")
+        ") ")
     Page<Booking> findBookingsByBookerAndState(
         @Param("bookerId") Long bookerId,
         @Param("stateName") String stateName,
@@ -43,8 +42,7 @@ public interface BookingJpaRepository extends BookingRepository, JpaRepository<B
         "   (:stateName = 'FUTURE' AND b.startDate > :now) OR " +
         "   (:stateName = 'WAITING' AND b.status = ru.practicum.shareit.booking.BookingStatus.WAITING) OR " +
         "   (:stateName = 'REJECTED' AND b.status = ru.practicum.shareit.booking.BookingStatus.REJECTED)" +
-        ") " +
-        "ORDER BY b.startDate DESC")
+        ") ")
     Page<Booking> findBookingsByItemOwnerAndState(
         @Param("ownerId") Long ownerId,
         @Param("stateName") String stateName,

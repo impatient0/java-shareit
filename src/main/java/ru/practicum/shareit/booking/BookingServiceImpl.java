@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingMapper;
@@ -143,7 +144,7 @@ public class BookingServiceImpl implements BookingService {
             throw new UserNotFoundException(
                 "User with id " + bookerId + " not found");
         }
-        Pageable pageable = getPageable(from, size);
+        Pageable pageable = getPageableWithDefaultSort(from, size);
         return bookingRepository.findBookingsByBookerAndState(bookerId, state.name(), LocalDateTime.now(), pageable)
             .stream()
             .map(bookingMapper::mapToDto)
@@ -157,17 +158,18 @@ public class BookingServiceImpl implements BookingService {
             throw new UserNotFoundException(
                 "User with id " + ownerId + " not found");
         }
-        Pageable pageable = getPageable(from, size);
+        Pageable pageable = getPageableWithDefaultSort(from, size);
         return bookingRepository.findBookingsByItemOwnerAndState(ownerId, state.name(), LocalDateTime.now(), pageable)
             .stream()
             .map(bookingMapper::mapToDto)
             .collect(Collectors.toList());
     }
 
-    private Pageable getPageable(Integer from, Integer size) {
+    private Pageable getPageableWithDefaultSort(Integer from, Integer size) {
+        Sort defaultSort = Sort.by("startDate").descending();
         if (from == null || size == null || from < 0 || size <= 0) {
             return Pageable.unpaged();
         }
-        return PageRequest.of(from / size, size);
+        return PageRequest.of(from / size, size, defaultSort);
     }
 }
