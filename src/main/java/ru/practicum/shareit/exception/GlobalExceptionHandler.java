@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @SuppressWarnings("unused")
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler({UserNotFoundException.class, ItemNotFoundException.class})
+    @ExceptionHandler({UserNotFoundException.class, ItemNotFoundException.class, BookingNotFoundException.class})
     public ResponseEntity<ErrorMessage> handleNotFound(final RuntimeException e) {
         log.warn("Encountered {} while processing request: returning 404 Not Found",
             e.getClass().getSimpleName());
@@ -34,8 +34,8 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(403).body(new ErrorMessage(e.getMessage(), 403));
     }
 
-    @ExceptionHandler({MissingRequestHeaderException.class})
-    public ResponseEntity<ErrorMessage> handleMissingHeader(final MissingRequestHeaderException e) {
+    @ExceptionHandler({MissingRequestHeaderException.class, BookingBadRequestException.class})
+    public ResponseEntity<ErrorMessage> handleMissingHeader(final RuntimeException e) {
         log.warn("Encountered {} while processing request: returning 400 Bad Request",
             e.getClass().getSimpleName());
         return ResponseEntity.status(400).body(new ErrorMessage(e.getMessage(), 400));

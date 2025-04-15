@@ -1,12 +1,10 @@
-package ru.practicum.shareit.user;
+package ru.practicum.shareit.item;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
 @SuppressWarnings("unused")
-public interface UserRepository extends JpaRepository<User, Long> {
-
-    boolean existsByEmail(String email);
+public interface CommentRepository extends JpaRepository<Comment, Long> {
 
 }
