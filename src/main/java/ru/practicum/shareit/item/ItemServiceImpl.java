@@ -109,11 +109,6 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto saveItem(NewItemDto newItemDto, Long userId) {
-        if (userRepository.findById(userId).isEmpty()) {
-            log.warn("User with id {} not found", userId);
-            throw new UserNotFoundException(
-                "User with id " + userId + " not found");
-        }
         Item item = itemMapper.mapToItem(newItemDto);
         item.setOwner(userRepository.findById(userId).orElseThrow(() -> {
             log.warn("User with id {} not found", userId);
