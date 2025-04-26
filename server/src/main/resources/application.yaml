@@ -1,5 +1,7 @@
 logging:
   level:
+    root: INFO
+    ru.practicum.shareit: DEBUG
     org:
       springframework:
         orm:
@@ -7,6 +9,10 @@ logging:
           jpa.JpaTransactionManager: DEBUG
         transaction: INFO
         transaction.interceptor: TRACE
+      hibernate:
+        orm:
+          jdbc:
+            bind: TRACE
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/shareit_db
