@@ -18,13 +18,13 @@ public class ItemMapperImpl implements ItemMapper {
 
     @Override
     public ItemDto mapToDto(Item item) {
-        return new ItemDto(item.getId(), item.getName(), item.getDescription(), item.getStatus());
+        return new ItemDto(item.getId(), item.getName(), item.getDescription(), item.getAvailable());
     }
 
     @Override
     public ItemWithBookingInfoDto mapToItemWithBookingInfoDto(Item item) {
         ItemWithBookingInfoDto dto = new ItemWithBookingInfoDto(item.getId(), item.getName(),
-            item.getDescription(), item.getStatus(), null, null, null);
+            item.getDescription(), item.getAvailable(), null, null, null);
         dto.setComments(
             item.getComments().stream().map(commentMapper::mapToDto).collect(Collectors.toSet()));
         return dto;
@@ -35,7 +35,7 @@ public class ItemMapperImpl implements ItemMapper {
         Item item = new Item();
         item.setName(newItemDto.getName());
         item.setDescription(newItemDto.getDescription());
-        item.setStatus(newItemDto.getStatus());
+        item.setAvailable(newItemDto.getAvailable());
         return item;
     }
 
@@ -47,8 +47,8 @@ public class ItemMapperImpl implements ItemMapper {
         if (updateItemDto.getDescription() != null) {
             item.setDescription(updateItemDto.getDescription());
         }
-        if (updateItemDto.getStatus() != null) {
-            item.setStatus(updateItemDto.getStatus());
+        if (updateItemDto.getAvailable() != null) {
+            item.setAvailable(updateItemDto.getAvailable());
         }
         return item;
     }

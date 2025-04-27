@@ -15,6 +15,6 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     @Query("SELECT i FROM Item i " +
         "WHERE (LOWER(i.name) LIKE LOWER(CONCAT('%', :searchText, '%')) OR " +
         "LOWER(i.description) LIKE LOWER(CONCAT('%', :searchText, '%'))) " +
-        "AND i.status = 'AVAILABLE'")
+        "AND i.available = true")
     List<Item> search(@Param("searchText") String text);
 }

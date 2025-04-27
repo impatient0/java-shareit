@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS items (
     name VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
     owner_id BIGINT NOT NULL,
-    status VARCHAR(50),
+    available BOOLEAN NOT NULL,
     FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE
 );
 

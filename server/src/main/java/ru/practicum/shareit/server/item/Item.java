@@ -3,8 +3,6 @@ package ru.practicum.shareit.server.item;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -19,7 +17,6 @@ import java.util.Set;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.practicum.shareit.common.enums.ItemStatus;
 import ru.practicum.shareit.server.user.User;
 
 @Entity
@@ -43,9 +40,8 @@ public class Item {
     @JoinColumn(name = "owner_id", referencedColumnName = "id", nullable = false)
     private User owner;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
-    private ItemStatus status;
+    @Column(name = "available", nullable = false)
+    private Boolean available;
 
     @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, orphanRemoval = true, fetch =
         FetchType.LAZY)
@@ -75,7 +71,7 @@ public class Item {
             ", name='" + name + '\'' +
             // getId() usually doesn't initialize the proxy
             ", ownerId=" + (owner != null ? owner.getId() : null) +
-            ", status=" + status +
+            ", status=" + available +
             '}';
     }
 }

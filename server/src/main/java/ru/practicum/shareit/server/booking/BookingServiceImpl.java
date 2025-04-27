@@ -9,11 +9,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.common.enums.BookingState;
-import ru.practicum.shareit.common.enums.BookingStatus;
-import ru.practicum.shareit.common.enums.ItemStatus;
 import ru.practicum.shareit.common.dto.booking.BookingDto;
 import ru.practicum.shareit.common.dto.booking.NewBookingDto;
+import ru.practicum.shareit.common.enums.BookingState;
+import ru.practicum.shareit.common.enums.BookingStatus;
 import ru.practicum.shareit.server.booking.dto.BookingMapper;
 import ru.practicum.shareit.server.exception.AccessDeniedException;
 import ru.practicum.shareit.server.exception.BookingBadRequestException;
@@ -60,7 +59,7 @@ public class BookingServiceImpl implements BookingService {
             throw new BookingBadRequestException(
                 "User with id " + userId + " is the owner of item with id " + booking.getItemId());
         }
-        if (!item.getStatus().equals(ItemStatus.AVAILABLE)) {
+        if (!item.getAvailable()) {
             log.warn("Item with id {} is not available", booking.getItemId());
             throw new BookingBadRequestException(
                 "Item with id " + booking.getItemId() + " is not available");
