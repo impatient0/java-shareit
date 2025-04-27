@@ -27,7 +27,7 @@ public class UserRoutesConfig {
     // private final String serverUri = "http://server:9090"; // Alternative: Hardcoded
 
     private static final String USERS_PATH = "/users";
-    private static final String USERS_ID_PATH = "/users/{id}";
+    private static final String USERS_ID_PATH = USERS_PATH + "/{id}";
 
     @Bean
     public RouteLocator userRoutes(RouteLocatorBuilder builder) {

@@ -71,7 +71,7 @@ public class ItemController {
 
     @DeleteMapping
     public ResponseEntity<Void> delete(@RequestHeader(USER_ID_HEADER) Long userId,
-        @RequestParam Long id) {
+        @PathVariable Long id) {
         log.info("Processing request to delete item with ID: {}", id);
         itemService.delete(id, userId);
         return ResponseEntity.noContent().build();
