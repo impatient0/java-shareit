@@ -18,7 +18,7 @@
 
   <properties>
     <java.version>21</java.version> <!-- Or your Java version -->
-    <spring-boot.version>3.4.4</spring-boot.version> <!-- Or your Spring Boot version -->
+    <spring-boot.version>3.4.5</spring-boot.version> <!-- Or your Spring Boot version -->
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -26,6 +26,8 @@
 
   <modules>
     <module>server</module>
+    <module>gateway</module>
+    <module>common</module>
   </modules>
 
   <dependencyManagement>
@@ -34,6 +36,13 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-dependencies</artifactId>
         <version>${spring-boot.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-dependencies</artifactId>
+        <version>2024.0.1</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
