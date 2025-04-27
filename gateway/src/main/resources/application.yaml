@@ -2,35 +2,16 @@
 server:
   port: 8080 # Port the gateway will listen on
 
-# Spring Application Configuration
 spring:
   application:
-    name: shareit-gateway # Service name, useful for logs and discovery
+    name: shareit-gateway
 
-  # Spring Cloud Gateway Configuration
   cloud:
     gateway:
-      # Disable service discovery integration if you're not using Eureka/Consul yet
       discovery:
         locator:
           enabled: false
-          lower-case-service-id: true # Good practice if using discovery later
-
-      # --- Route definitions are primarily handled in Java Config (UserRoutesConfig, etc.) ---
-      # We don't need the 'routes:' block here if all routes are in Java.
-
-      # Optional: Configure HTTP client settings (e.g., timeouts)
-      # httpclient:
-      #   connect-timeout: 2000  # milliseconds
-      #   response-timeout: 5s   # duration format
-
-      # Optional: Global CORS configuration if needed (adjust origins)
-      # globalcors:
-      #   corsConfigurations:
-      #     '[/**]':
-      #       allowedOrigins: "http://localhost:3000" # Example frontend
-      #       allowedMethods: "*"
-      #       allowedHeaders: "*"
+          lower-case-service-id: true
 
 shareit-server:
   url: http://server:9090

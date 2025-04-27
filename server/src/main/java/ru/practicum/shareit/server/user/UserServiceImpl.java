@@ -9,7 +9,7 @@ import ru.practicum.shareit.common.dto.user.UpdateUserDto;
 import ru.practicum.shareit.common.dto.user.UserDto;
 import ru.practicum.shareit.server.exception.EmailAlreadyExistsException;
 import ru.practicum.shareit.server.exception.UserNotFoundException;
-import ru.practicum.shareit.server.user.dto.UserMapper;
+import ru.practicum.shareit.server.user.mapper.UserMapper;
 
 @Service
 @RequiredArgsConstructor

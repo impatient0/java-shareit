@@ -1,4 +1,4 @@
-package ru.practicum.shareit.gateway.validation; // Example package
+package ru.practicum.shareit.gateway.validation;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;

@@ -2,6 +2,8 @@ server:
   port: 9090
 
 spring:
+  application:
+    name: shareit-server
   datasource:
     url: jdbc:postgresql://localhost:5432/shareit_db
     username: user

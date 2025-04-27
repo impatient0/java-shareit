@@ -21,8 +21,8 @@ import ru.practicum.shareit.server.booking.BookingRepository;
 import ru.practicum.shareit.server.exception.AccessDeniedException;
 import ru.practicum.shareit.server.exception.ItemNotFoundException;
 import ru.practicum.shareit.server.exception.UserNotFoundException;
-import ru.practicum.shareit.server.item.dto.CommentMapper;
-import ru.practicum.shareit.server.item.dto.ItemMapper;
+import ru.practicum.shareit.server.item.mapper.CommentMapper;
+import ru.practicum.shareit.server.item.mapper.ItemMapper;
 import ru.practicum.shareit.server.user.User;
 import ru.practicum.shareit.server.user.UserRepository;
 

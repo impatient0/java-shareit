@@ -9,22 +9,20 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import reactor.core.publisher.Mono;
-import ru.practicum.shareit.common.dto.user.NewUserDto;   // DTO from common module
-import ru.practicum.shareit.common.dto.user.UpdateUserDto; // DTO from common module
-import ru.practicum.shareit.gateway.validation.DtoValidator; // Your validator helper class
+import ru.practicum.shareit.common.dto.user.NewUserDto;
+import ru.practicum.shareit.common.dto.user.UpdateUserDto;
+import ru.practicum.shareit.gateway.validation.DtoValidator;
 
 @Configuration
 @RequiredArgsConstructor
 @Slf4j
+@SuppressWarnings("unused")
 public class UserRoutesConfig {
 
-    // Inject the DTO validator bean
     private final DtoValidator dtoValidator;
 
-    // Inject the target server URI from application.yaml (or define it here)
-    @Value("${shareit-server.url}") // Example: Injecting from properties
+    @Value("${shareit-server.url}")
     private String serverUri;
-    // private final String serverUri = "http://server:9090"; // Alternative: Hardcoded
 
     private static final String USERS_PATH = "/users";
     private static final String USERS_ID_PATH = USERS_PATH + "/{id}";
@@ -36,67 +34,58 @@ public class UserRoutesConfig {
         return builder.routes()
             // Route: POST /users -> Create User
             .route("create_user", r -> r
-                .path(USERS_PATH)                     // Matches path /users
+                .path(USERS_PATH)
                 .and()
-                .method(HttpMethod.POST)              // Matches POST method
-                .filters(f -> f.modifyRequestBody(     // Apply filter to validate body
-                    NewUserDto.class,                 // Expected input class
-                    NewUserDto.class,                 // Output class (same)
-                    (exchange, dto) -> {              // Validation function
+                .method(HttpMethod.POST)
+                .filters(f -> f.modifyRequestBody(
+                    NewUserDto.class,
+                    NewUserDto.class,
+                    (exchange, dto) -> {
                         log.debug("Validating NewUserDto for POST {}", USERS_PATH);
-                        dtoValidator.validate(dto);   // Use validator bean
-                        return Mono.just(dto);        // Return validated DTO if successful
+                        dtoValidator.validate(dto);
+                        return Mono.just(dto);
                     }
                 ))
-                .uri(serverUri)) // Forward to the server
+                .uri(serverUri))
 
             // Route: PATCH /users/{id} -> Update User
             .route("update_user", r -> r
-                .path(USERS_ID_PATH)                  // Matches path /users/{id}
+                .path(USERS_ID_PATH)
                 .and()
-                .method(HttpMethod.PATCH)             // Matches PATCH method
-                .filters(f -> f.modifyRequestBody(     // Apply filter to validate body
-                    UpdateUserDto.class,              // Expected input class
-                    UpdateUserDto.class,              // Output class (same)
-                    (exchange, dto) -> {              // Validation function
+                .method(HttpMethod.PATCH)
+                .filters(f -> f.modifyRequestBody(
+                    UpdateUserDto.class,
+                    UpdateUserDto.class,
+                    (exchange, dto) -> {
                         String userId = exchange.getRequest().getURI().getPath().substring(USERS_PATH.length() + 1);
                         log.debug("Validating UpdateUserDto for PATCH /users/{}", userId);
-                        dtoValidator.validate(dto);   // Use validator bean
-                        return Mono.just(dto);        // Return validated DTO if successful
+                        dtoValidator.validate(dto);
+                        return Mono.just(dto);
                     }
                 ))
-                .uri(serverUri)) // Forward to the server
+                .uri(serverUri))
 
             // Route: GET /users -> Get All Users
             .route("get_all_users", r -> r
-                .path(USERS_PATH)                     // Matches path /users
+                .path(USERS_PATH)
                 .and()
-                .method(HttpMethod.GET)               // Matches GET method
-                // No body validation filter needed for GET
-                .uri(serverUri)) // Forward directly
+                .method(HttpMethod.GET)
+                .uri(serverUri))
 
             // Route: GET /users/{id} -> Get User By ID
             .route("get_user_by_id", r -> r
-                .path(USERS_ID_PATH)                  // Matches path /users/{id}
+                .path(USERS_ID_PATH)
                 .and()
-                .method(HttpMethod.GET)               // Matches GET method
-                // No body validation filter needed for GET
-                .uri(serverUri)) // Forward directly
+                .method(HttpMethod.GET)
+                .uri(serverUri))
 
             // Route: DELETE /users/{id} -> Delete User By ID
             .route("delete_user", r -> r
-                .path(USERS_ID_PATH)                  // Matches path /users/{id}
+                .path(USERS_ID_PATH)
                 .and()
-                .method(HttpMethod.DELETE)            // Matches DELETE method
-                // No body validation filter needed for DELETE
-                .uri(serverUri)) // Forward directly
+                .method(HttpMethod.DELETE)
+                .uri(serverUri))
 
-            // No .build() here if you chain more RouteLocators in other config classes.
-            // If this is the ONLY RouteLocator bean, you would add .build() here.
-            // Let's assume you might add ItemRoutesConfig etc., so we omit .build()
-            // and rely on Spring Boot to collect all RouteLocator beans.
-            // For a single config class approach, you WOULD need .build() at the very end.
-            // Let's add build() for now assuming this might be the only one initially.
-            .build(); // Add .build() if this is the complete definition for now
+            .build();
     }
 }

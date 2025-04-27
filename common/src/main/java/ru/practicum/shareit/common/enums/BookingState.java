@@ -1,4 +1,4 @@
-package ru.practicum.shareit.common.enums; // Or a suitable common package
+package ru.practicum.shareit.common.enums;
 
 public enum BookingState {
     ALL,      // All bookings for the user

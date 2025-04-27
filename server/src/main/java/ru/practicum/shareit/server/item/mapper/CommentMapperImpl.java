@@ -1,4 +1,4 @@
-package ru.practicum.shareit.server.item.dto;
+package ru.practicum.shareit.server.item.mapper;
 
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.common.dto.item.CommentDto;

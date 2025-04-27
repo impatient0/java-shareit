@@ -1,4 +1,4 @@
-package ru.practicum.shareit.server.item.dto;
+package ru.practicum.shareit.server.item.mapper;
 
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;

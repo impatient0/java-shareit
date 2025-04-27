@@ -1,4 +1,4 @@
-package ru.practicum.shareit.gateway.validation; // Place in validation package
+package ru.practicum.shareit.gateway.validation;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilter;

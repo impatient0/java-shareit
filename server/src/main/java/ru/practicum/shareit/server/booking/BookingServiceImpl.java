@@ -13,7 +13,7 @@ import ru.practicum.shareit.common.dto.booking.BookingDto;
 import ru.practicum.shareit.common.dto.booking.NewBookingDto;
 import ru.practicum.shareit.common.enums.BookingState;
 import ru.practicum.shareit.common.enums.BookingStatus;
-import ru.practicum.shareit.server.booking.dto.BookingMapper;
+import ru.practicum.shareit.server.booking.mapper.BookingMapper;
 import ru.practicum.shareit.server.exception.AccessDeniedException;
 import ru.practicum.shareit.server.exception.BookingBadRequestException;
 import ru.practicum.shareit.server.exception.BookingNotFoundException;
