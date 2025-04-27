@@ -1,6 +1,5 @@
 package ru.practicum.shareit.server.booking;
 
-import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -15,9 +14,9 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ru.practicum.shareit.common.enums.BookingState;
 import ru.practicum.shareit.common.dto.booking.BookingDto;
 import ru.practicum.shareit.common.dto.booking.NewBookingDto;
+import ru.practicum.shareit.common.enums.BookingState;
 
 @RestController
 @RequestMapping(path = "/bookings")
@@ -31,7 +30,7 @@ public class BookingController {
 
     @PostMapping
     public ResponseEntity<BookingDto> saveBooking(@RequestHeader(USER_ID_HEADER) Long userId,
-        @RequestBody @Valid NewBookingDto booking) {
+        @RequestBody NewBookingDto booking) {
         log.info("Processing request to create a new booking...");
         BookingDto savedBooking = bookingService.saveBooking(booking, userId);
         return ResponseEntity.created(URI.create("/bookings/" + savedBooking.getId()))

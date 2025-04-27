@@ -1,6 +1,5 @@
 package ru.practicum.shareit.server.user;
 
-import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +32,7 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<UserDto> saveUser(@RequestBody @Valid NewUserDto userDto) {
+    public ResponseEntity<UserDto> saveUser(@RequestBody NewUserDto userDto) {
         log.info("Processing request to save a new user...");
         UserDto savedUser = userService.saveUser(userDto);
         return ResponseEntity.created(java.net.URI.create("/users/" + savedUser.getId()))
@@ -47,7 +46,7 @@ public class UserController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<UserDto> update(@RequestBody @Valid UpdateUserDto updatedUserDto,
+    public ResponseEntity<UserDto> update(@RequestBody UpdateUserDto updatedUserDto,
         @PathVariable Long id) {
         log.info("Processing request to update user with ID: {}", id);
         return ResponseEntity.ok(userService.update(updatedUserDto, id));

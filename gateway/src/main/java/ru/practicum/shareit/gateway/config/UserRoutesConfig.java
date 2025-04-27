@@ -57,7 +57,8 @@ public class UserRoutesConfig {
                     UpdateUserDto.class,
                     UpdateUserDto.class,
                     (exchange, dto) -> {
-                        String userId = exchange.getRequest().getURI().getPath().substring(USERS_PATH.length() + 1);
+                        String userId = exchange.getRequest().getURI().getPath()
+                            .substring(USERS_PATH.length() + 1);
                         log.debug("Validating UpdateUserDto for PATCH /users/{}", userId);
                         dtoValidator.validate(dto);
                         return Mono.just(dto);

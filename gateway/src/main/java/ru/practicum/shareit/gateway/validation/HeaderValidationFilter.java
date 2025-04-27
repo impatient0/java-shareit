@@ -27,7 +27,8 @@ public class HeaderValidationFilter {
                 Long.parseLong(userId);
                 log.trace("Header '{}' is present and is a number: {}", USER_ID_HEADER, userId);
             } catch (NumberFormatException e) {
-                log.warn("Validation failed: Header '{}' is not a valid number: {}", USER_ID_HEADER, userId, e);
+                log.warn("Validation failed: Header '{}' is not a valid number: {}", USER_ID_HEADER,
+                    userId, e);
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Invalid format for header '" + USER_ID_HEADER + "'");
             }

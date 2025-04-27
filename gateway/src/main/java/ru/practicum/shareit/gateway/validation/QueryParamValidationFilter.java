@@ -27,20 +27,27 @@ public class QueryParamValidationFilter {
         return (exchange, chain) -> {
             List<String> paramValues = exchange.getRequest().getQueryParams().get(paramName);
 
-            if (CollectionUtils.isEmpty(paramValues) || !StringUtils.hasText(paramValues.getFirst())) {
-                log.trace("Optional query parameter '{}' is not present or empty, allowing request.", paramName);
+            if (CollectionUtils.isEmpty(paramValues) || !StringUtils.hasText(
+                paramValues.getFirst())) {
+                log.trace(
+                    "Optional query parameter '{}' is not present or empty, allowing request.",
+                    paramName);
                 return chain.filter(exchange);
             }
 
             String actualValue = paramValues.getFirst().toUpperCase();
 
             if (allowedValues.contains(actualValue)) {
-                log.trace("Optional query parameter '{}' has valid value '{}', allowing request.", paramName, actualValue);
+                log.trace("Optional query parameter '{}' has valid value '{}', allowing request.",
+                    paramName, actualValue);
                 return chain.filter(exchange);
             } else {
-                log.warn("Validation failed: Query parameter '{}' has invalid value '{}'. Allowed values are: {}",
+                log.warn(
+                    "Validation failed: Query parameter '{}' has invalid value '{}'. Allowed "
+                        + "values are: {}",
                     paramName, paramValues.getFirst(), allowedValues);
-                String errorMessage = String.format("Unknown %s: %s", paramName, paramValues.getFirst());
+                String errorMessage = String.format("Unknown %s: %s", paramName,
+                    paramValues.getFirst());
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, errorMessage);
             }
         };

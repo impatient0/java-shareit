@@ -1,6 +1,5 @@
 package ru.practicum.shareit.server.item;
 
-import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,7 +47,7 @@ public class ItemController {
 
     @PostMapping
     public ResponseEntity<ItemDto> saveItem(@RequestHeader(USER_ID_HEADER) Long userId,
-        @RequestBody @Valid NewItemDto newItemDto) {
+        @RequestBody NewItemDto newItemDto) {
         log.info("Processing request to save a new item...");
         ItemDto savedItem = itemService.saveItem(newItemDto, userId);
         return ResponseEntity.created(java.net.URI.create("/items/" + savedItem.getId()))
@@ -57,7 +56,7 @@ public class ItemController {
 
     @PatchMapping("/{id}")
     public ResponseEntity<ItemDto> update(@RequestHeader(USER_ID_HEADER) Long userId,
-        @PathVariable Long id, @RequestBody @Valid UpdateItemDto updatedItemDto) {
+        @PathVariable Long id, @RequestBody UpdateItemDto updatedItemDto) {
         log.info("Processing request to update item with ID: {}", id);
         return ResponseEntity.ok(itemService.update(updatedItemDto, userId, id));
     }
@@ -79,7 +78,7 @@ public class ItemController {
 
     @PostMapping("{itemId}/comment")
     public ResponseEntity<CommentDto> saveComment(@RequestHeader(USER_ID_HEADER) Long userId,
-        @PathVariable Long itemId, @RequestBody @Valid NewCommentDto newCommentDto) {
+        @PathVariable Long itemId, @RequestBody NewCommentDto newCommentDto) {
         log.info("Processing request to save a comment for item with ID: {}", itemId);
         return ResponseEntity.created(java.net.URI.create("/items/" + itemId + "/comment"))
             .body(itemService.saveComment(newCommentDto, itemId, userId));

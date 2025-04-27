@@ -118,8 +118,10 @@ public class ItemRoutesConfig {
                         NewCommentDto.class, NewCommentDto.class,
                         (exchange, dto) -> {
                             String path = exchange.getRequest().getURI().getPath();
-                            String itemId = path.substring(ITEMS_PATH.length() + 1, path.indexOf("/comment"));
-                            log.debug("Validating NewCommentDto for POST /items/{}/comment", itemId);
+                            String itemId = path.substring(ITEMS_PATH.length() + 1,
+                                path.indexOf("/comment"));
+                            log.debug("Validating NewCommentDto for POST /items/{}/comment",
+                                itemId);
                             dtoValidator.validate(dto);
                             return Mono.just(dto);
                         }
