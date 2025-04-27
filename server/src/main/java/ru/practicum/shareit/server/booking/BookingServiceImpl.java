@@ -109,7 +109,7 @@ public class BookingServiceImpl implements BookingService {
             log.warn("User with id {} is not the owner of item in booking with id {}",
                 userId, bookingId);
             throw new AccessDeniedException(
-                "User with id " + userId + " is not the owner of item in booking with id"
+                "User with id " + userId + " is not the owner of item in booking with id "
                     + bookingId);
         }
         booking.setStatus(approved ? BookingStatus.APPROVED : BookingStatus.REJECTED);
