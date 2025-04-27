@@ -3,7 +3,7 @@ services:
     build: server
     container_name: shareit-server-compose
     ports:
-      - "8080:8080"
+      - "9090:9090"
     depends_on:
       - db
     environment:
@@ -11,6 +11,14 @@ services:
       - SPRING_DATASOURCE_USERNAME=user
       - SPRING_DATASOURCE_PASSWORD=password
       - JAVA_OPTS=-Duser.timezone=UTC
+
+  gateway:
+    build: gateway
+    container_name: shareit-gateway-compose
+    ports:
+      - "8080:8080"
+    depends_on:
+      - server
 
   db:
     image: postgres:16
