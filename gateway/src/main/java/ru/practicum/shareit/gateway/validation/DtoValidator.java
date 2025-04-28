@@ -2,6 +2,7 @@ package ru.practicum.shareit.gateway.validation;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
+import java.util.Objects;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +25,7 @@ public class DtoValidator {
         if (!violations.isEmpty()) {
             String errorMessages = violations.stream()
                 .map(ConstraintViolation::getMessage)
+                .filter(Objects::nonNull)
                 .findFirst().orElse("Unknown validation error");
             log.warn("Validation failed for DTO [{}]: {}", dto.getClass().getSimpleName(),
                 errorMessages);
