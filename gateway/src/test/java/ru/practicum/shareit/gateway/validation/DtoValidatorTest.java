@@ -65,7 +65,8 @@ class DtoValidatorTest {
 
     @Test
     void validate_whenOneViolation_shouldThrowServerWebInputExceptionWithViolationMessage() {
-        ConstraintViolation<Object> mockViolation = mock(ConstraintViolation.class);
+        @SuppressWarnings("unchecked")
+        ConstraintViolation<Object> mockViolation = (ConstraintViolation<Object>) mock(ConstraintViolation.class);
         when(mockViolation.getMessage()).thenReturn("Error message for field X");
 
         Set<ConstraintViolation<Object>> violations = Set.of(mockViolation);
@@ -82,10 +83,12 @@ class DtoValidatorTest {
 
     @Test
     void validate_whenMultipleViolations_shouldThrowServerWebInputExceptionWithFirstViolationMessage() {
-        ConstraintViolation<Object> mockViolation1 = mock(ConstraintViolation.class);
+        @SuppressWarnings("unchecked")
+        ConstraintViolation<Object> mockViolation1 = (ConstraintViolation<Object>) mock(ConstraintViolation.class);
         when(mockViolation1.getMessage()).thenReturn("First error message");
 
-        ConstraintViolation<Object> mockViolation2 = mock(ConstraintViolation.class);
+        @SuppressWarnings("unchecked")
+        ConstraintViolation<Object> mockViolation2 = (ConstraintViolation<Object>) mock(ConstraintViolation.class);
         // only need stubbing for one mock violation
 
         Set<ConstraintViolation<Object>> violations = Set.of(mockViolation1, mockViolation2);
@@ -107,7 +110,8 @@ class DtoValidatorTest {
 
     @Test
     void validate_whenViolationMessageIsNull_shouldThrowServerWebInputExceptionWithDefaultMessage() {
-        ConstraintViolation<Object> mockViolation = mock(ConstraintViolation.class);
+        @SuppressWarnings("unchecked")
+        ConstraintViolation<Object> mockViolation = (ConstraintViolation<Object>) mock(ConstraintViolation.class);
         when(mockViolation.getMessage()).thenReturn(null); // Simulate null message
 
         Set<ConstraintViolation<Object>> violations = Set.of(mockViolation);
