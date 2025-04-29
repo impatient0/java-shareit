@@ -21,6 +21,7 @@ import ru.practicum.shareit.server.exception.ItemNotFoundException;
 import ru.practicum.shareit.server.exception.UserNotFoundException;
 import ru.practicum.shareit.server.item.Item;
 import ru.practicum.shareit.server.item.ItemRepository;
+import ru.practicum.shareit.server.user.User;
 import ru.practicum.shareit.server.user.UserRepository;
 
 @Service
@@ -44,11 +45,10 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingDto saveBooking(NewBookingDto booking, Long userId) {
-        if (userRepository.findById(userId).isEmpty()) {
+        User booker = userRepository.findById(userId).orElseThrow(() -> {
             log.warn("User with id {} not found", userId);
-            throw new UserNotFoundException(
-                "User with id " + userId + " not found");
-        }
+            return new UserNotFoundException("User with id " + userId + " not found");
+        });
         Item item = itemRepository.findById(booking.getItemId()).orElseThrow(() -> {
             log.warn("Item with id {} not found", booking.getItemId());
             return new ItemNotFoundException(
@@ -74,7 +74,7 @@ public class BookingServiceImpl implements BookingService {
             throw new BookingBadRequestException("Booking end time must be after start time");
         }
         Booking newBooking = bookingMapper.mapToBooking(booking);
-        newBooking.setBooker(userRepository.findById(userId).get());
+        newBooking.setBooker(booker);
         newBooking.setItem(item);
         Booking savedBooking = bookingRepository.save(newBooking);
         log.debug("Saved new booking: {}", savedBooking);
