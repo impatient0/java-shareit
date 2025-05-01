@@ -31,7 +31,7 @@ public class GatewayErrorAttributes extends DefaultErrorAttributes {
         }
 
         errorAttributes.put("status", status.value());
-        errorAttributes.put("message", message);
+        errorAttributes.put("error", message);
         errorAttributes.remove("trace");
 
         return errorAttributes;

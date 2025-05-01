@@ -63,7 +63,7 @@ class GatewayErrorAttributesTest {
         assertThat("Error attributes should contain the correct status code", errorAttributes,
             hasEntry("status", expectedStatus.value()));
         assertThat("Error attributes should contain the correct message (reason)", errorAttributes,
-            hasEntry("message", expectedReason));
+            hasEntry("error", expectedReason));
         assertThat(
             "Error attributes should not contain 'exception' key for ResponseStatusException",
             errorAttributes, not(hasKey("exception")));
@@ -86,7 +86,7 @@ class GatewayErrorAttributesTest {
         assertThat("Error attributes should contain the correct status code", errorAttributes,
             hasEntry("status", expectedStatus.value()));
         assertThat("Error attributes should contain the default message when reason is null",
-            errorAttributes, hasEntry("message", "Invalid request"));
+            errorAttributes, hasEntry("error", "Invalid request"));
         assertThat(
             "Error attributes should not contain 'exception' key for ResponseStatusException",
             errorAttributes, not(hasKey("exception")));
@@ -109,7 +109,7 @@ class GatewayErrorAttributesTest {
         assertThat("Error attributes should contain INTERNAL_SERVER_ERROR status", errorAttributes,
             hasEntry("status", HttpStatus.INTERNAL_SERVER_ERROR.value()));
         assertThat("Error attributes should contain the error message", errorAttributes,
-            hasEntry("message", errorMessage));
+            hasEntry("error", errorMessage));
         assertThat("Error attributes should contain 'exception' key for other Throwables",
             errorAttributes, hasEntry("exception", otherError.getClass().getName()));
         assertThat("Error attributes should not contain 'trace' key", errorAttributes,
@@ -131,7 +131,7 @@ class GatewayErrorAttributesTest {
         assertThat("Error attributes should contain INTERNAL_SERVER_ERROR status", errorAttributes,
             hasEntry("status", HttpStatus.INTERNAL_SERVER_ERROR.value()));
         assertThat("Error attributes should contain the default message when error message is null",
-            errorAttributes, hasEntry("message", "Internal gateway error"));
+            errorAttributes, hasEntry("error", "Internal gateway error"));
         assertThat("Error attributes should contain 'exception' key for other Throwables",
             errorAttributes, hasEntry("exception", otherErrorWithNullMessage.getClass().getName()));
         assertThat("Error attributes should not contain 'trace' key", errorAttributes,

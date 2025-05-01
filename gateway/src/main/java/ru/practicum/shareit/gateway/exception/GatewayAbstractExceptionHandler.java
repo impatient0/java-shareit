@@ -49,7 +49,7 @@ public class GatewayAbstractExceptionHandler extends AbstractErrorWebExceptionHa
 
         int status = (int) Optional.ofNullable(errorPropertiesMap.get("status"))
             .orElse(HttpStatus.INTERNAL_SERVER_ERROR.value());
-        String message = (String) Optional.ofNullable(errorPropertiesMap.get("message"))
+        String message = (String) Optional.ofNullable(errorPropertiesMap.get("error"))
             .orElse("Unknown error");
 
         ErrorMessage errorResponse = new ErrorMessage(message, status);
