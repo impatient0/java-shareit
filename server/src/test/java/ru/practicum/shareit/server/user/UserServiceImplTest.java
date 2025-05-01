@@ -103,16 +103,14 @@ class UserServiceImplTest {
         verify(userMapper, never()).mapToDto(any(User.class));
     }
 
-    // --- Tests for saveUser(NewUserDto newUserDto) ---
-
     @Test
     @DisplayName("saveUser should save user and return DTO when email is unique")
     void saveUser_whenEmailIsUnique_shouldSaveAndReturnUserDto() {
-        User userToSave = new User(); // User before saving (no ID)
+        User userToSave = new User();
         userToSave.setName(newUserDto.getName());
         userToSave.setEmail(newUserDto.getEmail());
 
-        User savedUser = new User(); // User after saving (with ID)
+        User savedUser = new User();
         savedUser.setId(3L);
         savedUser.setName(newUserDto.getName());
         savedUser.setEmail(newUserDto.getEmail());
@@ -131,7 +129,7 @@ class UserServiceImplTest {
         verify(userMapper, times(1)).mapToUser(newUserDto);
         verify(userRepository, times(1)).existsByEmail(newUserDto.getEmail());
         verify(userRepository, times(1)).save(
-            userToSave); // Verify save was called with the correct object
+            userToSave);
         verify(userMapper, times(1)).mapToDto(savedUser);
     }
 
@@ -152,11 +150,9 @@ class UserServiceImplTest {
 
         verify(userMapper, times(1)).mapToUser(newUserDto);
         verify(userRepository, times(1)).existsByEmail(newUserDto.getEmail());
-        verify(userRepository, never()).save(any(User.class)); // Ensure save was not called
+        verify(userRepository, never()).save(any(User.class));
         verify(userMapper, never()).mapToDto(any(User.class));
     }
-
-    // --- Tests for getById(Long id) ---
 
     @Test
     @DisplayName("getById should return UserDto when user exists")
@@ -212,9 +208,9 @@ class UserServiceImplTest {
         assertThat(result, is(notNullValue()));
         assertThat(result, equalTo(updatedUserResultDto));
         verify(userRepository, times(1)).findById(userId);
-        verify(userRepository, times(1)).existsByEmail(updateUserDto.getEmail()); // Email checked
+        verify(userRepository, times(1)).existsByEmail(updateUserDto.getEmail());
         verify(userMapper, times(1)).updateUserFields(updateUserDto, existingUser);
-        verify(userRepository, times(1)).save(updatedUser); // Ensure save was called
+        verify(userRepository, times(1)).save(updatedUser);
         verify(userMapper, times(1)).mapToDto(updatedUser);
     }
 
@@ -222,12 +218,12 @@ class UserServiceImplTest {
     @DisplayName("update should update user when only name is changed")
     void update_whenOnlyNameChanged_shouldUpdateAndReturnDto() {
         Long userId = user1.getId();
-        UpdateUserDto nameOnlyUpdateDto = new UpdateUserDto("New Name Only", null); // Email is null
+        UpdateUserDto nameOnlyUpdateDto = new UpdateUserDto("New Name Only", null);
         User existingUser = user1;
         User updatedUser = new User();
         updatedUser.setId(userId);
         updatedUser.setName(nameOnlyUpdateDto.getName());
-        updatedUser.setEmail(existingUser.getEmail()); // Email remains the same
+        updatedUser.setEmail(existingUser.getEmail());
 
         UserDto resultDto = new UserDto(userId, nameOnlyUpdateDto.getName(),
             existingUser.getEmail());
@@ -241,7 +237,7 @@ class UserServiceImplTest {
 
         assertThat(result, equalTo(resultDto));
         verify(userRepository, times(1)).findById(userId);
-        verify(userRepository, never()).existsByEmail(anyString()); // Email check skipped
+        verify(userRepository, never()).existsByEmail(anyString());
         verify(userMapper, times(1)).updateUserFields(nameOnlyUpdateDto, existingUser);
         verify(userRepository, times(1)).save(updatedUser);
         verify(userMapper, times(1)).mapToDto(updatedUser);
@@ -271,7 +267,7 @@ class UserServiceImplTest {
 
         assertThat(result, equalTo(resultDto));
         verify(userRepository, times(1)).findById(userId);
-        verify(userRepository, never()).existsByEmail(anyString()); // Email check skipped
+        verify(userRepository, never()).existsByEmail(anyString());
         verify(userMapper, times(1)).updateUserFields(sameEmailUpdateDto, existingUser);
         verify(userRepository, times(1)).save(updatedUser);
         verify(userMapper, times(1)).mapToDto(updatedUser);

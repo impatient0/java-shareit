@@ -336,7 +336,7 @@ class BookingServiceImplTest {
         void getById_whenRequestedByBooker_shouldReturnDto() {
             when(userRepository.findById(bookerId)).thenReturn(Optional.of(booker));
             when(bookingRepository.findById(bookingWaitingId)).thenReturn(
-                Optional.of(bookingWaiting)); // Booker is booker
+                Optional.of(bookingWaiting));
             when(bookingMapper.mapToDto(bookingWaiting)).thenReturn(bookingDtoWaiting);
 
             BookingDto result = bookingService.getById(bookerId, bookingWaitingId);
@@ -352,7 +352,7 @@ class BookingServiceImplTest {
         void getById_whenRequestedByOwner_shouldReturnDto() {
             when(userRepository.findById(ownerId)).thenReturn(Optional.of(owner));
             when(bookingRepository.findById(bookingWaitingId)).thenReturn(
-                Optional.of(bookingWaiting)); // Owner is owner of item
+                Optional.of(bookingWaiting));
             when(bookingMapper.mapToDto(bookingWaiting)).thenReturn(bookingDtoWaiting);
 
             BookingDto result = bookingService.getById(ownerId, bookingWaitingId);
@@ -525,7 +525,7 @@ class BookingServiceImplTest {
         void delete_whenUserIsNotBooker_shouldThrowAccessDeniedException() {
             when(userRepository.findById(ownerId)).thenReturn(Optional.of(owner));
             when(bookingRepository.findById(bookingWaitingId)).thenReturn(
-                Optional.of(bookingWaiting)); // Booked by bookerId=2
+                Optional.of(bookingWaiting));
 
             assertThrows(AccessDeniedException.class,
                 () -> bookingService.delete(bookingWaitingId, ownerId));
@@ -614,11 +614,11 @@ class BookingServiceImplTest {
 
             bookingService.getBookingsByBooker(bookerId, BookingState.ALL, -1, size);
             verify(bookingRepository, times(2)).findBookingsByBookerAndState(anyLong(), anyString(),
-                any(LocalDateTime.class), eq(Pageable.unpaged())); // Called again
+                any(LocalDateTime.class), eq(Pageable.unpaged()));
 
             bookingService.getBookingsByBooker(bookerId, BookingState.ALL, from, 0);
             verify(bookingRepository, times(3)).findBookingsByBookerAndState(anyLong(), anyString(),
-                any(LocalDateTime.class), eq(Pageable.unpaged())); // Called again
+                any(LocalDateTime.class), eq(Pageable.unpaged()));
         }
 
         @Test

@@ -111,7 +111,7 @@ class GatewayIntegrationTest {
                 .expectHeader().contentType(MediaType.APPLICATION_JSON).expectBody(String.class)
                 .isEqualTo(expectedResponseBody);
 
-            RecordedRequest recordedRequest = takeRequestOrFail(); // Consume the expected request
+            RecordedRequest recordedRequest = takeRequestOrFail();
             assertEquals("POST", recordedRequest.getMethod());
             assertEquals("/users", recordedRequest.getPath());
             assertEquals(toJson(newUser), recordedRequest.getBody().readUtf8());
@@ -156,7 +156,7 @@ class GatewayIntegrationTest {
                 .expectHeader().contentType(MediaType.APPLICATION_JSON).expectBody(String.class)
                 .isEqualTo(expectedResponseBody);
 
-            RecordedRequest recordedRequest = takeRequestOrFail(); // Consume the expected request
+            RecordedRequest recordedRequest = takeRequestOrFail();
             assertEquals("PATCH", recordedRequest.getMethod());
             assertEquals("/users/" + userId, recordedRequest.getPath());
             assertEquals(toJson(updateUser), recordedRequest.getBody().readUtf8());
@@ -188,7 +188,7 @@ class GatewayIntegrationTest {
                 .expectHeader().contentType(MediaType.APPLICATION_JSON).expectBody(String.class)
                 .isEqualTo(expectedResponseBody);
 
-            RecordedRequest recordedRequest = takeRequestOrFail(); // Consume the expected request
+            RecordedRequest recordedRequest = takeRequestOrFail();
             assertEquals("GET", recordedRequest.getMethod());
             assertEquals("/users/" + userId, recordedRequest.getPath());
             assertNull(recordedRequest.getHeader(HEADER_USER_ID));
@@ -206,7 +206,7 @@ class GatewayIntegrationTest {
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody(ErrorMessage.class).isEqualTo(backendError);
 
-            RecordedRequest recordedRequest = takeRequestOrFail(); // Consume the expected request
+            RecordedRequest recordedRequest = takeRequestOrFail();
             assertEquals("GET", recordedRequest.getMethod());
             assertEquals("/users/" + userId, recordedRequest.getPath());
         }
@@ -221,7 +221,7 @@ class GatewayIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON).expectBody(String.class)
                 .isEqualTo(expectedResponseBody);
 
-            RecordedRequest recordedRequest = takeRequestOrFail(); // Consume the expected request
+            RecordedRequest recordedRequest = takeRequestOrFail();
             assertEquals("GET", recordedRequest.getMethod());
             assertEquals("/users", recordedRequest.getPath());
             assertNull(recordedRequest.getHeader(HEADER_USER_ID));
@@ -235,7 +235,7 @@ class GatewayIntegrationTest {
 
             webTestClient.delete().uri("/users/" + userId).exchange().expectStatus().isNoContent();
 
-            RecordedRequest recordedRequest = takeRequestOrFail(); // Consume the expected request
+            RecordedRequest recordedRequest = takeRequestOrFail();
             assertEquals("DELETE", recordedRequest.getMethod());
             assertEquals("/users/" + userId, recordedRequest.getPath());
             assertNull(recordedRequest.getHeader(HEADER_USER_ID));
@@ -535,8 +535,7 @@ class GatewayIntegrationTest {
         }
 
     }
-
-    // --- Booking Routes Tests ---
+    
     @Nested
     @DisplayName("Booking Routes (/bookings)")
     class BookingRoutesTests {
@@ -546,8 +545,6 @@ class GatewayIntegrationTest {
         private final long testBookingId = 50L;
         private final LocalDateTime validStart = LocalDateTime.now().plusDays(1);
         private final LocalDateTime validEnd = LocalDateTime.now().plusDays(2);
-
-        // **** REMOVE Thread.sleep() and request count check from failure tests ****
 
         @Test
         @DisplayName("POST /bookings - Valid Booking, Valid Header -> Forwarded (201 Created)")

@@ -107,7 +107,7 @@ class CommentMapperImplTest {
     @DisplayName("mapToComment should handle null text in NewCommentDto")
     void mapToComment_whenNewCommentDtoHasNullText_shouldReturnCommentWithNullText() {
         NewCommentDto newCommentDto = new NewCommentDto();
-        newCommentDto.setText(null); // DTO allows null text before validation
+        newCommentDto.setText(null);
 
         Comment comment = commentMapper.mapToComment(newCommentDto);
 

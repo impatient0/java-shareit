@@ -16,6 +16,7 @@ import ru.practicum.shareit.common.dto.user.UpdateUserDto;
 import ru.practicum.shareit.common.dto.user.UserDto;
 import ru.practicum.shareit.server.user.User;
 
+@DisplayName("User Mapper Implementation Tests")
 class UserMapperImplTest {
 
     private UserMapperImpl userMapper;

@@ -113,7 +113,7 @@ class BookingMapperImplTest {
     @DisplayName("mapToDto should map different BookingStatus values correctly")
     void mapToDto_whenStatusIsApproved_shouldMapStatusToString() {
         testBooking.setStatus(BookingStatus.APPROVED);
-        when(itemMapper.mapToDto(testItem)).thenReturn(testItemDto); // Still need mocks
+        when(itemMapper.mapToDto(testItem)).thenReturn(testItemDto);
         when(userMapper.mapToDto(testBooker)).thenReturn(testUserDto);
 
         BookingDto bookingDto = bookingMapper.mapToDto(testBooking);
@@ -136,7 +136,7 @@ class BookingMapperImplTest {
     @Test
     @DisplayName("mapToBooking should map NewBookingDto to partial Booking correctly")
     void mapToBooking_whenNewBookingDtoIsValid_shouldReturnPartialBooking() {
-        Long newItemId = 50L; // Note: This ID is in the DTO but NOT used by the mapper
+        Long newItemId = 50L;
         NewBookingDto newBookingDto = new NewBookingDto(newItemId, testStart, testEnd);
 
         Booking booking = bookingMapper.mapToBooking(newBookingDto);

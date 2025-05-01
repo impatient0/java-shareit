@@ -1,4 +1,4 @@
-package ru.practicum.shareit.gateway; // Root package of your gateway module
+package ru.practicum.shareit.gateway;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

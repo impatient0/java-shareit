@@ -115,7 +115,7 @@ class ItemServiceImplTest {
         item1.setDescription("Desc One");
         item1.setAvailable(true);
         item1.setOwner(ownerUser);
-        item1.setComments(Collections.emptySet()); // Initialize to avoid NPE
+        item1.setComments(Collections.emptySet());
 
         item2 = new Item();
         item2.setId(item2Id);
@@ -128,7 +128,6 @@ class ItemServiceImplTest {
         itemDto1 = new ItemDto(item1Id, "Item One", "Desc One", true);
         itemDto2 = new ItemDto(item2Id, "Item Two", "Desc Two", false);
 
-        // DTO for Item 1 including potential booking info (initially null)
         itemWithBookingInfoDto1 = new ItemWithBookingInfoDto(item1Id, "Item One", "Desc One", true,
             Collections.emptySet(), null, null);
 
@@ -143,7 +142,7 @@ class ItemServiceImplTest {
         comment1.setId(comment1Id);
         comment1.setText("Test Comment");
         comment1.setItem(item1);
-        comment1.setAuthor(otherUser); // Comment usually by someone other than owner
+        comment1.setAuthor(otherUser);
         comment1.setCreatedAt(LocalDateTime.now().minusDays(1));
 
         commentDto1 = new CommentDto(comment1Id, "Test Comment", item1Id, otherUser.getName(),
@@ -158,7 +157,6 @@ class ItemServiceImplTest {
             LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2));
     }
 
-    // --- getAllItems() ---
     @Nested
     @DisplayName("getAllItems Tests")
     class GetAllItemsTests {
@@ -198,12 +196,12 @@ class ItemServiceImplTest {
         @Test
         @DisplayName("should save item and return DTO")
         void saveItem_whenUserExists_shouldSaveAndReturnDto() {
-            Item itemToSave = new Item(); // Item mapped from DTO (no ID, no owner yet)
+            Item itemToSave = new Item();
             itemToSave.setName(newItemDto.getName());
             itemToSave.setDescription(newItemDto.getDescription());
             itemToSave.setAvailable(newItemDto.getAvailable());
 
-            Item savedItem = new Item(); // Item after save (with ID and owner)
+            Item savedItem = new Item();
             savedItem.setId(item1Id);
             savedItem.setName(newItemDto.getName());
             savedItem.setDescription(newItemDto.getDescription());
@@ -213,9 +211,9 @@ class ItemServiceImplTest {
             when(userRepository.findById(ownerUserId)).thenReturn(Optional.of(ownerUser));
             when(itemMapper.mapToItem(newItemDto)).thenReturn(itemToSave);
             when(itemRepository.save(any(Item.class))).thenReturn(
-                savedItem); // Return the fully formed saved item
+                savedItem);
             when(itemMapper.mapToDto(savedItem)).thenReturn(
-                itemDto1); // Assume DTO matches saved item
+                itemDto1);
 
             ItemDto result = itemService.saveItem(newItemDto, ownerUserId);
 
@@ -225,7 +223,7 @@ class ItemServiceImplTest {
             verify(itemRepository).save(itemArgumentCaptor.capture());
             Item capturedItem = itemArgumentCaptor.getValue();
             assertThat(capturedItem.getOwner(),
-                equalTo(ownerUser)); // Verify owner was set before saving
+                equalTo(ownerUser));
             assertThat(capturedItem.getName(), equalTo(newItemDto.getName()));
             verify(itemMapper).mapToDto(savedItem);
         }
@@ -291,7 +289,7 @@ class ItemServiceImplTest {
             ItemDto finalDto = new ItemDto(item1Id, updateItemDto.getName(),
                 updateItemDto.getDescription(), updateItemDto.getAvailable());
 
-            when(itemRepository.findById(item1Id)).thenReturn(Optional.of(item1)); // Existing item
+            when(itemRepository.findById(item1Id)).thenReturn(Optional.of(item1));
             when(itemMapper.updateItemFields(updateItemDto, item1)).thenReturn(updatedItem);
             when(itemRepository.save(updatedItem)).thenReturn(updatedItem);
             when(itemMapper.mapToDto(updatedItem)).thenReturn(finalDto);
@@ -431,9 +429,9 @@ class ItemServiceImplTest {
         @DisplayName("should throw AccessDeniedException when user is not owner")
         void delete_whenUserIsNotOwner_shouldThrowAccessDeniedException() {
             when(userRepository.findById(otherUserId)).thenReturn(
-                Optional.of(otherUser)); // other user trying to delete
+                Optional.of(otherUser));
             when(itemRepository.findById(item1Id)).thenReturn(
-                Optional.of(item1)); // item owned by ownerUser
+                Optional.of(item1));
 
             assertThrows(AccessDeniedException.class,
                 () -> itemService.delete(item1Id, otherUserId));
@@ -454,7 +452,7 @@ class ItemServiceImplTest {
             String query = "One";
             when(userRepository.findById(otherUserId)).thenReturn(Optional.of(otherUser));
             when(itemRepository.search(query)).thenReturn(
-                List.of(item1)); // Only item1 matches "One"
+                List.of(item1));
             when(itemMapper.mapToDto(item1)).thenReturn(itemDto1);
 
             List<ItemDto> result = itemService.searchItems(query, otherUserId);
@@ -765,7 +763,7 @@ class ItemServiceImplTest {
             verify(bookingRepository).findPastAndCurrentApprovedBookingsShortForItems(eq(itemIds),
                 timeArgumentCaptor.capture());
             verify(bookingRepository).findNextApprovedBookingsShortForItems(eq(itemIds),
-                eq(timeArgumentCaptor.getValue())); // Ensure same 'now' time used
+                eq(timeArgumentCaptor.getValue()));
         }
 
         @Test

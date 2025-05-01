@@ -1,4 +1,4 @@
-package ru.practicum.shareit.common.dto.item; // Assuming it belongs here
+package ru.practicum.shareit.common.dto.item;
 
 import java.util.Set;
 import lombok.AllArgsConstructor;
