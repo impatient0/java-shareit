@@ -109,12 +109,13 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto saveItem(NewItemDto newItemDto, Long userId) {
-        Item item = itemMapper.mapToItem(newItemDto);
-        item.setOwner(userRepository.findById(userId).orElseThrow(() -> {
+        User owner = userRepository.findById(userId).orElseThrow(() -> {
             log.warn("User with id {} not found", userId);
             return new UserNotFoundException(
                 "User with id " + userId + " not found");
-            }));
+        });
+        Item item = itemMapper.mapToItem(newItemDto);
+        item.setOwner(owner);
         Item savedItem = itemRepository.save(item);
         log.debug("Saved new item: {}", savedItem);
         return itemMapper.mapToDto(savedItem);
