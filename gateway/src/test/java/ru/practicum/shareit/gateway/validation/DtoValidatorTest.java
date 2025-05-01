@@ -48,7 +48,8 @@ class DtoValidatorTest {
     @DisplayName("validate should throw ServerWebInputException when DTO is null")
     void validate_whenDtoIsNull_shouldThrowServerWebInputException() {
         ServerWebInputException exception = assertThrows(ServerWebInputException.class,
-            () -> dtoValidator.validate(null), "Should throw ServerWebInputException when DTO is null");
+            () -> dtoValidator.validate(null),
+            "Should throw ServerWebInputException when DTO is null");
 
         assertThat(exception,
             hasProperty("reason", is(equalTo("Request body is missing or invalid"))));
@@ -60,24 +61,27 @@ class DtoValidatorTest {
     void validate_whenNoViolations_shouldNotThrowException() {
         when(mockValidator.validate(testDto)).thenReturn(Collections.emptySet());
 
-        assertDoesNotThrow(() -> dtoValidator.validate(testDto), "Should not throw exception when no violations");
+        assertDoesNotThrow(() -> dtoValidator.validate(testDto),
+            "Should not throw exception when no violations");
 
         verify(mockValidator, times(1)).validate(testDto);
     }
 
     @Test
-    @DisplayName("validate should throw ServerWebInputException with violation message when there is one violation")
+    @DisplayName("validate should throw ServerWebInputException with violation message when there"
+        + " is one violation")
     void validate_whenOneViolation_shouldThrowServerWebInputExceptionWithViolationMessage() {
         @SuppressWarnings("unchecked") ConstraintViolation<Object> mockViolation =
             (ConstraintViolation<Object>) mock(
-                ConstraintViolation.class);
+            ConstraintViolation.class);
         when(mockViolation.getMessage()).thenReturn("Error message for field X");
 
         Set<ConstraintViolation<Object>> violations = Set.of(mockViolation);
         when(mockValidator.validate(testDto)).thenReturn(violations);
 
         ServerWebInputException exception = assertThrows(ServerWebInputException.class,
-            () -> dtoValidator.validate(testDto), "Should throw ServerWebInputException when one violation exists");
+            () -> dtoValidator.validate(testDto),
+            "Should throw ServerWebInputException when one violation exists");
 
         assertThat(exception,
             hasProperty("reason", is(equalTo("Validation failed: Error message for field X"))));
@@ -85,45 +89,51 @@ class DtoValidatorTest {
     }
 
     @Test
-    @DisplayName("validate should throw ServerWebInputException with the first violation message when there are multiple violations")
+    @DisplayName("validate should throw ServerWebInputException with the first violation message "
+        + "when there are multiple violations")
     void validate_whenMultipleViolations_shouldThrowServerWebInputExceptionWithFirstViolationMessage() {
         @SuppressWarnings("unchecked") ConstraintViolation<Object> mockViolation1 =
             (ConstraintViolation<Object>) mock(
-                ConstraintViolation.class);
+            ConstraintViolation.class);
         when(mockViolation1.getMessage()).thenReturn("First error message");
 
         @SuppressWarnings("unchecked") ConstraintViolation<Object> mockViolation2 =
             (ConstraintViolation<Object>) mock(
-                ConstraintViolation.class);
+            ConstraintViolation.class);
         // only need stubbing for one mock violation
 
         Set<ConstraintViolation<Object>> violations = Set.of(mockViolation1, mockViolation2);
         when(mockValidator.validate(testDto)).thenReturn(violations);
 
         ServerWebInputException exception = assertThrows(ServerWebInputException.class,
-            () -> dtoValidator.validate(testDto), "Should throw ServerWebInputException when multiple violations exist");
+            () -> dtoValidator.validate(testDto),
+            "Should throw ServerWebInputException when multiple violations exist");
 
-        assertThat("Exception reason should contain 'Validation failed:' prefix", exception, hasProperty("reason", containsString("Validation failed: ")));
-        assertThat("Exception reason should contain the message of one of the violations", exception, hasProperty("reason",
-            either(containsString("Validation failed: First error message")).or(
-                containsString("Validation failed: Second error message"))));
+        assertThat("Exception reason should contain 'Validation failed:' prefix", exception,
+            hasProperty("reason", containsString("Validation failed: ")));
+        assertThat("Exception reason should contain the message of one of the violations",
+            exception, hasProperty("reason",
+                either(containsString("Validation failed: First error message")).or(
+                    containsString("Validation failed: Second error message"))));
 
         verify(mockValidator, times(1)).validate(testDto);
     }
 
     @Test
-    @DisplayName("validate should throw ServerWebInputException with default message when violation message is null")
+    @DisplayName("validate should throw ServerWebInputException with default message when "
+        + "violation message is null")
     void validate_whenViolationMessageIsNull_shouldThrowServerWebInputExceptionWithDefaultMessage() {
         @SuppressWarnings("unchecked") ConstraintViolation<Object> mockViolation =
             (ConstraintViolation<Object>) mock(
-                ConstraintViolation.class);
+            ConstraintViolation.class);
         when(mockViolation.getMessage()).thenReturn(null);
 
         Set<ConstraintViolation<Object>> violations = Set.of(mockViolation);
         when(mockValidator.validate(testDto)).thenReturn(violations);
 
         ServerWebInputException exception = assertThrows(ServerWebInputException.class,
-            () -> dtoValidator.validate(testDto), "Should throw ServerWebInputException when violation message is null");
+            () -> dtoValidator.validate(testDto),
+            "Should throw ServerWebInputException when violation message is null");
 
         assertThat(exception,
             hasProperty("reason", is(equalTo("Validation failed: Unknown validation error"))));

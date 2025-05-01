@@ -21,13 +21,11 @@ import reactor.test.StepVerifier;
 @ExtendWith(MockitoExtension.class)
 class HeaderValidationFilterTest {
 
+    private static final String USER_ID_HEADER = "X-Sharer-User-Id";
     @InjectMocks
     private HeaderValidationFilter headerValidationFilter;
-
     @Mock
     private GatewayFilterChain mockChain;
-
-    private static final String USER_ID_HEADER = "X-Sharer-User-Id";
 
     private MockServerWebExchange createExchangeWithHeader(String headerValue) {
         MockServerHttpRequest.BaseBuilder<?> requestBuilder = MockServerHttpRequest.get("/test");
@@ -54,8 +52,7 @@ class HeaderValidationFilterTest {
 
         when(mockChain.filter(exchange)).thenReturn(Mono.empty());
 
-        StepVerifier.create(filter.filter(exchange, mockChain))
-            .verifyComplete();
+        StepVerifier.create(filter.filter(exchange, mockChain)).verifyComplete();
     }
 
     @Test
@@ -65,9 +62,11 @@ class HeaderValidationFilterTest {
         GatewayFilter filter = headerValidationFilter.validateUserIdHeader();
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-            () -> filter.filter(exchange, mockChain).block(), "Should throw ResponseStatusException when header is missing");
+            () -> filter.filter(exchange, mockChain).block(),
+            "Should throw ResponseStatusException when header is missing");
 
-        assertEquals("Required header '" + USER_ID_HEADER + "' is missing", exception.getReason(), "Exception reason should indicate missing header");
+        assertEquals("Required header '" + USER_ID_HEADER + "' is missing", exception.getReason(),
+            "Exception reason should indicate missing header");
     }
 
     @Test
@@ -77,21 +76,26 @@ class HeaderValidationFilterTest {
         GatewayFilter filter = headerValidationFilter.validateUserIdHeader();
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-            () -> filter.filter(exchange, mockChain).block(), "Should throw ResponseStatusException when header is blank");
+            () -> filter.filter(exchange, mockChain).block(),
+            "Should throw ResponseStatusException when header is blank");
 
-        assertEquals("Required header '" + USER_ID_HEADER + "' is missing", exception.getReason(), "Exception reason should indicate missing header");
+        assertEquals("Required header '" + USER_ID_HEADER + "' is missing", exception.getReason(),
+            "Exception reason should indicate missing header");
     }
 
     @Test
-    @DisplayName("validateUserIdHeader should throw ResponseStatusException when header is not a number")
+    @DisplayName("validateUserIdHeader should throw ResponseStatusException when header is not a "
+        + "number")
     void validateUserIdHeader_whenHeaderIsNotANumber_shouldThrowResponseStatusException() {
         MockServerWebExchange exchange = createExchangeWithHeader("abc");
         GatewayFilter filter = headerValidationFilter.validateUserIdHeader();
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-            () -> filter.filter(exchange, mockChain).block(), "Should throw ResponseStatusException when header is not a number");
+            () -> filter.filter(exchange, mockChain).block(),
+            "Should throw ResponseStatusException when header is not a number");
 
-        assertEquals("Invalid format for header '" + USER_ID_HEADER + "'", exception.getReason(), "Exception reason should indicate invalid format");
+        assertEquals("Invalid format for header '" + USER_ID_HEADER + "'", exception.getReason(),
+            "Exception reason should indicate invalid format");
     }
 
     @Test
@@ -102,8 +106,7 @@ class HeaderValidationFilterTest {
 
         when(mockChain.filter(exchange)).thenReturn(Mono.empty());
 
-        StepVerifier.create(filter.filter(exchange, mockChain))
-            .verifyComplete();
+        StepVerifier.create(filter.filter(exchange, mockChain)).verifyComplete();
     }
 
     @Test
@@ -114,7 +117,6 @@ class HeaderValidationFilterTest {
 
         when(mockChain.filter(exchange)).thenReturn(Mono.empty());
 
-        StepVerifier.create(filter.filter(exchange, mockChain))
-            .verifyComplete();
+        StepVerifier.create(filter.filter(exchange, mockChain)).verifyComplete();
     }
 }

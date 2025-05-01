@@ -80,8 +80,7 @@ class BookingMapperImplTest {
 
         testItemDto = new ItemDto(testItem.getId(), testItem.getName(), testItem.getDescription(),
             testItem.getAvailable());
-        testUserDto = new UserDto(testBooker.getId(), testBooker.getName(),
-            testBooker.getEmail());
+        testUserDto = new UserDto(testBooker.getId(), testBooker.getName(), testBooker.getEmail());
     }
 
     @Test
@@ -93,12 +92,18 @@ class BookingMapperImplTest {
         BookingDto bookingDto = bookingMapper.mapToDto(testBooking);
 
         assertThat("Mapped DTO should not be null", bookingDto, is(notNullValue()));
-        assertThat("Mapped DTO should have correct ID", bookingDto, hasProperty("id", equalTo(100L)));
-        assertThat("Mapped DTO should have correct start date", bookingDto, hasProperty("start", equalTo(testStart)));
-        assertThat("Mapped DTO should have correct end date", bookingDto, hasProperty("end", equalTo(testEnd)));
-        assertThat("Mapped DTO should contain correct ItemDto", bookingDto, hasProperty("item", is(sameInstance(testItemDto))));
-        assertThat("Mapped DTO should contain correct UserDto (Booker)", bookingDto, hasProperty("booker", is(sameInstance(testUserDto))));
-        assertThat("Mapped DTO should have correct status string", bookingDto, hasProperty("status", equalTo(BookingStatus.WAITING.toString())));
+        assertThat("Mapped DTO should have correct ID", bookingDto,
+            hasProperty("id", equalTo(100L)));
+        assertThat("Mapped DTO should have correct start date", bookingDto,
+            hasProperty("start", equalTo(testStart)));
+        assertThat("Mapped DTO should have correct end date", bookingDto,
+            hasProperty("end", equalTo(testEnd)));
+        assertThat("Mapped DTO should contain correct ItemDto", bookingDto,
+            hasProperty("item", is(sameInstance(testItemDto))));
+        assertThat("Mapped DTO should contain correct UserDto (Booker)", bookingDto,
+            hasProperty("booker", is(sameInstance(testUserDto))));
+        assertThat("Mapped DTO should have correct status string", bookingDto,
+            hasProperty("status", equalTo(BookingStatus.WAITING.toString())));
 
         verify(itemMapper).mapToDto(testItem);
         verify(userMapper).mapToDto(testBooker);
@@ -113,7 +118,8 @@ class BookingMapperImplTest {
 
         BookingDto bookingDto = bookingMapper.mapToDto(testBooking);
 
-        assertThat("Mapped DTO status should be 'APPROVED'", bookingDto, hasProperty("status", equalTo(BookingStatus.APPROVED.toString())));
+        assertThat("Mapped DTO status should be 'APPROVED'", bookingDto,
+            hasProperty("status", equalTo(BookingStatus.APPROVED.toString())));
     }
 
     @Test
@@ -122,7 +128,7 @@ class BookingMapperImplTest {
         testBooking.setStatus(null);
         when(itemMapper.mapToDto(testItem)).thenReturn(testItemDto);
         when(userMapper.mapToDto(testBooker)).thenReturn(testUserDto);
-        
+
         assertThrows(NullPointerException.class, () -> bookingMapper.mapToDto(testBooking),
             "Should throw NullPointerException when Status is null");
     }
@@ -136,12 +142,17 @@ class BookingMapperImplTest {
         Booking booking = bookingMapper.mapToBooking(newBookingDto);
 
         assertThat("Mapped Booking should not be null", booking, is(notNullValue()));
-        assertThat("Mapped Booking should have correct start date", booking, hasProperty("startDate", equalTo(testStart)));
-        assertThat("Mapped Booking should have correct end date", booking, hasProperty("endDate", equalTo(testEnd)));
-        assertThat("Mapped Booking status should be WAITING", booking, hasProperty("status", equalTo(BookingStatus.WAITING)));
+        assertThat("Mapped Booking should have correct start date", booking,
+            hasProperty("startDate", equalTo(testStart)));
+        assertThat("Mapped Booking should have correct end date", booking,
+            hasProperty("endDate", equalTo(testEnd)));
+        assertThat("Mapped Booking status should be WAITING", booking,
+            hasProperty("status", equalTo(BookingStatus.WAITING)));
         assertThat("Mapped Booking ID should be null", booking, hasProperty("id", is(nullValue())));
-        assertThat("Mapped Booking Item should be null", booking, hasProperty("item", is(nullValue())));
-        assertThat("Mapped Booking Booker should be null", booking, hasProperty("booker", is(nullValue())));
+        assertThat("Mapped Booking Item should be null", booking,
+            hasProperty("item", is(nullValue())));
+        assertThat("Mapped Booking Booker should be null", booking,
+            hasProperty("booker", is(nullValue())));
     }
 
     @Test
@@ -152,10 +163,15 @@ class BookingMapperImplTest {
         Booking booking = bookingMapper.mapToBooking(newBookingDto);
 
         assertThat("Mapped Booking should not be null", booking, is(notNullValue()));
-        assertThat("Mapped Booking start date should be null", booking, hasProperty("startDate", is(nullValue())));
-        assertThat("Mapped Booking end date should be null", booking, hasProperty("endDate", is(nullValue())));
-        assertThat("Mapped Booking status should still be WAITING", booking, hasProperty("status", equalTo(BookingStatus.WAITING)));
-        assertThat("Mapped Booking Item should be null", booking, hasProperty("item", is(nullValue())));
-        assertThat("Mapped Booking Booker should be null", booking, hasProperty("booker", is(nullValue())));
+        assertThat("Mapped Booking start date should be null", booking,
+            hasProperty("startDate", is(nullValue())));
+        assertThat("Mapped Booking end date should be null", booking,
+            hasProperty("endDate", is(nullValue())));
+        assertThat("Mapped Booking status should still be WAITING", booking,
+            hasProperty("status", equalTo(BookingStatus.WAITING)));
+        assertThat("Mapped Booking Item should be null", booking,
+            hasProperty("item", is(nullValue())));
+        assertThat("Mapped Booking Booker should be null", booking,
+            hasProperty("booker", is(nullValue())));
     }
 }
