@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -45,8 +46,8 @@ class HeaderValidationFilterTest {
         return MockServerWebExchange.from(request);
     }
 
-
     @Test
+    @DisplayName("validateUserIdHeader should pass when header is present and valid")
     void validateUserIdHeader_whenHeaderIsPresentAndValid_shouldPass() {
         MockServerWebExchange exchange = createExchangeWithHeader("1");
         GatewayFilter filter = headerValidationFilter.validateUserIdHeader();
@@ -58,39 +59,43 @@ class HeaderValidationFilterTest {
     }
 
     @Test
+    @DisplayName("validateUserIdHeader should throw ResponseStatusException when header is missing")
     void validateUserIdHeader_whenHeaderIsMissing_shouldThrowResponseStatusException() {
         MockServerWebExchange exchange = createExchangeWithoutHeader();
         GatewayFilter filter = headerValidationFilter.validateUserIdHeader();
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-            () -> filter.filter(exchange, mockChain).block());
+            () -> filter.filter(exchange, mockChain).block(), "Should throw ResponseStatusException when header is missing");
 
-        assertEquals("Required header '" + USER_ID_HEADER + "' is missing", exception.getReason());
+        assertEquals("Required header '" + USER_ID_HEADER + "' is missing", exception.getReason(), "Exception reason should indicate missing header");
     }
 
     @Test
+    @DisplayName("validateUserIdHeader should throw ResponseStatusException when header is blank")
     void validateUserIdHeader_whenHeaderIsBlank_shouldThrowResponseStatusException() {
         MockServerWebExchange exchange = createExchangeWithHeader("");
         GatewayFilter filter = headerValidationFilter.validateUserIdHeader();
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-            () -> filter.filter(exchange, mockChain).block());
+            () -> filter.filter(exchange, mockChain).block(), "Should throw ResponseStatusException when header is blank");
 
-        assertEquals("Required header '" + USER_ID_HEADER + "' is missing", exception.getReason());
+        assertEquals("Required header '" + USER_ID_HEADER + "' is missing", exception.getReason(), "Exception reason should indicate missing header");
     }
 
     @Test
+    @DisplayName("validateUserIdHeader should throw ResponseStatusException when header is not a number")
     void validateUserIdHeader_whenHeaderIsNotANumber_shouldThrowResponseStatusException() {
         MockServerWebExchange exchange = createExchangeWithHeader("abc");
         GatewayFilter filter = headerValidationFilter.validateUserIdHeader();
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-            () -> filter.filter(exchange, mockChain).block());
+            () -> filter.filter(exchange, mockChain).block(), "Should throw ResponseStatusException when header is not a number");
 
-        assertEquals("Invalid format for header '" + USER_ID_HEADER + "'", exception.getReason());
+        assertEquals("Invalid format for header '" + USER_ID_HEADER + "'", exception.getReason(), "Exception reason should indicate invalid format");
     }
 
     @Test
+    @DisplayName("validateUserIdHeader should pass when header is a negative number")
     void validateUserIdHeader_whenHeaderIsNegativeNumber_shouldPass() {
         MockServerWebExchange exchange = createExchangeWithHeader("-1");
         GatewayFilter filter = headerValidationFilter.validateUserIdHeader();
@@ -102,6 +107,7 @@ class HeaderValidationFilterTest {
     }
 
     @Test
+    @DisplayName("validateUserIdHeader should pass when header is zero")
     void validateUserIdHeader_whenHeaderIsZero_shouldPass() {
         MockServerWebExchange exchange = createExchangeWithHeader("0");
         GatewayFilter filter = headerValidationFilter.validateUserIdHeader();

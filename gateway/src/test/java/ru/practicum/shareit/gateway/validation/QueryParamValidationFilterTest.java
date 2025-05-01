@@ -6,6 +6,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -54,8 +55,8 @@ class QueryParamValidationFilterTest {
         return MockServerWebExchange.from(request);
     }
 
-
     @Test
+    @DisplayName("validateOptionalEnumQueryParam should pass filter when parameter is missing")
     void validateOptionalEnumQueryParam_whenParamIsMissing_shouldPassFilter() {
         MockServerWebExchange exchange = createExchangeWithoutQueryParam();
         GatewayFilter filter = queryParamValidationFilter.validateOptionalEnumQueryParam(TEST_PARAM_NAME, TestEnum.class);
@@ -69,6 +70,7 @@ class QueryParamValidationFilterTest {
     }
 
     @Test
+    @DisplayName("validateOptionalEnumQueryParam should pass filter when parameter has an empty value list")
     void validateOptionalEnumQueryParam_whenParamHasEmptyValueList_shouldPassFilter() {
         MockServerWebExchange exchange = createExchangeWithQueryParam(TEST_PARAM_NAME);
         GatewayFilter filter = queryParamValidationFilter.validateOptionalEnumQueryParam(TEST_PARAM_NAME, TestEnum.class);
@@ -82,8 +84,9 @@ class QueryParamValidationFilterTest {
     }
 
     @Test
+    @DisplayName("validateOptionalEnumQueryParam should pass filter when parameter has a blank first value")
     void validateOptionalEnumQueryParam_whenParamHasBlankFirstValue_shouldPassFilter() {
-        MockServerWebExchange exchange = createExchangeWithQueryParam(TEST_PARAM_NAME, ""); // Blank value
+        MockServerWebExchange exchange = createExchangeWithQueryParam(TEST_PARAM_NAME, "");
         GatewayFilter filter = queryParamValidationFilter.validateOptionalEnumQueryParam(TEST_PARAM_NAME, TestEnum.class);
 
         when(mockChain.filter(exchange)).thenReturn(Mono.empty());
@@ -95,8 +98,9 @@ class QueryParamValidationFilterTest {
     }
 
     @Test
+    @DisplayName("validateOptionalEnumQueryParam should pass filter when parameter has a blank first value with spaces")
     void validateOptionalEnumQueryParam_whenParamHasBlankFirstValueWithSpaces_shouldPassFilter() {
-        MockServerWebExchange exchange = createExchangeWithQueryParam(TEST_PARAM_NAME, "   "); // Blank value with spaces
+        MockServerWebExchange exchange = createExchangeWithQueryParam(TEST_PARAM_NAME, "   ");
         GatewayFilter filter = queryParamValidationFilter.validateOptionalEnumQueryParam(TEST_PARAM_NAME, TestEnum.class);
 
         when(mockChain.filter(exchange)).thenReturn(Mono.empty());
@@ -107,10 +111,10 @@ class QueryParamValidationFilterTest {
         verify(mockChain).filter(exchange);
     }
 
-
     @Test
+    @DisplayName("validateOptionalEnumQueryParam should pass filter when parameter has a valid uppercase value")
     void validateOptionalEnumQueryParam_whenParamHasValidUppercaseValue_shouldPassFilter() {
-        MockServerWebExchange exchange = createExchangeWithQueryParam(TEST_PARAM_NAME, "VALUE1"); // Valid uppercase
+        MockServerWebExchange exchange = createExchangeWithQueryParam(TEST_PARAM_NAME, "VALUE1");
         GatewayFilter filter = queryParamValidationFilter.validateOptionalEnumQueryParam(TEST_PARAM_NAME, TestEnum.class);
 
         when(mockChain.filter(exchange)).thenReturn(Mono.empty());
@@ -122,8 +126,9 @@ class QueryParamValidationFilterTest {
     }
 
     @Test
+    @DisplayName("validateOptionalEnumQueryParam should pass filter when parameter has a valid lowercase value")
     void validateOptionalEnumQueryParam_whenParamHasValidLowercaseValue_shouldPassFilter() {
-        MockServerWebExchange exchange = createExchangeWithQueryParam(TEST_PARAM_NAME, "value2"); // Valid lowercase
+        MockServerWebExchange exchange = createExchangeWithQueryParam(TEST_PARAM_NAME, "value2");
         GatewayFilter filter = queryParamValidationFilter.validateOptionalEnumQueryParam(TEST_PARAM_NAME, TestEnum.class);
 
         when(mockChain.filter(exchange)).thenReturn(Mono.empty());
@@ -135,8 +140,9 @@ class QueryParamValidationFilterTest {
     }
 
     @Test
+    @DisplayName("validateOptionalEnumQueryParam should pass filter when parameter has a valid mixed case value")
     void validateOptionalEnumQueryParam_whenParamHasValidMixedCaseValue_shouldPassFilter() {
-        MockServerWebExchange exchange = createExchangeWithQueryParam(TEST_PARAM_NAME, "aNoThEr_VaLuE"); // Valid mixed case
+        MockServerWebExchange exchange = createExchangeWithQueryParam(TEST_PARAM_NAME, "aNoThEr_VaLuE");
         GatewayFilter filter = queryParamValidationFilter.validateOptionalEnumQueryParam(TEST_PARAM_NAME, TestEnum.class);
 
         when(mockChain.filter(exchange)).thenReturn(Mono.empty());
@@ -148,19 +154,21 @@ class QueryParamValidationFilterTest {
     }
 
     @Test
+    @DisplayName("validateOptionalEnumQueryParam should throw exception when parameter has an invalid value")
     void validateOptionalEnumQueryParam_whenParamHasInvalidValue_shouldThrowException() {
-        MockServerWebExchange exchange = createExchangeWithQueryParam(TEST_PARAM_NAME, "INVALID_VALUE"); // Invalid value
+        MockServerWebExchange exchange = createExchangeWithQueryParam(TEST_PARAM_NAME, "INVALID_VALUE");
         GatewayFilter filter = queryParamValidationFilter.validateOptionalEnumQueryParam(TEST_PARAM_NAME, TestEnum.class);
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-            () -> filter.filter(exchange, mockChain).block());
+            () -> filter.filter(exchange, mockChain).block(), "Should throw ResponseStatusException for invalid enum value");
 
-        assertEquals("Unknown " + TEST_PARAM_NAME + ": INVALID_VALUE", exception.getReason());
+        assertEquals("Unknown " + TEST_PARAM_NAME + ": INVALID_VALUE", exception.getReason(), "Exception reason should describe the unknown value");
 
         verify(mockChain, never()).filter(exchange);
     }
 
     @Test
+    @DisplayName("validateOptionalEnumQueryParam should pass filter when parameter has multiple values and the first is valid")
     void validateOptionalEnumQueryParam_whenParamHasMultipleValuesFirstIsValid_shouldPassFilter() {
         MockServerWebExchange exchange = createExchangeWithQueryParam(TEST_PARAM_NAME, "VALUE1", "INVALID_VALUE");
         GatewayFilter filter = queryParamValidationFilter.validateOptionalEnumQueryParam(TEST_PARAM_NAME, TestEnum.class);
@@ -174,14 +182,15 @@ class QueryParamValidationFilterTest {
     }
 
     @Test
+    @DisplayName("validateOptionalEnumQueryParam should throw exception when parameter has multiple values and the first is invalid")
     void validateOptionalEnumQueryParam_whenParamHasMultipleValuesFirstIsInvalid_shouldThrowException() {
         MockServerWebExchange exchange = createExchangeWithQueryParam(TEST_PARAM_NAME, "INVALID_VALUE", "VALUE1");
         GatewayFilter filter = queryParamValidationFilter.validateOptionalEnumQueryParam(TEST_PARAM_NAME, TestEnum.class);
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-            () -> filter.filter(exchange, mockChain).block());
+            () -> filter.filter(exchange, mockChain).block(), "Should throw ResponseStatusException when first of multiple values is invalid");
 
-        assertEquals("Unknown " + TEST_PARAM_NAME + ": INVALID_VALUE", exception.getReason());
+        assertEquals("Unknown " + TEST_PARAM_NAME + ": INVALID_VALUE", exception.getReason(), "Exception reason should describe the unknown value");
 
         verify(mockChain, never()).filter(exchange);
     }
