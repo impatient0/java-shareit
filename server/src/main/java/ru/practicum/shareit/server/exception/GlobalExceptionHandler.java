@@ -2,8 +2,6 @@ package ru.practicum.shareit.server.exception;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -40,19 +38,6 @@ public class GlobalExceptionHandler {
         log.warn("Encountered {} while processing request: returning 400 Bad Request",
             e.getClass().getSimpleName());
         return ResponseEntity.status(400).body(new ErrorMessage(e.getMessage(), 400));
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorMessage> handleMethodArgumentNotValid(
-        final MethodArgumentNotValidException e) {
-        log.warn("Encountered {} while processing request: returning 400 Bad Request",
-            e.getClass().getSimpleName());
-        FieldError fieldError = e.getBindingResult().getFieldError();
-        String errorMessage = "Validation error";
-        if (fieldError != null) {
-            errorMessage = fieldError.getDefaultMessage();
-        }
-        return ResponseEntity.status(400).body(new ErrorMessage(errorMessage, 400));
     }
 
     @ExceptionHandler(RuntimeException.class)
