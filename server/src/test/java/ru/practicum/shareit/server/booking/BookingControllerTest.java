@@ -73,17 +73,19 @@ class BookingControllerTest {
 
         newBookingDto = new NewBookingDto(itemId, start, end);
 
-        bookingDto1 = new BookingDto(booking1Id, null, null, start, end, BookingStatus.WAITING.toString());
-        bookingDto2 = new BookingDto(booking2Id, null, null, start.plusDays(5), end.plusDays(5), BookingStatus.APPROVED.toString());
+        bookingDto1 = new BookingDto(booking1Id, null, null, start, end,
+            BookingStatus.WAITING.toString());
+        bookingDto2 = new BookingDto(booking2Id, null, null, start.plusDays(5), end.plusDays(5),
+            BookingStatus.APPROVED.toString());
     }
 
     @Test
     @DisplayName("POST /bookings - Success")
     void saveBooking_whenValid_shouldReturnCreatedAndBookingDto() throws Exception {
-        when(bookingService.saveBooking(any(NewBookingDto.class), eq(bookerId))).thenReturn(bookingDto1);
+        when(bookingService.saveBooking(any(NewBookingDto.class), eq(bookerId))).thenReturn(
+            bookingDto1);
 
-        mockMvc.perform(post("/bookings")
-                .header(userIdHeaderName, bookerId)
+        mockMvc.perform(post("/bookings").header(userIdHeaderName, bookerId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(newBookingDto)))
             .andExpect(status().isCreated())
@@ -155,8 +157,10 @@ class BookingControllerTest {
     @Test
     @DisplayName("PATCH /bookings/{bookingId}?approved=true - Success")
     void approveBooking_whenApproveTrue_shouldReturnOkAndApprovedDto() throws Exception {
-        BookingDto approvedDto = new BookingDto(booking1Id, null, null, start, end, BookingStatus.APPROVED.toString());
-        when(bookingService.approveBooking(eq(booking1Id), eq(ownerId), eq(true))).thenReturn(approvedDto);
+        BookingDto approvedDto = new BookingDto(booking1Id, null, null, start, end,
+            BookingStatus.APPROVED.toString());
+        when(bookingService.approveBooking(eq(booking1Id), eq(ownerId), eq(true))).thenReturn(
+            approvedDto);
 
         mockMvc.perform(patch("/bookings/{bookingId}", booking1Id)
                 .header(userIdHeaderName, ownerId)
@@ -172,8 +176,10 @@ class BookingControllerTest {
     @Test
     @DisplayName("PATCH /bookings/{bookingId}?approved=false - Success")
     void approveBooking_whenApproveFalse_shouldReturnOkAndRejectedDto() throws Exception {
-        BookingDto rejectedDto = new BookingDto(booking1Id, null, null, start, end, BookingStatus.REJECTED.toString());
-        when(bookingService.approveBooking(eq(booking1Id), eq(ownerId), eq(false))).thenReturn(rejectedDto);
+        BookingDto rejectedDto = new BookingDto(booking1Id, null, null, start, end,
+            BookingStatus.REJECTED.toString());
+        when(bookingService.approveBooking(eq(booking1Id), eq(ownerId), eq(false))).thenReturn(
+            rejectedDto);
 
         mockMvc.perform(patch("/bookings/{bookingId}", booking1Id)
                 .header(userIdHeaderName, ownerId)
@@ -281,7 +287,6 @@ class BookingControllerTest {
             .andExpect(jsonPath("$.message", is(errorMsg)))
             .andExpect(jsonPath("$.responseCode", is(403)));
 
-
         verify(bookingService).getById(eq(otherUserId), eq(booking1Id));
     }
 
@@ -299,7 +304,8 @@ class BookingControllerTest {
             .andExpect(jsonPath("$[0].id", is(booking1Id.intValue())))
             .andExpect(jsonPath("$[1].id", is(booking2Id.intValue())));
 
-        verify(bookingService).getBookingsByBooker(eq(bookerId), eq(BookingState.ALL), isNull(), isNull());
+        verify(bookingService).getBookingsByBooker(eq(bookerId), eq(BookingState.ALL), isNull(),
+            isNull());
     }
 
     @Test
@@ -307,8 +313,8 @@ class BookingControllerTest {
     void getBookingsByBooker_whenStateAndPaging_shouldReturnOkAndList() throws Exception {
         int from = 0;
         int size = 1;
-        when(bookingService.getBookingsByBooker(eq(bookerId), eq(BookingState.WAITING), eq(from), eq(size)))
-            .thenReturn(List.of(bookingDto1));
+        when(bookingService.getBookingsByBooker(eq(bookerId), eq(BookingState.WAITING), eq(from),
+            eq(size))).thenReturn(List.of(bookingDto1));
 
         mockMvc.perform(get("/bookings")
                 .header(userIdHeaderName, bookerId)
@@ -320,15 +326,16 @@ class BookingControllerTest {
             .andExpect(jsonPath("$", hasSize(1)))
             .andExpect(jsonPath("$[0].id", is(booking1Id.intValue())));
 
-        verify(bookingService).getBookingsByBooker(eq(bookerId), eq(BookingState.WAITING), eq(from), eq(size));
+        verify(bookingService).getBookingsByBooker(eq(bookerId), eq(BookingState.WAITING), eq(from),
+            eq(size));
     }
 
     @Test
     @DisplayName("GET /bookings - Failure (Booker Not Found)")
     void getBookingsByBooker_whenUserNotFound_shouldReturnNotFound() throws Exception {
         String errorMsg = "Booker user not found";
-        when(bookingService.getBookingsByBooker(eq(nonExistentBookingId), any(BookingState.class), any(), any()))
-            .thenThrow(new UserNotFoundException(errorMsg));
+        when(bookingService.getBookingsByBooker(eq(nonExistentBookingId), any(BookingState.class),
+            any(), any())).thenThrow(new UserNotFoundException(errorMsg));
 
         mockMvc.perform(get("/bookings")
                 .header(userIdHeaderName, nonExistentBookingId))
@@ -337,14 +344,15 @@ class BookingControllerTest {
             .andExpect(jsonPath("$.message", is(errorMsg)))
             .andExpect(jsonPath("$.responseCode", is(404)));
 
-        verify(bookingService).getBookingsByBooker(eq(nonExistentBookingId), eq(BookingState.ALL), isNull(), isNull());
+        verify(bookingService).getBookingsByBooker(eq(nonExistentBookingId), eq(BookingState.ALL),
+            isNull(), isNull());
     }
 
     @Test
     @DisplayName("GET /bookings/owner?state=ALL - Success")
     void getBookingsByOwner_whenDefaultState_shouldReturnOkAndList() throws Exception {
-        when(bookingService.getBookingsByOwner(eq(ownerId), eq(BookingState.ALL), any(), any()))
-            .thenReturn(List.of(bookingDto1, bookingDto2));
+        when(bookingService.getBookingsByOwner(eq(ownerId), eq(BookingState.ALL), any(),
+            any())).thenReturn(List.of(bookingDto1, bookingDto2));
 
         mockMvc.perform(get("/bookings/owner")
                 .header(userIdHeaderName, ownerId))
@@ -354,15 +362,16 @@ class BookingControllerTest {
             .andExpect(jsonPath("$[0].id", is(booking1Id.intValue())))
             .andExpect(jsonPath("$[1].id", is(booking2Id.intValue())));
 
-        verify(bookingService).getBookingsByOwner(eq(ownerId), eq(BookingState.ALL), isNull(), isNull());
+        verify(bookingService).getBookingsByOwner(eq(ownerId), eq(BookingState.ALL), isNull(),
+            isNull());
     }
 
     @Test
     @DisplayName("GET /bookings/owner - Failure (Owner Not Found)")
     void getBookingsByOwner_whenUserNotFound_shouldReturnNotFound() throws Exception {
         String errorMsg = "Owner user not found";
-        when(bookingService.getBookingsByOwner(eq(nonExistentBookingId), any(BookingState.class), any(), any()))
-            .thenThrow(new UserNotFoundException(errorMsg));
+        when(bookingService.getBookingsByOwner(eq(nonExistentBookingId), any(BookingState.class),
+            any(), any())).thenThrow(new UserNotFoundException(errorMsg));
 
         mockMvc.perform(get("/bookings/owner")
                 .header(userIdHeaderName, nonExistentBookingId))
@@ -371,7 +380,7 @@ class BookingControllerTest {
             .andExpect(jsonPath("$.message", is(errorMsg)))
             .andExpect(jsonPath("$.responseCode", is(404)));
 
-        verify(bookingService).getBookingsByOwner(eq(nonExistentBookingId), eq(BookingState.ALL), isNull(), isNull());
+        verify(bookingService).getBookingsByOwner(eq(nonExistentBookingId), eq(BookingState.ALL),
+            isNull(), isNull());
     }
-
 }

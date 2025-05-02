@@ -42,7 +42,8 @@ class BookingRepositoryTest {
     private BookingRepository bookingRepository;
 
     @Container
-    private static final PostgreSQLContainer<?> database = new PostgreSQLContainer<>(DockerImageName.parse("postgres:16"));
+    private static final PostgreSQLContainer<?> database = new PostgreSQLContainer<>(
+        DockerImageName.parse("postgres:16"));
 
     @DynamicPropertySource
     static void databaseProperties(DynamicPropertyRegistry registry) {
@@ -153,10 +154,12 @@ class BookingRepositoryTest {
     @DisplayName("findBookingsByBookerAndState (ALL) should return all bookings for booker1")
     void findByBooker_StateALL_shouldReturnAllBooker1Bookings() {
         Pageable pageable = PageRequest.of(0, 10, Sort.by("startDate").descending());
-        Page<Booking> result = bookingRepository.findBookingsByBookerAndState(booker1.getId(), "ALL", now, pageable);
+        Page<Booking> result = bookingRepository.findBookingsByBookerAndState(booker1.getId(),
+            "ALL", now, pageable);
 
         assertThat(result.getContent(), hasSize(4));
-        assertThat(result.getContent(), containsInAnyOrder(booking1Past, booking2Current, booking3Future, booking4Rejected));
+        assertThat(result.getContent(),
+            containsInAnyOrder(booking1Past, booking2Current, booking3Future, booking4Rejected));
         assertThat(result.getTotalElements(), equalTo(4L));
     }
 
@@ -164,7 +167,8 @@ class BookingRepositoryTest {
     @DisplayName("findBookingsByBookerAndState (CURRENT) should return current booking")
     void findByBooker_StateCURRENT_shouldReturnCurrentBooking() {
         Pageable pageable = Pageable.unpaged();
-        Page<Booking> result = bookingRepository.findBookingsByBookerAndState(booker1.getId(), "CURRENT", now, pageable);
+        Page<Booking> result = bookingRepository.findBookingsByBookerAndState(booker1.getId(),
+            "CURRENT", now, pageable);
 
         assertThat(result.getContent(), hasSize(1));
         assertThat(result.getContent().getFirst(), equalTo(booking2Current));
@@ -174,7 +178,8 @@ class BookingRepositoryTest {
     @DisplayName("findBookingsByBookerAndState (PAST) should return past booking")
     void findByBooker_StatePAST_shouldReturnPastBooking() {
         Pageable pageable = Pageable.unpaged();
-        Page<Booking> result = bookingRepository.findBookingsByBookerAndState(booker1.getId(), "PAST", now, pageable);
+        Page<Booking> result = bookingRepository.findBookingsByBookerAndState(booker1.getId(),
+            "PAST", now, pageable);
 
         assertThat(result.getContent(), hasSize(1));
         assertThat(result.getContent().getFirst(), equalTo(booking1Past));
@@ -184,7 +189,8 @@ class BookingRepositoryTest {
     @DisplayName("findBookingsByBookerAndState (FUTURE) should return future bookings")
     void findByBooker_StateFUTURE_shouldReturnFutureBookings() {
         Pageable pageable = PageRequest.of(0, 10, Sort.by("startDate").descending());
-        Page<Booking> result = bookingRepository.findBookingsByBookerAndState(booker1.getId(), "FUTURE", now, pageable);
+        Page<Booking> result = bookingRepository.findBookingsByBookerAndState(booker1.getId(),
+            "FUTURE", now, pageable);
 
         assertThat(result.getContent(), hasSize(2));
         assertThat(result.getContent(), containsInAnyOrder(booking3Future, booking4Rejected));
@@ -194,7 +200,8 @@ class BookingRepositoryTest {
     @DisplayName("findBookingsByBookerAndState (WAITING) should return waiting booking")
     void findByBooker_StateWAITING_shouldReturnWaitingBooking() {
         Pageable pageable = Pageable.unpaged();
-        Page<Booking> result = bookingRepository.findBookingsByBookerAndState(booker1.getId(), "WAITING", now, pageable);
+        Page<Booking> result = bookingRepository.findBookingsByBookerAndState(booker1.getId(),
+            "WAITING", now, pageable);
 
         assertThat(result.getContent(), hasSize(1));
         assertThat(result.getContent().getFirst(), equalTo(booking3Future));
@@ -204,7 +211,8 @@ class BookingRepositoryTest {
     @DisplayName("findBookingsByBookerAndState (REJECTED) should return rejected booking")
     void findByBooker_StateREJECTED_shouldReturnRejectedBooking() {
         Pageable pageable = Pageable.unpaged();
-        Page<Booking> result = bookingRepository.findBookingsByBookerAndState(booker1.getId(), "REJECTED", now, pageable);
+        Page<Booking> result = bookingRepository.findBookingsByBookerAndState(booker1.getId(),
+            "REJECTED", now, pageable);
 
         assertThat(result.getContent(), hasSize(1));
         assertThat(result.getContent().getFirst(), equalTo(booking4Rejected));
@@ -214,7 +222,8 @@ class BookingRepositoryTest {
     @DisplayName("findBookingsByBookerAndState should apply pagination")
     void findByBooker_StateALL_WithPagination_shouldReturnPaginated() {
         Pageable pageable = PageRequest.of(0, 2, Sort.by("startDate").descending());
-        Page<Booking> result = bookingRepository.findBookingsByBookerAndState(booker1.getId(), "ALL", now, pageable);
+        Page<Booking> result = bookingRepository.findBookingsByBookerAndState(booker1.getId(),
+            "ALL", now, pageable);
 
         assertThat(result.getContent(), hasSize(2));
         assertThat(result.getContent().get(0).getStatus(), equalTo(BookingStatus.REJECTED));
@@ -224,55 +233,69 @@ class BookingRepositoryTest {
     }
 
     @Test
-    @DisplayName("findBookingsByItemOwnerAndState (ALL) should return all bookings for owner's items")
+    @DisplayName("findBookingsByItemOwnerAndState (ALL) should return all bookings for owner's "
+        + "items")
     void findByOwner_StateALL_shouldReturnAllOwnerItemBookings() {
         Pageable pageable = PageRequest.of(0, 10, Sort.by("startDate").descending());
-        Page<Booking> result = bookingRepository.findBookingsByItemOwnerAndState(owner.getId(), "ALL", now, pageable);
+        Page<Booking> result = bookingRepository.findBookingsByItemOwnerAndState(owner.getId(),
+            "ALL", now, pageable);
 
         assertThat(result.getContent(), hasSize(5));
-        assertThat(result.getContent(), containsInAnyOrder(booking1Past, booking2Current, booking3Future, booking4Rejected, booking5OtherUser));
+        assertThat(result.getContent(),
+            containsInAnyOrder(booking1Past, booking2Current, booking3Future, booking4Rejected,
+                booking5OtherUser));
         assertThat(result.getTotalElements(), equalTo(5L));
     }
 
     @Test
-    @DisplayName("findBookingsByItemOwnerAndState (WAITING) should return waiting bookings for owner's items")
+    @DisplayName("findBookingsByItemOwnerAndState (WAITING) should return waiting bookings for "
+        + "owner's items")
     void findByOwner_StateWAITING_shouldReturnWaitingBooking() {
         Pageable pageable = Pageable.unpaged();
-        Page<Booking> result = bookingRepository.findBookingsByItemOwnerAndState(owner.getId(), "WAITING", now, pageable);
+        Page<Booking> result = bookingRepository.findBookingsByItemOwnerAndState(owner.getId(),
+            "WAITING", now, pageable);
 
         assertThat(result.getContent(), hasSize(1));
         assertThat(result.getContent().getFirst(), equalTo(booking3Future));
     }
 
     @Test
-    @DisplayName("findBookingsByItemOwnerAndState (FUTURE) should return future bookings for owner's items")
+    @DisplayName("findBookingsByItemOwnerAndState (FUTURE) should return future bookings for "
+        + "owner's items")
     void findByOwner_StateFUTURE_shouldReturnFutureBookings() {
         Pageable pageable = PageRequest.of(0, 10, Sort.by("startDate").descending());
-        Page<Booking> result = bookingRepository.findBookingsByItemOwnerAndState(owner.getId(), "FUTURE", now, pageable);
+        Page<Booking> result = bookingRepository.findBookingsByItemOwnerAndState(owner.getId(),
+            "FUTURE", now, pageable);
 
         assertThat(result.getContent(), hasSize(3));
-        assertThat(result.getContent(), containsInAnyOrder(booking3Future, booking4Rejected, booking5OtherUser));
+        assertThat(result.getContent(),
+            containsInAnyOrder(booking3Future, booking4Rejected, booking5OtherUser));
     }
 
     @Test
     @DisplayName("findBookingsByItemOwnerAndState for owner of item2 (booker1)")
     void findByOwner_OwnerIsBooker1_StateWAITING_shouldReturnBooking6() {
         Pageable pageable = Pageable.unpaged();
-        Page<Booking> result = bookingRepository.findBookingsByItemOwnerAndState(booker1.getId(), "WAITING", now, pageable);
+        Page<Booking> result = bookingRepository.findBookingsByItemOwnerAndState(booker1.getId(),
+            "WAITING", now, pageable);
 
         assertThat(result.getContent(), hasSize(1));
         assertThat(result.getContent().getFirst(), equalTo(booking6OwnerItem));
     }
 
     @Test
-    @DisplayName("findPastAndCurrentApprovedBookingsShortForItems should return past and current approved")
+    @DisplayName("findPastAndCurrentApprovedBookingsShortForItems should return past and current "
+        + "approved")
     void findPastCurrentApproved_shouldReturnCorrectDtos() {
-        List<BookingShortDto> result = bookingRepository.findPastAndCurrentApprovedBookingsShortForItems(List.of(item1.getId()), now);
+        List<BookingShortDto> result =
+            bookingRepository.findPastAndCurrentApprovedBookingsShortForItems(
+            List.of(item1.getId()), now);
 
         assertThat(result, hasSize(2));
         assertThat(result.get(0).getId(), equalTo(booking2Current.getId()));
         assertThat(result.get(1).getId(), equalTo(booking1Past.getId()));
-        BookingShortDto dto = result.stream().filter(d -> d.getId().equals(booking2Current.getId())).findFirst().orElseThrow();
+        BookingShortDto dto = result.stream().filter(d -> d.getId().equals(booking2Current.getId()))
+            .findFirst().orElseThrow();
         assertThat(dto.getBookerId(), equalTo(booker1.getId()));
         assertThat(dto.getItemId(), equalTo(item1.getId()));
         assertThat(dto.getStart(), equalTo(booking2Current.getStartDate()));
@@ -280,9 +303,12 @@ class BookingRepositoryTest {
     }
 
     @Test
-    @DisplayName("findPastAndCurrentApprovedBookingsShortForItems should ignore future/non-approved")
+    @DisplayName("findPastAndCurrentApprovedBookingsShortForItems should ignore "
+        + "future/non-approved")
     void findPastCurrentApproved_shouldIgnoreFutureAndNonApproved() {
-        List<BookingShortDto> result = bookingRepository.findPastAndCurrentApprovedBookingsShortForItems(List.of(item1.getId()), now);
+        List<BookingShortDto> result =
+            bookingRepository.findPastAndCurrentApprovedBookingsShortForItems(
+            List.of(item1.getId()), now);
 
         assertThat(result, hasSize(2));
         assertTrue(result.stream().noneMatch(dto -> dto.getId().equals(booking3Future.getId())));
@@ -293,7 +319,9 @@ class BookingRepositoryTest {
     @Test
     @DisplayName("findPastAndCurrentApprovedBookingsShortForItems handles multiple items")
     void findPastCurrentApproved_whenMultipleItems_shouldReturnCorrectDtos() {
-        List<BookingShortDto> result = bookingRepository.findPastAndCurrentApprovedBookingsShortForItems(List.of(item1.getId(), item2.getId()), now);
+        List<BookingShortDto> result =
+            bookingRepository.findPastAndCurrentApprovedBookingsShortForItems(
+            List.of(item1.getId(), item2.getId()), now);
 
         assertThat(result, hasSize(2));
         assertThat(result.get(0).getId(), equalTo(booking2Current.getId()));
@@ -303,7 +331,8 @@ class BookingRepositoryTest {
     @Test
     @DisplayName("findNextApprovedBookingsShortForItems should return future approved")
     void findNextApproved_shouldReturnCorrectDtos() {
-        List<BookingShortDto> result = bookingRepository.findNextApprovedBookingsShortForItems(List.of(item1.getId()), now);
+        List<BookingShortDto> result = bookingRepository.findNextApprovedBookingsShortForItems(
+            List.of(item1.getId()), now);
 
         assertThat(result, hasSize(1));
         assertThat(result.getFirst().getId(), equalTo(booking5OtherUser.getId()));
@@ -317,7 +346,8 @@ class BookingRepositoryTest {
     @Test
     @DisplayName("findNextApprovedBookingsShortForItems should ignore past/current/non-approved")
     void findNextApproved_shouldIgnorePastCurrentNonApproved() {
-        List<BookingShortDto> result = bookingRepository.findNextApprovedBookingsShortForItems(List.of(item1.getId()), now);
+        List<BookingShortDto> result = bookingRepository.findNextApprovedBookingsShortForItems(
+            List.of(item1.getId()), now);
 
         assertThat(result, hasSize(1));
         assertTrue(result.stream().noneMatch(dto -> dto.getId().equals(booking1Past.getId())));
@@ -329,7 +359,8 @@ class BookingRepositoryTest {
     @Test
     @DisplayName("findNextApprovedBookingsShortForItems handles multiple items")
     void findNextApproved_whenMultipleItems_shouldReturnCorrectDtos() {
-        List<BookingShortDto> result = bookingRepository.findNextApprovedBookingsShortForItems(List.of(item1.getId(), item2.getId()), now);
+        List<BookingShortDto> result = bookingRepository.findNextApprovedBookingsShortForItems(
+            List.of(item1.getId(), item2.getId()), now);
 
         assertThat(result, hasSize(1));
         assertThat(result.getFirst().getId(), equalTo(booking5OtherUser.getId()));
@@ -346,7 +377,8 @@ class BookingRepositoryTest {
         anotherFutureApproved.setStatus(BookingStatus.APPROVED);
         entityManager.persistAndFlush(anotherFutureApproved);
 
-        List<BookingShortDto> result = bookingRepository.findNextApprovedBookingsShortForItems(List.of(item1.getId()), now);
+        List<BookingShortDto> result = bookingRepository.findNextApprovedBookingsShortForItems(
+            List.of(item1.getId()), now);
 
         assertThat(result, hasSize(2));
         assertThat(result.get(0).getId(), equalTo(booking5OtherUser.getId()));

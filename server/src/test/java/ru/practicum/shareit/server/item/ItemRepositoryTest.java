@@ -105,8 +105,10 @@ class ItemRepositoryTest {
         List<Item> foundItems = itemRepository.findByOwnerId(owner1.getId());
 
         assertThat(foundItems, hasSize(3));
-        assertThat(foundItems, containsInAnyOrder(item1Owner1, item2Owner1, item4Owner1Unavailable));
-        assertTrue(foundItems.stream().allMatch(item -> item.getOwner().getId().equals(owner1.getId())));
+        assertThat(foundItems,
+            containsInAnyOrder(item1Owner1, item2Owner1, item4Owner1Unavailable));
+        assertTrue(
+            foundItems.stream().allMatch(item -> item.getOwner().getId().equals(owner1.getId())));
     }
 
     @Test
@@ -115,7 +117,8 @@ class ItemRepositoryTest {
         List<Item> foundItems = itemRepository.findByOwnerId(owner1.getId());
 
         assertThat(foundItems, hasSize(3));
-        assertThat(foundItems, containsInAnyOrder(item1Owner1, item2Owner1, item4Owner1Unavailable));
+        assertThat(foundItems,
+            containsInAnyOrder(item1Owner1, item2Owner1, item4Owner1Unavailable));
         assertFalse(foundItems.contains(item3Owner2));
     }
 
@@ -199,13 +202,13 @@ class ItemRepositoryTest {
 
     @Test
     @DisplayName("search should return empty list when text is empty")
-    void search_whenTextIsEmpty_shouldReturnEmptyList() {        
+    void search_whenTextIsEmpty_shouldReturnEmptyList() {
         List<Item> foundItems = itemRepository.search("");
 
         assertThat(foundItems, hasSize(3));
         assertThat(foundItems, containsInAnyOrder(item1Owner1, item2Owner1, item3Owner2));
     }
-    
+
     @Test
     @DisplayName("save should throw DataIntegrityViolationException for null name")
     void save_whenNullName_shouldThrowException() {
@@ -214,7 +217,7 @@ class ItemRepositoryTest {
         itemWithNullName.setDescription("Desc");
         itemWithNullName.setAvailable(true);
         itemWithNullName.setName(null);
-        
+
         assertThrows(DataIntegrityViolationException.class, () -> {
             itemRepository.save(itemWithNullName);
             entityManager.flush();
@@ -229,7 +232,7 @@ class ItemRepositoryTest {
         itemWithNullDesc.setName("Name");
         itemWithNullDesc.setAvailable(true);
         itemWithNullDesc.setDescription(null);
-        
+
         assertThrows(DataIntegrityViolationException.class, () -> {
             itemRepository.save(itemWithNullDesc);
             entityManager.flush();
@@ -244,7 +247,7 @@ class ItemRepositoryTest {
         itemWithNullAvail.setName("Name");
         itemWithNullAvail.setDescription("Desc");
         itemWithNullAvail.setAvailable(null);
-        
+
         assertThrows(DataIntegrityViolationException.class, () -> {
             itemRepository.save(itemWithNullAvail);
             entityManager.flush();
@@ -259,7 +262,7 @@ class ItemRepositoryTest {
         itemWithNullOwner.setDescription("Desc");
         itemWithNullOwner.setAvailable(true);
         itemWithNullOwner.setOwner(null);
-        
+
         assertThrows(DataIntegrityViolationException.class, () -> {
             itemRepository.save(itemWithNullOwner);
             entityManager.flush();

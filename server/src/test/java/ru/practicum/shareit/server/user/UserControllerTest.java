@@ -170,8 +170,10 @@ class UserControllerTest {
     @Test
     @DisplayName("PATCH /users/{id} - Success")
     void update_whenValidRequest_shouldReturnOkAndUpdatedUserDto() throws Exception {
-        UserDto updatedResultDto = new UserDto(userId1, updateUserDto.getName(), updateUserDto.getEmail());
-        when(userService.update(any(UpdateUserDto.class), eq(userId1))).thenReturn(updatedResultDto);
+        UserDto updatedResultDto = new UserDto(userId1, updateUserDto.getName(),
+            updateUserDto.getEmail());
+        when(userService.update(any(UpdateUserDto.class), eq(userId1))).thenReturn(
+            updatedResultDto);
 
         mockMvc.perform(patch("/users/{id}", userId1)
                 .contentType(MediaType.APPLICATION_JSON)
