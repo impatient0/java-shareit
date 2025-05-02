@@ -331,7 +331,7 @@ class ItemMapperImplTest {
             }
 
             @Test
-            @DisplayName("mapToShortDto should handle null Owner (if possible)")
+            @DisplayName("mapToShortDto should handle null Owner")
             void mapToShortDto_whenOwnerIsNull_shouldReturnDtoWithNullOwnerId() {
                 testItem.setOwner(null);
 
