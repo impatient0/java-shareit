@@ -20,12 +20,12 @@ import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-enum TestEnum {
-    VALUE1, VALUE2, ANOTHER_VALUE
-}
-
 @ExtendWith(MockitoExtension.class)
 class QueryParamValidationFilterTest {
+
+    private enum TestEnum {
+        VALUE1, VALUE2, ANOTHER_VALUE
+    }
 
     private static final String TEST_PARAM_NAME = "status";
     @InjectMocks

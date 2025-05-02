@@ -51,6 +51,7 @@ class BookingRepositoryTest {
         registry.add("spring.datasource.username", database::getUsername);
         registry.add("spring.datasource.password", database::getPassword);
     }
+
     private User owner;
     private User booker1;
     private User booker2;

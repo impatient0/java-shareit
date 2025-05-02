@@ -36,7 +36,7 @@ class UserRepositoryTest {
     private User user2;
 
     @Container
-    private final static PostgreSQLContainer<?> database = new PostgreSQLContainer<>(
+    private static final PostgreSQLContainer<?> database = new PostgreSQLContainer<>(
         DockerImageName.parse("postgres:16"));
 
     @DynamicPropertySource

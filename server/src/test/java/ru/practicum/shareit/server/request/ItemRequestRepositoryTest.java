@@ -80,7 +80,7 @@ class ItemRequestRepositoryTest {
         itemOwner.setName("Item Owner");
         itemOwner.setEmail("owner@example.com");
         itemOwner = entityManager.persistAndFlush(itemOwner);
-        
+
         // no auditing here so creation timestamp *might* not be set automatically
         LocalDateTime time1 = LocalDateTime.now().minusDays(2).truncatedTo(ChronoUnit.MILLIS);
         LocalDateTime time2 = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.MILLIS);
@@ -116,7 +116,7 @@ class ItemRequestRepositoryTest {
         request4NoItems.setRequestor(requestor1);
         request4NoItems.setCreated(time4);
         request4NoItems = entityManager.persistAndFlush(request4NoItems);
-        
+
         item1 = new Item();
         item1.setName("Hammer Response");
         item1.setDescription("Good hammer");
