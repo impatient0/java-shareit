@@ -11,6 +11,7 @@ import ru.practicum.shareit.server.request.ItemRequest;
 
 @Component
 @RequiredArgsConstructor
+@SuppressWarnings("unused")
 public class ItemRequestMapperImpl implements ItemRequestMapper {
 
     private final ItemMapper itemMapper;
