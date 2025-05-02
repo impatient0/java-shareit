@@ -1,13 +1,16 @@
 package ru.practicum.shareit.server.item;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -44,10 +47,14 @@ import ru.practicum.shareit.common.dto.item.NewItemDto;
 import ru.practicum.shareit.common.dto.item.UpdateItemDto;
 import ru.practicum.shareit.server.booking.BookingRepository;
 import ru.practicum.shareit.server.exception.AccessDeniedException;
+import ru.practicum.shareit.server.exception.BookingBadRequestException;
 import ru.practicum.shareit.server.exception.ItemNotFoundException;
+import ru.practicum.shareit.server.exception.ItemRequestNotFoundException;
 import ru.practicum.shareit.server.exception.UserNotFoundException;
 import ru.practicum.shareit.server.item.mapper.CommentMapper;
 import ru.practicum.shareit.server.item.mapper.ItemMapper;
+import ru.practicum.shareit.server.request.ItemRequest;
+import ru.practicum.shareit.server.request.ItemRequestRepository;
 import ru.practicum.shareit.server.user.User;
 import ru.practicum.shareit.server.user.UserRepository;
 
@@ -55,19 +62,6 @@ import ru.practicum.shareit.server.user.UserRepository;
 @DisplayName("Item Service Implementation Tests")
 class ItemServiceImplTest {
 
-    private final Long ownerUserId = 1L;
-    private final Long otherUserId = 2L;
-    private final Long item1Id = 10L;
-    private final Long item2Id = 11L;
-    private final Long comment1Id = 100L;
-    private final Long lastBookingId = 200L;
-    private final Long nextBookingId = 201L;
-    @Captor
-    ArgumentCaptor<Item> itemArgumentCaptor;
-    @Captor
-    ArgumentCaptor<Comment> commentArgumentCaptor;
-    @Captor
-    ArgumentCaptor<LocalDateTime> timeArgumentCaptor;
     @Mock
     private ItemRepository itemRepository;
     @Mock
@@ -80,8 +74,19 @@ class ItemServiceImplTest {
     private ItemMapper itemMapper;
     @Mock
     private CommentMapper commentMapper;
+    @Mock
+    private ItemRequestRepository itemRequestRepository;
+
     @InjectMocks
     private ItemServiceImpl itemService;
+
+    @Captor
+    ArgumentCaptor<Item> itemArgumentCaptor;
+    @Captor
+    ArgumentCaptor<Comment> commentArgumentCaptor;
+    @Captor
+    ArgumentCaptor<LocalDateTime> timeArgumentCaptor;
+
     private User ownerUser;
     private User otherUser;
     private Item item1;
@@ -90,12 +95,24 @@ class ItemServiceImplTest {
     private ItemDto itemDto2;
     private ItemWithBookingInfoDto itemWithBookingInfoDto1;
     private NewItemDto newItemDto;
+    private NewItemDto newItemDtoWithRequest;
     private UpdateItemDto updateItemDto;
     private Comment comment1;
     private CommentDto commentDto1;
     private NewCommentDto newCommentDto;
     private BookingShortDto lastBookingDto;
     private BookingShortDto nextBookingDto;
+    private ItemRequest itemRequest1;
+
+    private final Long ownerUserId = 1L;
+    private final Long otherUserId = 2L;
+    private final Long item1Id = 10L;
+    private final Long item2Id = 11L;
+    private final Long comment1Id = 100L;
+    private final Long lastBookingId = 200L;
+    private final Long nextBookingId = 201L;
+    private final Long itemRequestId = 50L;
+    private final Long nonExistentRequestId = 55L;
 
     @BeforeEach
     void setUp() {
@@ -108,6 +125,12 @@ class ItemServiceImplTest {
         otherUser.setId(otherUserId);
         otherUser.setName("Other");
         otherUser.setEmail("other@example.com");
+
+        itemRequest1 = new ItemRequest();
+        itemRequest1.setId(itemRequestId);
+        itemRequest1.setDescription("Need stuff");
+        itemRequest1.setRequestor(otherUser);
+        itemRequest1.setCreatedAt(LocalDateTime.now().minusDays(1));
 
         item1 = new Item();
         item1.setId(item1Id);
@@ -135,6 +158,13 @@ class ItemServiceImplTest {
         newItemDto.setName("New Item");
         newItemDto.setDescription("New Desc");
         newItemDto.setAvailable(true);
+        newItemDto.setRequestId(null);
+
+        newItemDtoWithRequest = new NewItemDto();
+        newItemDtoWithRequest.setName("Item for Request");
+        newItemDtoWithRequest.setDescription("Specific Desc");
+        newItemDtoWithRequest.setAvailable(true);
+        newItemDtoWithRequest.setRequestId(itemRequestId);
 
         updateItemDto = new UpdateItemDto("Updated Name", "Updated Desc", false);
 
@@ -170,8 +200,11 @@ class ItemServiceImplTest {
 
             List<ItemDto> result = itemService.getAllItems();
 
-            assertThat(result, hasSize(2));
-            assertThat(result, contains(itemDto1, itemDto2));
+            assertThat("Result list should not be null", result, is(notNullValue()));
+            assertThat("Result list should contain 2 items", result, hasSize(2));
+            assertThat("Result list should contain the expected ItemDto objects", result,
+                contains(itemDto1, itemDto2));
+
             verify(itemRepository).findAll();
             verify(itemMapper, times(2)).mapToDto(any(Item.class));
         }
@@ -183,7 +216,9 @@ class ItemServiceImplTest {
 
             List<ItemDto> result = itemService.getAllItems();
 
-            assertThat(result, is(empty()));
+            assertThat("Result list should not be null", result, is(notNullValue()));
+            assertThat("Result list should be empty", result, is(empty()));
+
             verify(itemRepository).findAll();
             verify(itemMapper, never()).mapToDto(any());
         }
@@ -194,8 +229,8 @@ class ItemServiceImplTest {
     class SaveItemTests {
 
         @Test
-        @DisplayName("should save item and return DTO")
-        void saveItem_whenUserExists_shouldSaveAndReturnDto() {
+        @DisplayName("should save item without request ID and return DTO")
+        void saveItem_whenNoRequestIdAndUserExists_shouldSaveAndReturnDto() {
             Item itemToSave = new Item();
             itemToSave.setName(newItemDto.getName());
             itemToSave.setDescription(newItemDto.getDescription());
@@ -207,26 +242,111 @@ class ItemServiceImplTest {
             savedItem.setDescription(newItemDto.getDescription());
             savedItem.setAvailable(newItemDto.getAvailable());
             savedItem.setOwner(ownerUser);
+            savedItem.setRequest(null);
+
+            ItemDto resultDto = new ItemDto(item1Id, newItemDto.getName(),
+                newItemDto.getDescription(), newItemDto.getAvailable());
 
             when(userRepository.findById(ownerUserId)).thenReturn(Optional.of(ownerUser));
             when(itemMapper.mapToItem(newItemDto)).thenReturn(itemToSave);
-            when(itemRepository.save(any(Item.class))).thenReturn(
-                savedItem);
-            when(itemMapper.mapToDto(savedItem)).thenReturn(
-                itemDto1);
+            when(itemRepository.save(any(Item.class))).thenReturn(savedItem);
+            when(itemMapper.mapToDto(savedItem)).thenReturn(resultDto);
 
             ItemDto result = itemService.saveItem(newItemDto, ownerUserId);
 
-            assertThat(result, equalTo(itemDto1));
+            assertThat("Returned ItemDto should not be null", result, is(notNullValue()));
+            assertThat("Returned ItemDto should match the expected DTO", result, equalTo(resultDto));
+
             verify(userRepository).findById(ownerUserId);
             verify(itemMapper).mapToItem(newItemDto);
+            verify(itemRequestRepository, never()).findById(anyLong());
             verify(itemRepository).save(itemArgumentCaptor.capture());
             Item capturedItem = itemArgumentCaptor.getValue();
-            assertThat(capturedItem.getOwner(),
-                equalTo(ownerUser));
-            assertThat(capturedItem.getName(), equalTo(newItemDto.getName()));
+            assertThat(
+                "Saved Item should have correct owner and properties from DTO, and null request",
+                capturedItem,
+                allOf(
+                    hasProperty("owner", equalTo(ownerUser)),
+                    hasProperty("name", equalTo(newItemDto.getName())),
+                    hasProperty("description", equalTo(newItemDto.getDescription())),
+                    hasProperty("available", equalTo(newItemDto.getAvailable())),
+                    hasProperty("request", is(nullValue()))
+                )
+            );
             verify(itemMapper).mapToDto(savedItem);
         }
+
+        @Test
+        @DisplayName("should save item with valid request ID and return DTO")
+        void saveItem_whenValidRequestIdAndUserExists_shouldSaveAndReturnDto() {
+            Item itemToSave = new Item();
+            itemToSave.setName(newItemDtoWithRequest.getName());
+            itemToSave.setDescription(newItemDtoWithRequest.getDescription());
+            itemToSave.setAvailable(newItemDtoWithRequest.getAvailable());
+
+            Item savedItem = new Item();
+            savedItem.setId(item1Id);
+            savedItem.setName(newItemDtoWithRequest.getName());
+            savedItem.setDescription(newItemDtoWithRequest.getDescription());
+            savedItem.setAvailable(newItemDtoWithRequest.getAvailable());
+            savedItem.setOwner(ownerUser);
+            savedItem.setRequest(itemRequest1);
+
+            ItemDto resultDto = new ItemDto(item1Id, newItemDtoWithRequest.getName(),
+                newItemDtoWithRequest.getDescription(), newItemDtoWithRequest.getAvailable());
+
+            when(userRepository.findById(ownerUserId)).thenReturn(Optional.of(ownerUser));
+            when(itemMapper.mapToItem(newItemDtoWithRequest)).thenReturn(itemToSave);
+            when(itemRequestRepository.findById(itemRequestId)).thenReturn(Optional.of(itemRequest1));
+            when(itemRepository.save(any(Item.class))).thenReturn(savedItem);
+            when(itemMapper.mapToDto(savedItem)).thenReturn(resultDto);
+
+            ItemDto result = itemService.saveItem(newItemDtoWithRequest, ownerUserId);
+
+            assertThat("Returned ItemDto should not be null", result, is(notNullValue()));
+            assertThat("Returned ItemDto should match the expected DTO", result,
+                equalTo(resultDto));
+
+            verify(userRepository).findById(ownerUserId);
+            verify(itemMapper).mapToItem(newItemDtoWithRequest);
+            verify(itemRequestRepository).findById(itemRequestId);
+            verify(itemRepository).save(itemArgumentCaptor.capture());
+            Item capturedItem = itemArgumentCaptor.getValue();
+            assertThat("Saved Item should have correct owner, request, and properties from DTO",
+                capturedItem,
+                allOf(
+                    hasProperty("owner", equalTo(ownerUser)),
+                    hasProperty("name", equalTo(newItemDtoWithRequest.getName())),
+                    hasProperty("description", equalTo(newItemDtoWithRequest.getDescription())),
+                    hasProperty("available", equalTo(newItemDtoWithRequest.getAvailable())),
+                    hasProperty("request", equalTo(itemRequest1))
+                )
+            );
+            verify(itemMapper).mapToDto(savedItem);
+        }
+
+        @Test
+        @DisplayName("should throw ItemRequestNotFoundException when request ID invalid")
+        void saveItem_whenInvalidRequestId_shouldThrowItemRequestNotFoundException() {
+            newItemDtoWithRequest.setRequestId(nonExistentRequestId);
+            Item itemToSave = new Item();
+
+            when(userRepository.findById(ownerUserId)).thenReturn(Optional.of(ownerUser));
+            when(itemMapper.mapToItem(newItemDtoWithRequest)).thenReturn(itemToSave);
+            when(itemRequestRepository.findById(nonExistentRequestId)).thenReturn(Optional.empty());
+
+            assertThrows(ItemRequestNotFoundException.class,
+                () -> itemService.saveItem(newItemDtoWithRequest, ownerUserId),
+                "Saving item with non-existent request ID should throw "
+                    + "ItemRequestNotFoundException");
+
+            verify(userRepository).findById(ownerUserId);
+            verify(itemMapper).mapToItem(newItemDtoWithRequest);
+            verify(itemRequestRepository).findById(nonExistentRequestId);
+            verify(itemRepository, never()).save(any(Item.class));
+            verify(itemMapper, never()).mapToDto(any(Item.class));
+        }
+
 
         @Test
         @DisplayName("should throw UserNotFoundException when owner not found")
@@ -234,10 +354,12 @@ class ItemServiceImplTest {
             when(userRepository.findById(ownerUserId)).thenReturn(Optional.empty());
 
             assertThrows(UserNotFoundException.class,
-                () -> itemService.saveItem(newItemDto, ownerUserId));
+                () -> itemService.saveItem(newItemDto, ownerUserId),
+                "Saving item when owner user is not found should throw UserNotFoundException");
 
             verify(userRepository).findById(ownerUserId);
             verify(itemMapper, never()).mapToItem(any());
+            verify(itemRequestRepository, never()).findById(anyLong());
             verify(itemRepository, never()).save(any());
             verify(itemMapper, never()).mapToDto(any());
         }
@@ -255,7 +377,9 @@ class ItemServiceImplTest {
 
             ItemDto result = itemService.getItemById(item1Id);
 
-            assertThat(result, equalTo(itemDto1));
+            assertThat("Returned ItemDto should not be null", result, is(notNullValue()));
+            assertThat("Returned ItemDto should match the expected DTO", result, equalTo(itemDto1));
+
             verify(itemRepository).findById(item1Id);
             verify(itemMapper).mapToDto(item1);
         }
@@ -265,7 +389,8 @@ class ItemServiceImplTest {
         void getItemById_whenNotFound_shouldThrowItemNotFoundException() {
             when(itemRepository.findById(item1Id)).thenReturn(Optional.empty());
 
-            assertThrows(ItemNotFoundException.class, () -> itemService.getItemById(item1Id));
+            assertThrows(ItemNotFoundException.class, () -> itemService.getItemById(item1Id),
+                "Getting item by ID when item is not found should throw ItemNotFoundException");
 
             verify(itemRepository).findById(item1Id);
             verify(itemMapper, never()).mapToDto(any());
@@ -296,10 +421,26 @@ class ItemServiceImplTest {
 
             ItemDto result = itemService.update(updateItemDto, ownerUserId, item1Id);
 
-            assertThat(result, equalTo(finalDto));
+            assertThat("Returned ItemDto should not be null", result, is(notNullValue()));
+            assertThat("Returned ItemDto should match the expected DTO", result, equalTo(finalDto));
+
             verify(itemRepository).findById(item1Id);
             verify(itemMapper).updateItemFields(updateItemDto, item1);
-            verify(itemRepository).save(updatedItem);
+            verify(itemRepository).save(itemArgumentCaptor.capture());
+            Item capturedItem = itemArgumentCaptor.getValue();
+            assertThat(
+                "Saved Item should be the same instance returned by updateItemFields and have "
+                    + "updated properties",
+                capturedItem,
+                allOf(
+                    is(sameInstance(updatedItem)),
+                    hasProperty("id", equalTo(item1Id)),
+                    hasProperty("name", equalTo(updateItemDto.getName())),
+                    hasProperty("description", equalTo(updateItemDto.getDescription())),
+                    hasProperty("available", equalTo(updateItemDto.getAvailable())),
+                    hasProperty("owner", equalTo(ownerUser))
+                )
+            );
             verify(itemMapper).mapToDto(updatedItem);
         }
 
@@ -309,7 +450,8 @@ class ItemServiceImplTest {
             when(itemRepository.findById(item1Id)).thenReturn(Optional.empty());
 
             assertThrows(ItemNotFoundException.class,
-                () -> itemService.update(updateItemDto, ownerUserId, item1Id));
+                () -> itemService.update(updateItemDto, ownerUserId, item1Id),
+                "Updating non-existent item should throw ItemNotFoundException");
 
             verify(itemRepository).findById(item1Id);
             verify(itemMapper, never()).updateItemFields(any(), any());
@@ -323,7 +465,8 @@ class ItemServiceImplTest {
             when(itemRepository.findById(item1Id)).thenReturn(Optional.of(item1));
 
             assertThrows(AccessDeniedException.class,
-                () -> itemService.update(updateItemDto, otherUserId, item1Id));
+                () -> itemService.update(updateItemDto, otherUserId, item1Id),
+                "Updating item when user is not the owner should throw AccessDeniedException");
 
             verify(itemRepository).findById(item1Id);
             verify(itemMapper, never()).updateItemFields(any(), any());
@@ -346,8 +489,11 @@ class ItemServiceImplTest {
 
             List<ItemDto> result = itemService.getItemsByUserId(ownerUserId);
 
-            assertThat(result, hasSize(2));
-            assertThat(result, contains(itemDto1, itemDto2));
+            assertThat("Result list should not be null", result, is(notNullValue()));
+            assertThat("Result list should contain 2 items", result, hasSize(2));
+            assertThat("Result list should contain the expected ItemDto objects", result,
+                contains(itemDto1, itemDto2));
+
             verify(userRepository).findById(ownerUserId);
             verify(itemRepository).findByOwnerId(ownerUserId);
             verify(itemMapper, times(2)).mapToDto(any(Item.class));
@@ -361,7 +507,9 @@ class ItemServiceImplTest {
 
             List<ItemDto> result = itemService.getItemsByUserId(ownerUserId);
 
-            assertThat(result, is(empty()));
+            assertThat("Result list should not be null", result, is(notNullValue()));
+            assertThat("Result list should be empty", result, is(empty()));
+
             verify(userRepository).findById(ownerUserId);
             verify(itemRepository).findByOwnerId(ownerUserId);
             verify(itemMapper, never()).mapToDto(any());
@@ -373,7 +521,8 @@ class ItemServiceImplTest {
             when(userRepository.findById(ownerUserId)).thenReturn(Optional.empty());
 
             assertThrows(UserNotFoundException.class,
-                () -> itemService.getItemsByUserId(ownerUserId));
+                () -> itemService.getItemsByUserId(ownerUserId),
+                "Getting items when user is not found should throw UserNotFoundException");
 
             verify(userRepository).findById(ownerUserId);
             verify(itemRepository, never()).findByOwnerId(anyLong());
@@ -391,7 +540,8 @@ class ItemServiceImplTest {
             when(userRepository.findById(ownerUserId)).thenReturn(Optional.of(ownerUser));
             when(itemRepository.findById(item1Id)).thenReturn(Optional.of(item1));
 
-            assertDoesNotThrow(() -> itemService.delete(item1Id, ownerUserId));
+            assertDoesNotThrow(() -> itemService.delete(item1Id, ownerUserId),
+                "Deleting item by owner should not throw exception");
 
             verify(userRepository).findById(ownerUserId);
             verify(itemRepository).findById(item1Id);
@@ -404,7 +554,8 @@ class ItemServiceImplTest {
             when(userRepository.findById(ownerUserId)).thenReturn(Optional.empty());
 
             assertThrows(UserNotFoundException.class,
-                () -> itemService.delete(item1Id, ownerUserId));
+                () -> itemService.delete(item1Id, ownerUserId),
+                "Deleting item when user is not found should throw UserNotFoundException");
 
             verify(userRepository).findById(ownerUserId);
             verify(itemRepository, never()).findById(anyLong());
@@ -418,7 +569,8 @@ class ItemServiceImplTest {
             when(itemRepository.findById(item1Id)).thenReturn(Optional.empty());
 
             assertThrows(ItemNotFoundException.class,
-                () -> itemService.delete(item1Id, ownerUserId));
+                () -> itemService.delete(item1Id, ownerUserId),
+                "Deleting non-existent item should throw ItemNotFoundException");
 
             verify(userRepository).findById(ownerUserId);
             verify(itemRepository).findById(item1Id);
@@ -434,7 +586,8 @@ class ItemServiceImplTest {
                 Optional.of(item1));
 
             assertThrows(AccessDeniedException.class,
-                () -> itemService.delete(item1Id, otherUserId));
+                () -> itemService.delete(item1Id, otherUserId),
+                "Deleting item when user is not the owner should throw AccessDeniedException");
 
             verify(userRepository).findById(otherUserId);
             verify(itemRepository).findById(item1Id);
@@ -457,8 +610,11 @@ class ItemServiceImplTest {
 
             List<ItemDto> result = itemService.searchItems(query, otherUserId);
 
-            assertThat(result, hasSize(1));
-            assertThat(result, contains(itemDto1));
+            assertThat("Result list should not be null", result, is(notNullValue()));
+            assertThat("Result list should contain 1 item", result, hasSize(1));
+            assertThat("Result list should contain the expected ItemDto object", result,
+                contains(itemDto1));
+
             verify(userRepository).findById(otherUserId);
             verify(itemRepository).search(query);
             verify(itemMapper).mapToDto(item1);
@@ -473,7 +629,9 @@ class ItemServiceImplTest {
 
             List<ItemDto> result = itemService.searchItems(query, otherUserId);
 
-            assertThat(result, is(empty()));
+            assertThat("Result list should not be null", result, is(notNullValue()));
+            assertThat("Result list should be empty", result, is(empty()));
+
             verify(userRepository).findById(otherUserId);
             verify(itemRepository).search(query);
             verify(itemMapper, never()).mapToDto(any());
@@ -487,7 +645,9 @@ class ItemServiceImplTest {
 
             List<ItemDto> result = itemService.searchItems(query, otherUserId);
 
-            assertThat(result, is(empty()));
+            assertThat("Result list should not be null", result, is(notNullValue()));
+            assertThat("Result list should be empty for blank query", result, is(empty()));
+
             verify(userRepository).findById(otherUserId);
             verify(itemRepository, never()).search(anyString());
             verify(itemMapper, never()).mapToDto(any());
@@ -500,7 +660,8 @@ class ItemServiceImplTest {
             when(userRepository.findById(otherUserId)).thenReturn(Optional.empty());
 
             assertThrows(UserNotFoundException.class,
-                () -> itemService.searchItems(query, otherUserId));
+                () -> itemService.searchItems(query, otherUserId),
+                "Searching items when user is not found should throw UserNotFoundException");
 
             verify(userRepository).findById(otherUserId);
             verify(itemRepository, never()).search(anyString());
@@ -536,7 +697,10 @@ class ItemServiceImplTest {
 
             CommentDto result = itemService.saveComment(newCommentDto, item1Id, otherUserId);
 
-            assertThat(result, equalTo(commentDto1));
+            assertThat("Returned CommentDto should not be null", result, is(notNullValue()));
+            assertThat("Returned CommentDto should match the expected DTO", result,
+                equalTo(commentDto1));
+
             verify(userRepository).findById(otherUserId);
             verify(itemRepository).findById(item1Id);
             verify(bookingRepository).findPastAndCurrentApprovedBookingsShortForItems(
@@ -544,9 +708,14 @@ class ItemServiceImplTest {
             verify(commentMapper).mapToComment(newCommentDto);
             verify(commentRepository).save(commentArgumentCaptor.capture());
             Comment capturedComment = commentArgumentCaptor.getValue();
-            assertThat(capturedComment.getAuthor(), equalTo(otherUser));
-            assertThat(capturedComment.getItem(), equalTo(item1));
-            assertThat(capturedComment.getText(), equalTo(newCommentDto.getText()));
+            assertThat("Saved Comment entity should have correct item, author, and text",
+                capturedComment,
+                allOf(
+                    hasProperty("item", equalTo(item1)),
+                    hasProperty("author", equalTo(otherUser)),
+                    hasProperty("text", equalTo(newCommentDto.getText()))
+                )
+            );
             verify(commentMapper).mapToDto(savedComment);
         }
 
@@ -556,8 +725,10 @@ class ItemServiceImplTest {
             when(userRepository.findById(otherUserId)).thenReturn(Optional.empty());
 
             assertThrows(UserNotFoundException.class,
-                () -> itemService.saveComment(newCommentDto, item1Id, otherUserId));
+                () -> itemService.saveComment(newCommentDto, item1Id, otherUserId),
+                "Saving comment when user is not found should throw UserNotFoundException");
 
+            verify(userRepository).findById(otherUserId);
             verifyNoInteractions(itemRepository, bookingRepository, commentRepository,
                 commentMapper);
         }
@@ -569,7 +740,8 @@ class ItemServiceImplTest {
             when(itemRepository.findById(item1Id)).thenReturn(Optional.empty());
 
             assertThrows(ItemNotFoundException.class,
-                () -> itemService.saveComment(newCommentDto, item1Id, otherUserId));
+                () -> itemService.saveComment(newCommentDto, item1Id, otherUserId),
+                "Saving comment for non-existent item should throw ItemNotFoundException");
 
             verify(userRepository).findById(otherUserId);
             verify(itemRepository).findById(item1Id);
@@ -577,16 +749,18 @@ class ItemServiceImplTest {
         }
 
         @Test
-        @DisplayName("should throw IllegalArgumentException when user did not book item")
-        void saveComment_whenUserDidNotBookItem_shouldThrowIllegalArgumentException() {
+        @DisplayName("should throw BookingBadRequestException when user did not book item")
+        void saveComment_whenUserDidNotBookItem_shouldThrowBookingBadRequestException() {
             when(userRepository.findById(otherUserId)).thenReturn(Optional.of(otherUser));
             when(itemRepository.findById(item1Id)).thenReturn(Optional.of(item1));
             when(bookingRepository.findPastAndCurrentApprovedBookingsShortForItems(
                 eq(List.of(item1Id)), any(LocalDateTime.class))).thenReturn(
                 Collections.emptyList());
 
-            assertThrows(IllegalArgumentException.class,
-                () -> itemService.saveComment(newCommentDto, item1Id, otherUserId));
+            assertThrows(BookingBadRequestException.class,
+                () -> itemService.saveComment(newCommentDto, item1Id, otherUserId),
+                "Saving comment when user has not booked the item should throw "
+                    + "BookingBadRequestException");
 
             verify(userRepository).findById(otherUserId);
             verify(itemRepository).findById(item1Id);
@@ -596,8 +770,8 @@ class ItemServiceImplTest {
         }
 
         @Test
-        @DisplayName("should throw IllegalArgumentException when user booked a different item")
-        void saveComment_whenUserBookedDifferentItem_shouldThrowIllegalArgumentException() {
+        @DisplayName("should throw BookingBadRequestException when user booked a different item")
+        void saveComment_whenUserBookedDifferentItem_shouldThrowBookingBadRequestException() {
             when(userRepository.findById(otherUserId)).thenReturn(Optional.of(otherUser));
             when(itemRepository.findById(item1Id)).thenReturn(Optional.of(item1));
             BookingShortDto bookingDifferentItem = new BookingShortDto(300L, otherUserId, item2Id,
@@ -606,9 +780,13 @@ class ItemServiceImplTest {
                 eq(List.of(item1Id)), any(LocalDateTime.class))).thenReturn(
                 Collections.emptyList());
 
-            assertThrows(IllegalArgumentException.class,
-                () -> itemService.saveComment(newCommentDto, item1Id, otherUserId));
+            assertThrows(BookingBadRequestException.class,
+                () -> itemService.saveComment(newCommentDto, item1Id, otherUserId),
+                "Saving comment when user booked a different item should throw "
+                    + "BookingBadRequestException");
 
+            verify(userRepository).findById(otherUserId);
+            verify(itemRepository).findById(item1Id);
             verify(bookingRepository).findPastAndCurrentApprovedBookingsShortForItems(
                 eq(List.of(item1Id)), any(LocalDateTime.class));
             verifyNoInteractions(commentRepository, commentMapper);
@@ -634,12 +812,18 @@ class ItemServiceImplTest {
             ItemWithBookingInfoDto result = itemService.getItemByIdWithBookingInfo(item1Id,
                 ownerUserId);
 
-            assertThat(result, is(notNullValue()));
-            assertThat(result.getId(), equalTo(item1Id));
-            assertThat("Last booking should be set", result.getLastBooking(),
-                equalTo(lastBookingDto));
-            assertThat("Next booking should be set", result.getNextBooking(),
-                equalTo(nextBookingDto));
+            assertThat("Returned ItemWithBookingInfoDto should not be null", result,
+                is(notNullValue()));
+            assertThat(
+                "Returned ItemWithBookingInfoDto should have correct ID and populated bookings",
+                result,
+                allOf(
+                    hasProperty("id", equalTo(item1Id)),
+                    hasProperty("lastBooking", equalTo(lastBookingDto)),
+                    hasProperty("nextBooking", equalTo(nextBookingDto))
+                )
+            );
+
             verify(userRepository).findById(ownerUserId);
             verify(itemRepository).findById(item1Id);
             verify(itemMapper).mapToItemWithBookingInfoDto(item1);
@@ -665,10 +849,20 @@ class ItemServiceImplTest {
             ItemWithBookingInfoDto result = itemService.getItemByIdWithBookingInfo(item1Id,
                 ownerUserId);
 
-            assertThat(result, is(notNullValue()));
-            assertThat(result.getId(), equalTo(item1Id));
-            assertThat("Last booking should be null", result.getLastBooking(), is(nullValue()));
-            assertThat("Next booking should be null", result.getNextBooking(), is(nullValue()));
+            assertThat("Returned ItemWithBookingInfoDto should not be null", result,
+                is(notNullValue()));
+            assertThat("Returned ItemWithBookingInfoDto should have correct ID and null bookings",
+                result,
+                allOf(
+                    hasProperty("id", equalTo(item1Id)),
+                    hasProperty("lastBooking", is(nullValue())),
+                    hasProperty("nextBooking", is(nullValue()))
+                )
+            );
+
+            verify(userRepository).findById(ownerUserId);
+            verify(itemRepository).findById(item1Id);
+            verify(itemMapper).mapToItemWithBookingInfoDto(item1);
             verify(bookingRepository).findPastAndCurrentApprovedBookingsShortForItems(
                 eq(List.of(item1Id)), any(LocalDateTime.class));
             verify(bookingRepository).findNextApprovedBookingsShortForItems(eq(List.of(item1Id)),
@@ -685,10 +879,17 @@ class ItemServiceImplTest {
             ItemWithBookingInfoDto result = itemService.getItemByIdWithBookingInfo(item1Id,
                 otherUserId);
 
-            assertThat(result, is(notNullValue()));
-            assertThat(result.getId(), equalTo(item1Id));
-            assertThat("Last booking should be null", result.getLastBooking(), is(nullValue()));
-            assertThat("Next booking should be null", result.getNextBooking(), is(nullValue()));
+            assertThat("Returned ItemWithBookingInfoDto should not be null", result,
+                is(notNullValue()));
+            assertThat("Returned ItemWithBookingInfoDto should have correct ID and null bookings",
+                result,
+                allOf(
+                    hasProperty("id", equalTo(item1Id)),
+                    hasProperty("lastBooking", is(nullValue())),
+                    hasProperty("nextBooking", is(nullValue()))
+                )
+            );
+
             verify(userRepository).findById(otherUserId);
             verify(itemRepository).findById(item1Id);
             verify(itemMapper).mapToItemWithBookingInfoDto(item1);
@@ -704,7 +905,9 @@ class ItemServiceImplTest {
             when(userRepository.findById(ownerUserId)).thenReturn(Optional.empty());
 
             assertThrows(UserNotFoundException.class,
-                () -> itemService.getItemByIdWithBookingInfo(item1Id, ownerUserId));
+                () -> itemService.getItemByIdWithBookingInfo(item1Id, ownerUserId),
+                "Getting item info when user is not found should throw UserNotFoundException");
+
             verify(userRepository).findById(ownerUserId);
             verifyNoInteractions(itemRepository, itemMapper, bookingRepository);
         }
@@ -716,7 +919,9 @@ class ItemServiceImplTest {
             when(itemRepository.findById(item1Id)).thenReturn(Optional.empty());
 
             assertThrows(ItemNotFoundException.class,
-                () -> itemService.getItemByIdWithBookingInfo(item1Id, ownerUserId));
+                () -> itemService.getItemByIdWithBookingInfo(item1Id, ownerUserId),
+                "Getting info for non-existent item should throw ItemNotFoundException");
+
             verify(userRepository).findById(ownerUserId);
             verify(itemRepository).findById(item1Id);
             verifyNoInteractions(itemMapper, bookingRepository);
@@ -747,15 +952,26 @@ class ItemServiceImplTest {
             List<ItemWithBookingInfoDto> result = itemService.getAllItemsByOwnerWithBookingInfo(
                 ownerUserId);
 
-            assertThat(result, hasSize(2));
+            assertThat("Result list should not be null", result, is(notNullValue()));
+            assertThat("Result list should contain 2 items", result, hasSize(2));
+
             ItemWithBookingInfoDto resultItem1 = result.stream()
                 .filter(i -> i.getId().equals(item1Id)).findFirst().orElseThrow();
-            assertThat(resultItem1.getLastBooking(), equalTo(lastBookingDto));
-            assertThat(resultItem1.getNextBooking(), equalTo(nextBookingDto));
+            assertThat("Item One (available) should have last and next bookings set", resultItem1,
+                allOf(
+                    hasProperty("lastBooking", equalTo(lastBookingDto)),
+                    hasProperty("nextBooking", equalTo(nextBookingDto))
+                )
+            );
             ItemWithBookingInfoDto resultItem2 = result.stream()
                 .filter(i -> i.getId().equals(item2Id)).findFirst().orElseThrow();
-            assertThat(resultItem2.getLastBooking(), is(nullValue()));
-            assertThat(resultItem2.getNextBooking(), is(nullValue()));
+            assertThat("Item Two (not available) should have null last and next bookings",
+                resultItem2,
+                allOf(
+                    hasProperty("lastBooking", is(nullValue())),
+                    hasProperty("nextBooking", is(nullValue()))
+                )
+            );
 
             verify(userRepository).findById(ownerUserId);
             verify(itemRepository).findByOwnerId(ownerUserId);
@@ -775,7 +991,9 @@ class ItemServiceImplTest {
             List<ItemWithBookingInfoDto> result = itemService.getAllItemsByOwnerWithBookingInfo(
                 ownerUserId);
 
-            assertThat(result, is(empty()));
+            assertThat("Result list should not be null", result, is(notNullValue()));
+            assertThat("Result list should be empty for owner with no items", result, is(empty()));
+
             verify(userRepository).findById(ownerUserId);
             verify(itemRepository).findByOwnerId(ownerUserId);
             verifyNoInteractions(itemMapper, bookingRepository);
@@ -787,10 +1005,11 @@ class ItemServiceImplTest {
             when(userRepository.findById(ownerUserId)).thenReturn(Optional.empty());
 
             assertThrows(UserNotFoundException.class,
-                () -> itemService.getAllItemsByOwnerWithBookingInfo(ownerUserId));
+                () -> itemService.getAllItemsByOwnerWithBookingInfo(ownerUserId),
+                "Getting all items for non-existent user should throw UserNotFoundException");
+
             verify(userRepository).findById(ownerUserId);
             verifyNoInteractions(itemRepository, itemMapper, bookingRepository);
         }
     }
-
 }
