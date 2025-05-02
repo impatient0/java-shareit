@@ -110,7 +110,7 @@ class ItemRequestControllerTest {
                 .content(objectMapper.writeValueAsString(newItemRequestDto)))
             .andExpect(status().isNotFound())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.message", is(errorMsg)))
+            .andExpect(jsonPath("$.error", is(errorMsg)))
             .andExpect(jsonPath("$.responseCode", is(404)));
 
         verify(itemRequestService).addRequest(refEq(newItemRequestDto), eq(nonExistentUserId));
@@ -158,7 +158,7 @@ class ItemRequestControllerTest {
                 .header(userIdHeaderName, nonExistentUserId))
             .andExpect(status().isNotFound())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.message", is(errorMsg)))
+            .andExpect(jsonPath("$.error", is(errorMsg)))
             .andExpect(jsonPath("$.responseCode", is(404)));
 
         verify(itemRequestService).getOwnRequests(nonExistentUserId);
@@ -212,7 +212,7 @@ class ItemRequestControllerTest {
                 .header(userIdHeaderName, nonExistentUserId))
             .andExpect(status().isNotFound())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.message", is(errorMsg)))
+            .andExpect(jsonPath("$.error", is(errorMsg)))
             .andExpect(jsonPath("$.responseCode", is(404)));
 
         verify(itemRequestService).getAllRequests(eq(nonExistentUserId), isNull(), isNull());
@@ -247,7 +247,7 @@ class ItemRequestControllerTest {
                 .header(userIdHeaderName, userId1))
             .andExpect(status().isNotFound())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.message", is(errorMsg)))
+            .andExpect(jsonPath("$.error", is(errorMsg)))
             .andExpect(jsonPath("$.responseCode", is(404)));
 
         verify(itemRequestService).getRequestById(eq(nonExistentRequestId), eq(userId1));
@@ -264,7 +264,7 @@ class ItemRequestControllerTest {
                 .header(userIdHeaderName, nonExistentUserId))
             .andExpect(status().isNotFound())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.message", is(errorMsg)))
+            .andExpect(jsonPath("$.error", is(errorMsg)))
             .andExpect(jsonPath("$.responseCode", is(404)));
 
         verify(itemRequestService).getRequestById(eq(request1Id), eq(nonExistentUserId));

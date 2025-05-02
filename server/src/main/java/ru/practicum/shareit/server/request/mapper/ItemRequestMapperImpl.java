@@ -25,7 +25,7 @@ public class ItemRequestMapperImpl implements ItemRequestMapper {
         ItemRequestDto dto = new ItemRequestDto();
         dto.setId(request.getId());
         dto.setDescription(request.getDescription());
-        dto.setCreatedAt(request.getCreatedAt());
+        dto.setCreated(request.getCreated());
 
         if (request.getItems() != null) {
             dto.setItems(request.getItems().stream()

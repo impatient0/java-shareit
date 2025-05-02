@@ -113,28 +113,28 @@ class ItemRequestServiceImplTest {
         request1.setId(request1Id);
         request1.setDescription("Need hammer");
         request1.setRequestor(requestor1);
-        request1.setCreatedAt(now.minusDays(2));
+        request1.setCreated(now.minusDays(2));
         request2 = new ItemRequest();
         request2.setId(request2Id);
         request2.setDescription("Need drill");
         request2.setRequestor(requestor1);
-        request2.setCreatedAt(now.minusDays(1));
+        request2.setCreated(now.minusDays(1));
         request3 = new ItemRequest();
         request3.setId(request3Id);
         request3.setDescription("Need ladder");
         request3.setRequestor(requestor2);
-        request3.setCreatedAt(now);
+        request3.setCreated(now);
 
         item1.setRequest(request1);
         request1.setItems(Set.of(item1));
 
         itemShortDto1 = new ItemShortDto(item1Id, "Hammer Resp", null, true, requestor2Id,
             request1Id);
-        requestDto1 = new ItemRequestDto(request1Id, "Need hammer", request1.getCreatedAt(),
+        requestDto1 = new ItemRequestDto(request1Id, "Need hammer", request1.getCreated(),
             Set.of(itemShortDto1));
-        requestDto2 = new ItemRequestDto(request2Id, "Need drill", request2.getCreatedAt(),
+        requestDto2 = new ItemRequestDto(request2Id, "Need drill", request2.getCreated(),
             Collections.emptySet());
-        requestDto3 = new ItemRequestDto(request3Id, "Need ladder", request3.getCreatedAt(),
+        requestDto3 = new ItemRequestDto(request3Id, "Need ladder", request3.getCreated(),
             Collections.emptySet());
     }
 
@@ -152,11 +152,11 @@ class ItemRequestServiceImplTest {
             savedRequest.setId(request1Id);
             savedRequest.setDescription(newItemRequestDto.getDescription());
             savedRequest.setRequestor(requestor1);
-            savedRequest.setCreatedAt(LocalDateTime.now());
+            savedRequest.setCreated(LocalDateTime.now());
             savedRequest.setItems(Collections.emptySet());
 
             ItemRequestDto resultDto = new ItemRequestDto(request1Id,
-                newItemRequestDto.getDescription(), savedRequest.getCreatedAt(),
+                newItemRequestDto.getDescription(), savedRequest.getCreated(),
                 Collections.emptySet());
 
             when(userRepository.findById(requestor1Id)).thenReturn(Optional.of(requestor1));
@@ -207,7 +207,7 @@ class ItemRequestServiceImplTest {
         void getOwnRequests_whenUserExistsAndHasRequests_shouldReturnOrderedDtoList() {
             List<ItemRequest> requestsFromRepo = List.of(request2, request1);
             when(userRepository.findById(requestor1Id)).thenReturn(Optional.of(requestor1));
-            when(itemRequestRepository.findByRequestorIdOrderByCreatedAtDesc(requestor1Id))
+            when(itemRequestRepository.findByRequestorIdOrderByCreatedDesc(requestor1Id))
                 .thenReturn(requestsFromRepo);
             when(itemRequestMapper.mapToDto(request1)).thenReturn(requestDto1);
             when(itemRequestMapper.mapToDto(request2)).thenReturn(requestDto2);
@@ -221,7 +221,7 @@ class ItemRequestServiceImplTest {
                 contains(requestDto2, requestDto1));
 
             verify(userRepository).findById(requestor1Id);
-            verify(itemRequestRepository).findByRequestorIdOrderByCreatedAtDesc(requestor1Id);
+            verify(itemRequestRepository).findByRequestorIdOrderByCreatedDesc(requestor1Id);
             verify(itemRequestMapper, times(2)).mapToDto(any(ItemRequest.class));
         }
 
@@ -229,7 +229,7 @@ class ItemRequestServiceImplTest {
         @DisplayName("should return empty list when user has no requests")
         void getOwnRequests_whenUserHasNoRequests_shouldReturnEmptyList() {
             when(userRepository.findById(requestor1Id)).thenReturn(Optional.of(requestor1));
-            when(itemRequestRepository.findByRequestorIdOrderByCreatedAtDesc(requestor1Id))
+            when(itemRequestRepository.findByRequestorIdOrderByCreatedDesc(requestor1Id))
                 .thenReturn(Collections.emptyList());
 
             List<ItemRequestDto> results = itemRequestService.getOwnRequests(requestor1Id);
@@ -238,7 +238,7 @@ class ItemRequestServiceImplTest {
             assertThat("Result list should be empty", results, is(empty()));
 
             verify(userRepository).findById(requestor1Id);
-            verify(itemRequestRepository).findByRequestorIdOrderByCreatedAtDesc(requestor1Id);
+            verify(itemRequestRepository).findByRequestorIdOrderByCreatedDesc(requestor1Id);
             verifyNoInteractions(itemRequestMapper);
         }
 
@@ -260,7 +260,7 @@ class ItemRequestServiceImplTest {
     class GetAllRequestsTests {
         private final int defaultPage = 0;
         private final int defaultSize = 10;
-        private final Sort defaultSort = Sort.by("createdAt").descending();
+        private final Sort defaultSort = Sort.by("created").descending();
 
         @Test
         @DisplayName("should return paginated requests from other users")

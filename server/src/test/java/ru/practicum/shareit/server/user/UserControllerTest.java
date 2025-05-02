@@ -130,7 +130,7 @@ class UserControllerTest {
                 .content(objectMapper.writeValueAsString(newUserDto)))
             .andExpect(status().isConflict())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.message", is(errorMessage)))
+            .andExpect(jsonPath("$.error", is(errorMessage)))
             .andExpect(jsonPath("$.responseCode", is(409)));
 
         verify(userService, times(1)).saveUser(refEq(newUserDto));
@@ -161,7 +161,7 @@ class UserControllerTest {
         mockMvc.perform(get("/users/{id}", nonExistentUserId))
             .andExpect(status().isNotFound())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.message", is(errorMessage)))
+            .andExpect(jsonPath("$.error", is(errorMessage)))
             .andExpect(jsonPath("$.responseCode", is(404)));
 
         verify(userService, times(1)).getById(nonExistentUserId);
@@ -199,7 +199,7 @@ class UserControllerTest {
                 .content(objectMapper.writeValueAsString(updateUserDto)))
             .andExpect(status().isNotFound())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.message", is(errorMessage)))
+            .andExpect(jsonPath("$.error", is(errorMessage)))
             .andExpect(jsonPath("$.responseCode", is(404)));
 
         verify(userService, times(1)).update(refEq(updateUserDto), eq(nonExistentUserId));
@@ -217,7 +217,7 @@ class UserControllerTest {
                 .content(objectMapper.writeValueAsString(updateUserDto)))
             .andExpect(status().isConflict())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.message", is(errorMessage)))
+            .andExpect(jsonPath("$.error", is(errorMessage)))
             .andExpect(jsonPath("$.responseCode", is(409)));
 
         verify(userService, times(1)).update(refEq(updateUserDto), eq(userId1));

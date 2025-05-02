@@ -43,8 +43,8 @@ public class Comment {
     private User author;
 
     @CreatedDate
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    @Column(name = "created", nullable = false, updatable = false)
+    private LocalDateTime created;
 
     @Override
     public boolean equals(Object o) {
@@ -66,7 +66,7 @@ public class Comment {
             ", text='" + (text != null ? text.substring(0, Math.min(text.length(), 50)) + "..." : null) + '\'' +
             ", itemId=" + (item != null ? item.getId() : null) +
             ", authorId=" + (author != null ? author.getId() : null) +
-            ", createdAt=" + createdAt +
+            ", created=" + created +
             '}';
     }
 }

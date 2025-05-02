@@ -12,8 +12,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ItemRequestRepository extends JpaRepository<ItemRequest, Long> {
 
-    @Query("SELECT ir FROM ItemRequest ir LEFT JOIN FETCH ir.items WHERE ir.requestor.id = :requestorId ORDER BY ir.createdAt DESC")
-    List<ItemRequest> findByRequestorIdOrderByCreatedAtDesc(@Param("requestorId") Long requestorId);
+    @Query("SELECT ir FROM ItemRequest ir LEFT JOIN FETCH ir.items WHERE ir.requestor.id = :requestorId ORDER BY ir.created DESC")
+    List<ItemRequest> findByRequestorIdOrderByCreatedDesc(@Param("requestorId") Long requestorId);
 
     @Query("SELECT ir FROM ItemRequest ir LEFT JOIN FETCH ir.items WHERE ir.requestor.id <> :userId")
     Page<ItemRequest> findAllByRequestorIdNot(@Param("userId") Long userId, Pageable pageable);

@@ -34,7 +34,7 @@ class GlobalExceptionHandlerTest {
         assertNotNull(response);
         assertThat(response.getStatusCode(), is(equalTo(HttpStatus.NOT_FOUND)));
         assertNotNull(response.getBody());
-        assertThat(response.getBody().getMessage(), is(equalTo(errorMessage)));
+        assertThat(response.getBody().getError(), is(equalTo(errorMessage)));
         assertThat(response.getBody().getResponseCode(), is(equalTo(expectedStatus)));
     }
 
@@ -50,7 +50,7 @@ class GlobalExceptionHandlerTest {
         assertNotNull(response);
         assertThat(response.getStatusCode(), is(equalTo(HttpStatus.NOT_FOUND)));
         assertNotNull(response.getBody());
-        assertThat(response.getBody().getMessage(), is(equalTo(errorMessage)));
+        assertThat(response.getBody().getError(), is(equalTo(errorMessage)));
         assertThat(response.getBody().getResponseCode(), is(equalTo(expectedStatus)));
     }
 
@@ -66,7 +66,7 @@ class GlobalExceptionHandlerTest {
         assertNotNull(response);
         assertThat(response.getStatusCode(), is(equalTo(HttpStatus.NOT_FOUND)));
         assertNotNull(response.getBody());
-        assertThat(response.getBody().getMessage(), is(equalTo(errorMessage)));
+        assertThat(response.getBody().getError(), is(equalTo(errorMessage)));
         assertThat(response.getBody().getResponseCode(), is(equalTo(expectedStatus)));
     }
 
@@ -83,7 +83,7 @@ class GlobalExceptionHandlerTest {
         assertNotNull(response);
         assertThat(response.getStatusCode(), is(equalTo(HttpStatus.CONFLICT)));
         assertNotNull(response.getBody());
-        assertThat(response.getBody().getMessage(), is(equalTo(errorMessage)));
+        assertThat(response.getBody().getError(), is(equalTo(errorMessage)));
         assertThat(response.getBody().getResponseCode(), is(equalTo(expectedStatus)));
     }
 
@@ -100,7 +100,7 @@ class GlobalExceptionHandlerTest {
         assertNotNull(response);
         assertThat(response.getStatusCode(), is(equalTo(HttpStatus.FORBIDDEN)));
         assertNotNull(response.getBody());
-        assertThat(response.getBody().getMessage(), is(equalTo(errorMessage)));
+        assertThat(response.getBody().getError(), is(equalTo(errorMessage)));
         assertThat(response.getBody().getResponseCode(), is(equalTo(expectedStatus)));
     }
 
@@ -117,7 +117,7 @@ class GlobalExceptionHandlerTest {
         assertNotNull(response);
         assertThat(response.getStatusCode(), is(equalTo(HttpStatus.BAD_REQUEST)));
         assertNotNull(response.getBody());
-        assertThat(response.getBody().getMessage(), is(equalTo(errorMessage)));
+        assertThat(response.getBody().getError(), is(equalTo(errorMessage)));
         assertThat(response.getBody().getResponseCode(), is(equalTo(expectedStatus)));
     }
 
@@ -135,7 +135,7 @@ class GlobalExceptionHandlerTest {
         assertNotNull(response);
         assertThat(response.getStatusCode(), is(equalTo(HttpStatus.INTERNAL_SERVER_ERROR)));
         assertNotNull(response.getBody());
-        assertThat(response.getBody().getMessage(), is(equalTo(errorMessage)));
+        assertThat(response.getBody().getError(), is(equalTo(errorMessage)));
         assertThat(response.getBody().getResponseCode(), is(equalTo(expectedStatus)));
     }
 
@@ -153,7 +153,7 @@ class GlobalExceptionHandlerTest {
         assertNotNull(response);
         assertThat(response.getStatusCode(), is(equalTo(HttpStatus.INTERNAL_SERVER_ERROR)));
         assertNotNull(response.getBody());
-        assertThat(response.getBody().getMessage(), is(equalTo(errorMessage)));
+        assertThat(response.getBody().getError(), is(equalTo(errorMessage)));
         assertThat(response.getBody().getResponseCode(), is(equalTo(expectedStatus)));
     }
 }

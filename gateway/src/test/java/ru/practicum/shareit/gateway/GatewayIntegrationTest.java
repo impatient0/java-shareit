@@ -135,7 +135,7 @@ class GatewayIntegrationTest {
 
             webTestClient.post().uri("/users").contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(invalidUser)).exchange().expectStatus().isBadRequest()
-                .expectBody(ErrorMessage.class).value(error -> assertThat(error.getMessage()).as(
+                .expectBody(ErrorMessage.class).value(error -> assertThat(error.getError()).as(
                         "Error message for blank name should be specific")
                     .isEqualTo("Validation failed: Name cannot be " + "blank"));
         }
@@ -147,7 +147,7 @@ class GatewayIntegrationTest {
 
             webTestClient.post().uri("/users").contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(invalidUser)).exchange().expectStatus().isBadRequest()
-                .expectBody(ErrorMessage.class).value(error -> assertThat(error.getMessage()).as(
+                .expectBody(ErrorMessage.class).value(error -> assertThat(error.getError()).as(
                         "Error message for invalid email should be specific")
                     .isEqualTo("Validation failed: Invalid email " + "format"));
         }
@@ -186,7 +186,7 @@ class GatewayIntegrationTest {
             webTestClient.patch().uri("/users/" + userId).contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(invalidUpdate)).exchange().expectStatus()
                 .isBadRequest().expectBody(ErrorMessage.class).value(
-                    error -> assertThat(error.getMessage()).as(
+                    error -> assertThat(error.getError()).as(
                             "Error message for invalid email should be specific")
                         .isEqualTo("Validation failed: Invalid email " + "format"));
         }
@@ -315,7 +315,7 @@ class GatewayIntegrationTest {
 
             webTestClient.post().uri(itemsPath).contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(newItem)).exchange().expectStatus().isBadRequest()
-                .expectBody(ErrorMessage.class).value(error -> assertThat(error.getMessage()).as(
+                .expectBody(ErrorMessage.class).value(error -> assertThat(error.getError()).as(
                         "Error message for missing header should be specific")
                     .isEqualTo("Required header 'X-Sharer-User-Id' is missing"));
         }
@@ -331,7 +331,7 @@ class GatewayIntegrationTest {
             webTestClient.post().uri(itemsPath).header(HEADER_USER_ID, "invalid")
                 .contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(newItem))
                 .exchange().expectStatus().isBadRequest().expectBody(ErrorMessage.class).value(
-                    error -> assertThat(error.getMessage()).as(
+                    error -> assertThat(error.getError()).as(
                             "Error message for invalid header format should be specific")
                         .isEqualTo("Invalid format for header 'X-Sharer-User-Id'"));
         }
@@ -347,7 +347,7 @@ class GatewayIntegrationTest {
             webTestClient.post().uri(itemsPath).header(HEADER_USER_ID, validUserIdHeader)
                 .contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(invalidItem))
                 .exchange().expectStatus().isBadRequest().expectBody(ErrorMessage.class).value(
-                    error -> assertThat(error.getMessage()).as(
+                    error -> assertThat(error.getError()).as(
                             "Error message for blank name should be specific")
                         .isEqualTo("Validation failed: Name cannot be blank"));
         }
@@ -363,7 +363,7 @@ class GatewayIntegrationTest {
             webTestClient.post().uri(itemsPath).header(HEADER_USER_ID, validUserIdHeader)
                 .contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(invalidItem))
                 .exchange().expectStatus().isBadRequest().expectBody(ErrorMessage.class).value(
-                    error -> assertThat(error.getMessage()).as(
+                    error -> assertThat(error.getError()).as(
                             "Error message for null available status should be specific")
                         .isEqualTo("Validation failed: Item status must be set"));
         }
@@ -403,7 +403,7 @@ class GatewayIntegrationTest {
             webTestClient.patch().uri(itemsPath + "/" + testItemId)
                 .contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(updateItem))
                 .exchange().expectStatus().isBadRequest().expectBody(ErrorMessage.class).value(
-                    error -> assertThat(error.getMessage()).as(
+                    error -> assertThat(error.getError()).as(
                             "Error message for missing header should be specific")
                         .isEqualTo("Required header 'X-Sharer-User-Id' is missing"));
         }
@@ -434,7 +434,7 @@ class GatewayIntegrationTest {
         void getItemById_whenMissingHeader_shouldReturnBadRequest() {
             webTestClient.get().uri(itemsPath + "/" + testItemId).exchange().expectStatus()
                 .isBadRequest().expectBody(ErrorMessage.class).value(
-                    error -> assertThat(error.getMessage()).as(
+                    error -> assertThat(error.getError()).as(
                             "Error message for missing header should be specific")
                         .isEqualTo("Required header 'X-Sharer-User-Id' is missing"));
         }
@@ -463,7 +463,7 @@ class GatewayIntegrationTest {
         @DisplayName("GET /items - Bad Request (Missing Header)")
         void getUserItems_whenMissingHeader_shouldReturnBadRequest() {
             webTestClient.get().uri(itemsPath).exchange().expectStatus().isBadRequest()
-                .expectBody(ErrorMessage.class).value(error -> assertThat(error.getMessage()).as(
+                .expectBody(ErrorMessage.class).value(error -> assertThat(error.getError()).as(
                         "Error message for missing header should be specific")
                     .isEqualTo("Required header 'X-Sharer-User-Id' is missing"));
         }
@@ -499,7 +499,7 @@ class GatewayIntegrationTest {
                     uriBuilder -> uriBuilder.path(itemsPath + "/search").queryParam("text",
                             "something")
                         .build()).exchange().expectStatus().isBadRequest()
-                .expectBody(ErrorMessage.class).value(error -> assertThat(error.getMessage()).as(
+                .expectBody(ErrorMessage.class).value(error -> assertThat(error.getError()).as(
                         "Error message for missing header should be specific")
                     .isEqualTo("Required header 'X-Sharer-User-Id' is missing"));
         }
@@ -543,7 +543,7 @@ class GatewayIntegrationTest {
                 .header(HEADER_USER_ID, validUserIdHeader).contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(invalidComment)).exchange().expectStatus()
                 .isBadRequest().expectBody(ErrorMessage.class).value(
-                    error -> assertThat(error.getMessage()).as(
+                    error -> assertThat(error.getError()).as(
                             "Error message for blank comment text should be specific")
                         .isEqualTo("Validation failed: Comment text cannot be blank"));
         }
@@ -558,7 +558,7 @@ class GatewayIntegrationTest {
             webTestClient.post().uri(itemsPath + "/" + itemIdForComment + "/comment")
                 .contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(newComment))
                 .exchange().expectStatus().isBadRequest().expectBody(ErrorMessage.class).value(
-                    error -> assertThat(error.getMessage()).as(
+                    error -> assertThat(error.getError()).as(
                             "Error message for missing header should be specific")
                         .isEqualTo("Required header 'X-Sharer-User-Id' is missing"));
         }
@@ -587,7 +587,7 @@ class GatewayIntegrationTest {
         void deleteItem_whenMissingHeader_shouldReturnBadRequest() {
             webTestClient.delete().uri(itemsPath + "/" + testItemId).exchange().expectStatus()
                 .isBadRequest().expectBody(ErrorMessage.class).value(
-                    error -> assertThat(error.getMessage()).as(
+                    error -> assertThat(error.getError()).as(
                             "Error message for missing header should be specific")
                         .isEqualTo("Required header 'X-Sharer-User-Id' is missing"));
         }
@@ -638,7 +638,7 @@ class GatewayIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(invalidBooking)).exchange().expectStatus()
                 .isBadRequest().expectBody(ErrorMessage.class).value(
-                    error -> assertThat(error.getMessage()).as(
+                    error -> assertThat(error.getError()).as(
                             "Error message for null start date should be specific")
                         .isEqualTo("Validation failed: Start date cannot be null"));
         }
@@ -652,7 +652,7 @@ class GatewayIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(invalidBooking)).exchange().expectStatus()
                 .isBadRequest().expectBody(ErrorMessage.class).value(
-                    error -> assertThat(error.getMessage()).as(
+                    error -> assertThat(error.getError()).as(
                             "Error message for null end date should be specific")
                         .isEqualTo("Validation failed: End date cannot be null"));
         }
@@ -666,7 +666,7 @@ class GatewayIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(invalidBooking)).exchange().expectStatus()
                 .isBadRequest().expectBody(ErrorMessage.class).value(
-                    error -> assertThat(error.getMessage()).as(
+                    error -> assertThat(error.getError()).as(
                             "Error message for null item ID should be specific")
                         .isEqualTo("Validation failed: Item ID cannot be null"));
         }
@@ -678,7 +678,7 @@ class GatewayIntegrationTest {
 
             webTestClient.post().uri(bookingsPath).contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(newBooking)).exchange().expectStatus().isBadRequest()
-                .expectBody(ErrorMessage.class).value(error -> assertThat(error.getMessage()).as(
+                .expectBody(ErrorMessage.class).value(error -> assertThat(error.getError()).as(
                         "Error message for missing header should be specific")
                     .isEqualTo("Required header 'X-Sharer-User-Id' is missing"));
         }
@@ -734,7 +734,7 @@ class GatewayIntegrationTest {
                     uriBuilder -> uriBuilder.path(bookingsPath + "/" + testBookingId)
                         .queryParam("approved", "true").build()).exchange().expectStatus()
                 .isBadRequest().expectBody(ErrorMessage.class).value(
-                    error -> assertThat(error.getMessage()).as(
+                    error -> assertThat(error.getError()).as(
                             "Error message for missing header should be specific")
                         .isEqualTo("Required header 'X-Sharer-User-Id' is missing"));
         }
@@ -764,7 +764,7 @@ class GatewayIntegrationTest {
         void getBookingById_whenMissingHeader_shouldReturnBadRequest() {
             webTestClient.get().uri(bookingsPath + "/" + testBookingId).exchange().expectStatus()
                 .isBadRequest().expectBody(ErrorMessage.class).value(
-                    error -> assertThat(error.getMessage()).as(
+                    error -> assertThat(error.getError()).as(
                             "Error message for missing header should be specific")
                         .isEqualTo("Required header 'X-Sharer-User-Id' is missing"));
         }
@@ -801,7 +801,7 @@ class GatewayIntegrationTest {
                     uriBuilder -> uriBuilder.path(bookingsPath).queryParam("state", invalidState)
                         .build()).header(HEADER_USER_ID, validUserIdHeader).exchange().expectStatus()
                 .isBadRequest().expectBody(ErrorMessage.class).value(
-                    error -> assertThat(error.getMessage()).as(
+                    error -> assertThat(error.getError()).as(
                             "Error message for invalid state should be specific")
                         .isEqualTo("Unknown state: " + invalidState));
         }
@@ -832,7 +832,7 @@ class GatewayIntegrationTest {
             webTestClient.get()
                 .uri(uriBuilder -> uriBuilder.path(bookingsPath).queryParam("state", "ALL").build())
                 .exchange().expectStatus().isBadRequest().expectBody(ErrorMessage.class).value(
-                    error -> assertThat(error.getMessage()).as(
+                    error -> assertThat(error.getError()).as(
                             "Error message for missing header should be specific")
                         .isEqualTo("Required header 'X-Sharer-User-Id' is missing"));
         }
@@ -886,7 +886,7 @@ class GatewayIntegrationTest {
         void getBookingsByOwner_whenMissingHeader_shouldReturnBadRequest() {
             webTestClient.get().uri(bookingsPath + "/owner").exchange().expectStatus()
                 .isBadRequest().expectBody(ErrorMessage.class).value(
-                    error -> assertThat(error.getMessage()).as(
+                    error -> assertThat(error.getError()).as(
                             "Error message for missing header should be specific")
                         .isEqualTo("Required header 'X-Sharer-User-Id' is missing"));
         }
@@ -935,7 +935,7 @@ class GatewayIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(invalidRequest)).exchange().expectStatus()
                 .isBadRequest().expectBody(ErrorMessage.class).value(
-                    error -> assertThat(error.getMessage()).as(
+                    error -> assertThat(error.getError()).as(
                             "Error message for blank description should be specific")
                         .isEqualTo("Validation failed: Request description cannot be blank"));
 
@@ -950,7 +950,7 @@ class GatewayIntegrationTest {
 
             webTestClient.post().uri(requestsPath).contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(newRequest)).exchange().expectStatus().isBadRequest()
-                .expectBody(ErrorMessage.class).value(error -> assertThat(error.getMessage()).as(
+                .expectBody(ErrorMessage.class).value(error -> assertThat(error.getError()).as(
                         "Error message for missing header should be specific")
                     .isEqualTo("Required header 'X-Sharer-User-Id' is missing"));
         }
@@ -983,7 +983,7 @@ class GatewayIntegrationTest {
         @DisplayName("GET /requests - Bad Request (Missing Header)")
         void getOwnRequests_whenMissingHeader_shouldReturnBadRequest() {
             webTestClient.get().uri(requestsPath).exchange().expectStatus().isBadRequest()
-                .expectBody(ErrorMessage.class).value(error -> assertThat(error.getMessage()).as(
+                .expectBody(ErrorMessage.class).value(error -> assertThat(error.getError()).as(
                         "Error message for missing header should be specific")
                     .isEqualTo("Required header 'X-Sharer-User-Id' is missing"));
         }
@@ -1041,7 +1041,7 @@ class GatewayIntegrationTest {
         @DisplayName("GET /requests/all - Bad Request (Missing Header)")
         void getAllRequests_whenMissingHeader_shouldReturnBadRequest() {
             webTestClient.get().uri(requestsAllPath).exchange().expectStatus().isBadRequest()
-                .expectBody(ErrorMessage.class).value(error -> assertThat(error.getMessage()).as(
+                .expectBody(ErrorMessage.class).value(error -> assertThat(error.getError()).as(
                         "Error message for missing header should be specific")
                     .isEqualTo("Required header 'X-Sharer-User-Id' is missing"));
         }
@@ -1094,7 +1094,7 @@ class GatewayIntegrationTest {
         void getRequestById_whenMissingHeader_shouldReturnBadRequest() {
             webTestClient.get().uri(requestsPath + "/" + testRequestId).exchange().expectStatus()
                 .isBadRequest().expectBody(ErrorMessage.class).value(
-                    error -> assertThat(error.getMessage()).as(
+                    error -> assertThat(error.getError()).as(
                             "Error message for missing header should be specific")
                         .isEqualTo("Required header 'X-Sharer-User-Id' is missing"));
         }

@@ -12,7 +12,7 @@ public class CommentMapperImpl implements CommentMapper {
     @Override
     public CommentDto mapToDto(Comment comment) {
         return new CommentDto(comment.getId(), comment.getText(), comment.getItem().getId(),
-            comment.getAuthor().getName(), comment.getCreatedAt().toString());
+            comment.getAuthor().getName(), comment.getCreated().toString());
     }
 
     @Override

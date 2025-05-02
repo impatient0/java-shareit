@@ -46,7 +46,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         log.debug("Fetching own item requests for user {}", userId);
         findUserOrThrow(userId);
 
-        List<ItemRequest> requests = itemRequestRepository.findByRequestorIdOrderByCreatedAtDesc(userId);
+        List<ItemRequest> requests = itemRequestRepository.findByRequestorIdOrderByCreatedDesc(userId);
 
         log.info("Found {} requests for user {}", requests.size(), userId);
         return requests.stream()
@@ -95,7 +95,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     }
 
     private Pageable createPageable(Integer from, Integer size) {
-        Sort defaultSort = Sort.by("createdAt").descending();
+        Sort defaultSort = Sort.by("created").descending();
         if (from == null || size == null || from < 0 || size <= 0) {
             log.warn("Invalid pagination parameters (from={}, size={}). Defaulting to page 0, size 10.", from, size);
             from = 0;

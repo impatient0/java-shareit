@@ -43,9 +43,9 @@ public class ItemRequest {
     @JoinColumn(name = "requestor_id", referencedColumnName = "id", nullable = false)
     private User requestor;
 
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created", nullable = false)
     @CreatedDate
-    private LocalDateTime createdAt;
+    private LocalDateTime created;
 
     @OneToMany(mappedBy = "request", fetch = FetchType.LAZY)
     private Set<Item> items = new HashSet<>();
@@ -72,7 +72,7 @@ public class ItemRequest {
         return "ItemRequest{" +
             "id=" + id +
             ", description='" + description + '\'' +
-            ", createdAt=" + createdAt +
+            ", created=" + created +
             '}';
     }
 }

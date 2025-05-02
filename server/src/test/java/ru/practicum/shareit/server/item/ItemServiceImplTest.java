@@ -130,7 +130,7 @@ class ItemServiceImplTest {
         itemRequest1.setId(itemRequestId);
         itemRequest1.setDescription("Need stuff");
         itemRequest1.setRequestor(otherUser);
-        itemRequest1.setCreatedAt(LocalDateTime.now().minusDays(1));
+        itemRequest1.setCreated(LocalDateTime.now().minusDays(1));
 
         item1 = new Item();
         item1.setId(item1Id);
@@ -173,10 +173,10 @@ class ItemServiceImplTest {
         comment1.setText("Test Comment");
         comment1.setItem(item1);
         comment1.setAuthor(otherUser);
-        comment1.setCreatedAt(LocalDateTime.now().minusDays(1));
+        comment1.setCreated(LocalDateTime.now().minusDays(1));
 
         commentDto1 = new CommentDto(comment1Id, "Test Comment", item1Id, otherUser.getName(),
-            comment1.getCreatedAt().toString());
+            comment1.getCreated().toString());
 
         newCommentDto = new NewCommentDto();
         newCommentDto.setText("A new comment");
@@ -684,7 +684,7 @@ class ItemServiceImplTest {
             savedComment.setText(newCommentDto.getText());
             savedComment.setItem(item1);
             savedComment.setAuthor(otherUser);
-            savedComment.setCreatedAt(LocalDateTime.now());
+            savedComment.setCreated(LocalDateTime.now());
 
             when(userRepository.findById(otherUserId)).thenReturn(Optional.of(otherUser));
             when(itemRepository.findById(item1Id)).thenReturn(Optional.of(item1));

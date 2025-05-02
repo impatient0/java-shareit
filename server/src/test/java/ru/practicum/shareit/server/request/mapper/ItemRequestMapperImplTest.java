@@ -42,7 +42,7 @@ class ItemRequestMapperImplTest {
     private ItemShortDto itemShortDto1;
     private ItemShortDto itemShortDto2;
     private NewItemRequestDto newItemRequestDto;
-    private LocalDateTime createdAt;
+    private LocalDateTime created;
 
     private final Long requestorId = 1L;
     private final Long requestId = 10L;
@@ -52,7 +52,7 @@ class ItemRequestMapperImplTest {
 
     @BeforeEach
     void setUp() {
-        createdAt = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS);
+        created = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS);
 
         requestor = new User();
         requestor.setId(requestorId);
@@ -78,7 +78,7 @@ class ItemRequestMapperImplTest {
         itemRequest1.setId(requestId);
         itemRequest1.setDescription("Need tools");
         itemRequest1.setRequestor(requestor);
-        itemRequest1.setCreatedAt(createdAt);
+        itemRequest1.setCreated(created);
         itemRequest1.setItems(Set.of(itemResponse1, itemResponse2));
 
         itemResponse1.setRequest(itemRequest1);
@@ -109,7 +109,7 @@ class ItemRequestMapperImplTest {
                 allOf(
                     hasProperty("id", equalTo(requestId)),
                     hasProperty("description", equalTo("Need tools")),
-                    hasProperty("createdAt", equalTo(createdAt))
+                    hasProperty("created", equalTo(created))
                 )
             );
             assertThat("Mapped ItemRequestDto items list should not be null", resultDto.getItems(),
@@ -135,7 +135,7 @@ class ItemRequestMapperImplTest {
                 allOf(
                     hasProperty("id", equalTo(requestId)),
                     hasProperty("description", equalTo("Need tools")),
-                    hasProperty("createdAt", equalTo(createdAt))
+                    hasProperty("created", equalTo(created))
                 )
             );
             assertThat("Mapped ItemRequestDto items list should not be null", resultDto.getItems(),
@@ -158,7 +158,7 @@ class ItemRequestMapperImplTest {
                 allOf(
                     hasProperty("id", equalTo(requestId)),
                     hasProperty("description", equalTo("Need tools")),
-                    hasProperty("createdAt", equalTo(createdAt))
+                    hasProperty("created", equalTo(created))
                 )
             );
             assertThat(
@@ -201,7 +201,7 @@ class ItemRequestMapperImplTest {
                     hasProperty("description", equalTo(newItemRequestDto.getDescription())),
                     hasProperty("id", is(nullValue())),
                     hasProperty("requestor", is(nullValue())),
-                    hasProperty("createdAt", is(nullValue()))
+                    hasProperty("created", is(nullValue()))
                 )
             );
             assertThat("Mapped ItemRequest entity items collection should be empty",

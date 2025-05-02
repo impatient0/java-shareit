@@ -60,7 +60,7 @@ class CommentMapperImplTest {
             testComment.setText("This is a test comment.");
             testComment.setItem(testItem);
             testComment.setAuthor(testAuthor);
-            testComment.setCreatedAt(testTimestamp);
+            testComment.setCreated(testTimestamp);
         }
 
         @Test
@@ -74,7 +74,7 @@ class CommentMapperImplTest {
                     hasProperty("id", equalTo(100L)),
                     hasProperty("text", equalTo("This is a test comment.")),
                     hasProperty("authorName", equalTo("Author Name")),
-                    hasProperty("createdAt", equalTo(testTimestamp.toString()))
+                    hasProperty("created", equalTo(testTimestamp.toString()))
                 )
             );
         }
@@ -100,7 +100,7 @@ class CommentMapperImplTest {
                     hasProperty("id", is(nullValue())),
                     hasProperty("item", is(nullValue())),
                     hasProperty("author", is(nullValue())),
-                    hasProperty("createdAt", is(nullValue()))
+                    hasProperty("created", is(nullValue()))
                 )
             );
         }

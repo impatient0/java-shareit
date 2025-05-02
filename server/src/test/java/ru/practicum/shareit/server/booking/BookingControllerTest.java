@@ -110,7 +110,7 @@ class BookingControllerTest {
                 .content(objectMapper.writeValueAsString(newBookingDto)))
             .andExpect(status().isNotFound())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.message", is(errorMsg)))
+            .andExpect(jsonPath("$.error", is(errorMsg)))
             .andExpect(jsonPath("$.responseCode", is(404)));
 
         verify(bookingService).saveBooking(refEq(newBookingDto), eq(otherUserId));
@@ -129,7 +129,7 @@ class BookingControllerTest {
                 .content(objectMapper.writeValueAsString(newBookingDto)))
             .andExpect(status().isNotFound())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.message", is(errorMsg)))
+            .andExpect(jsonPath("$.error", is(errorMsg)))
             .andExpect(jsonPath("$.responseCode", is(404)));
 
         verify(bookingService).saveBooking(refEq(newBookingDto), eq(bookerId));
@@ -148,7 +148,7 @@ class BookingControllerTest {
                 .content(objectMapper.writeValueAsString(newBookingDto)))
             .andExpect(status().isBadRequest())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.message", is(errorMsg)))
+            .andExpect(jsonPath("$.error", is(errorMsg)))
             .andExpect(jsonPath("$.responseCode", is(400)));
 
         verify(bookingService).saveBooking(refEq(newBookingDto), eq(bookerId));
@@ -204,7 +204,7 @@ class BookingControllerTest {
                 .param("approved", "true"))
             .andExpect(status().isNotFound())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.message", is(errorMsg)))
+            .andExpect(jsonPath("$.error", is(errorMsg)))
             .andExpect(jsonPath("$.responseCode", is(404)));
 
         verify(bookingService).approveBooking(eq(nonExistentBookingId), eq(ownerId), eq(true));
@@ -222,7 +222,7 @@ class BookingControllerTest {
                 .param("approved", "true"))
             .andExpect(status().isForbidden())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.message", is(errorMsg)))
+            .andExpect(jsonPath("$.error", is(errorMsg)))
             .andExpect(jsonPath("$.responseCode", is(403)));
 
         verify(bookingService).approveBooking(eq(booking1Id), eq(bookerId), eq(true));
@@ -267,7 +267,7 @@ class BookingControllerTest {
                 .header(userIdHeaderName, bookerId))
             .andExpect(status().isNotFound())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.message", is(errorMsg)))
+            .andExpect(jsonPath("$.error", is(errorMsg)))
             .andExpect(jsonPath("$.responseCode", is(404)));
 
         verify(bookingService).getById(eq(bookerId), eq(nonExistentBookingId));
@@ -284,7 +284,7 @@ class BookingControllerTest {
                 .header(userIdHeaderName, otherUserId))
             .andExpect(status().isForbidden())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.message", is(errorMsg)))
+            .andExpect(jsonPath("$.error", is(errorMsg)))
             .andExpect(jsonPath("$.responseCode", is(403)));
 
         verify(bookingService).getById(eq(otherUserId), eq(booking1Id));
@@ -341,7 +341,7 @@ class BookingControllerTest {
                 .header(userIdHeaderName, nonExistentBookingId))
             .andExpect(status().isNotFound())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.message", is(errorMsg)))
+            .andExpect(jsonPath("$.error", is(errorMsg)))
             .andExpect(jsonPath("$.responseCode", is(404)));
 
         verify(bookingService).getBookingsByBooker(eq(nonExistentBookingId), eq(BookingState.ALL),
@@ -377,7 +377,7 @@ class BookingControllerTest {
                 .header(userIdHeaderName, nonExistentBookingId))
             .andExpect(status().isNotFound())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.message", is(errorMsg)))
+            .andExpect(jsonPath("$.error", is(errorMsg)))
             .andExpect(jsonPath("$.responseCode", is(404)));
 
         verify(bookingService).getBookingsByOwner(eq(nonExistentBookingId), eq(BookingState.ALL),

@@ -14,6 +14,6 @@ import ru.practicum.shareit.common.dto.item.ItemShortDto;
 public class ItemRequestDto {
     private Long id;
     private String description;
-    private LocalDateTime createdAt;
+    private LocalDateTime created;
     private Set<ItemShortDto> items = new HashSet<>();
 }

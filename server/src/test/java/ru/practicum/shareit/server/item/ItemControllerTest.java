@@ -130,7 +130,7 @@ class ItemControllerTest {
                 nonExistentItemId))
             .andExpect(status().isNotFound())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.message", is(errorMsg)))
+            .andExpect(jsonPath("$.error", is(errorMsg)))
             .andExpect(jsonPath("$.responseCode", is(404)));
 
         verify(itemService).getAllItemsByOwnerWithBookingInfo(nonExistentItemId);
@@ -160,7 +160,7 @@ class ItemControllerTest {
         mockMvc.perform(get("/items/{id}", nonExistentItemId).header(userIdHeaderName, ownerUserId))
             .andExpect(status().isNotFound())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.message", is(errorMsg)))
+            .andExpect(jsonPath("$.error", is(errorMsg)))
             .andExpect(jsonPath("$.responseCode", is(404)));
 
         verify(itemService).getItemByIdWithBookingInfo(nonExistentItemId, ownerUserId);
@@ -177,7 +177,7 @@ class ItemControllerTest {
                 nonExistentItemId))
             .andExpect(status().isNotFound())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.message", is(errorMsg)))
+            .andExpect(jsonPath("$.error", is(errorMsg)))
             .andExpect(jsonPath("$.responseCode", is(404)));
 
         verify(itemService).getItemByIdWithBookingInfo(item1Id, nonExistentItemId);
@@ -210,7 +210,7 @@ class ItemControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(newItemDto))).andExpect(status().isNotFound())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.message", is(errorMsg)))
+            .andExpect(jsonPath("$.error", is(errorMsg)))
             .andExpect(jsonPath("$.responseCode", is(404)));
 
         verify(itemService).saveItem(refEq(newItemDto), eq(nonExistentItemId));
@@ -248,7 +248,7 @@ class ItemControllerTest {
                     .content(objectMapper.writeValueAsString(updateItemDto)))
             .andExpect(status().isNotFound())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.message", is(errorMsg)))
+            .andExpect(jsonPath("$.error", is(errorMsg)))
             .andExpect(jsonPath("$.responseCode", is(404)));
 
         verify(itemService).update(refEq(updateItemDto), eq(ownerUserId), eq(nonExistentItemId));
@@ -267,7 +267,7 @@ class ItemControllerTest {
                     .content(objectMapper.writeValueAsString(updateItemDto)))
             .andExpect(status().isForbidden())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.message", is(errorMsg)))
+            .andExpect(jsonPath("$.error", is(errorMsg)))
             .andExpect(jsonPath("$.responseCode", is(403)));
 
         verify(itemService).update(refEq(updateItemDto), eq(otherUserId), eq(item1Id));
@@ -316,7 +316,7 @@ class ItemControllerTest {
                     query))
             .andExpect(status().isNotFound())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.message", is(errorMsg)))
+            .andExpect(jsonPath("$.error", is(errorMsg)))
             .andExpect(jsonPath("$.responseCode", is(404)));
 
         verify(itemService).searchItems(eq(query), eq(nonExistentItemId));
@@ -344,7 +344,7 @@ class ItemControllerTest {
                 delete("/items/{id}", nonExistentItemId)
                     .header(userIdHeaderName, ownerUserId)).andExpect(status().isNotFound())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.message", is(errorMsg)))
+            .andExpect(jsonPath("$.error", is(errorMsg)))
             .andExpect(jsonPath("$.responseCode", is(404)));
 
         verify(itemService).delete(nonExistentItemId, ownerUserId);
@@ -361,7 +361,7 @@ class ItemControllerTest {
                 .header(userIdHeaderName, otherUserId))
             .andExpect(status().isForbidden())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.message", is(errorMsg)))
+            .andExpect(jsonPath("$.error", is(errorMsg)))
             .andExpect(jsonPath("$.responseCode", is(403)));
 
         verify(itemService).delete(item1Id, otherUserId);
@@ -400,7 +400,7 @@ class ItemControllerTest {
                     .content(objectMapper.writeValueAsString(newCommentDto)))
             .andExpect(status().isNotFound())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.message", is(errorMsg)))
+            .andExpect(jsonPath("$.error", is(errorMsg)))
             .andExpect(jsonPath("$.responseCode", is(404)));
 
         verify(itemService).saveComment(refEq(newCommentDto), eq(nonExistentItemId),
@@ -420,7 +420,7 @@ class ItemControllerTest {
                 .content(objectMapper.writeValueAsString(newCommentDto)))
             .andExpect(status().isNotFound())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.message", is(errorMsg)))
+            .andExpect(jsonPath("$.error", is(errorMsg)))
             .andExpect(jsonPath("$.responseCode", is(404)));
 
         verify(itemService).saveComment(refEq(newCommentDto), eq(item1Id), eq(nonExistentItemId));
