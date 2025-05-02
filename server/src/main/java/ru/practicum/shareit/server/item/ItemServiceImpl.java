@@ -19,10 +19,14 @@ import ru.practicum.shareit.common.dto.item.NewItemDto;
 import ru.practicum.shareit.common.dto.item.UpdateItemDto;
 import ru.practicum.shareit.server.booking.BookingRepository;
 import ru.practicum.shareit.server.exception.AccessDeniedException;
+import ru.practicum.shareit.server.exception.BookingBadRequestException;
 import ru.practicum.shareit.server.exception.ItemNotFoundException;
+import ru.practicum.shareit.server.exception.ItemRequestNotFoundException;
 import ru.practicum.shareit.server.exception.UserNotFoundException;
 import ru.practicum.shareit.server.item.mapper.CommentMapper;
 import ru.practicum.shareit.server.item.mapper.ItemMapper;
+import ru.practicum.shareit.server.request.ItemRequest;
+import ru.practicum.shareit.server.request.ItemRequestRepository;
 import ru.practicum.shareit.server.user.User;
 import ru.practicum.shareit.server.user.UserRepository;
 
@@ -38,27 +42,33 @@ public class ItemServiceImpl implements ItemService {
     private final CommentRepository commentRepository;
     private final ItemMapper itemMapper;
     private final CommentMapper commentMapper;
+    private final ItemRequestRepository itemRequestRepository;
 
     private record LastNextBookingPair(BookingShortDto lastBooking, BookingShortDto nextBooking) {}
 
-    private Map<Long, LastNextBookingPair> getLastAndNextBookingsForItems(List<Long> itemIds, LocalDateTime now) {
+    private Map<Long, LastNextBookingPair> getLastAndNextBookingsForItems(List<Long> itemIds,
+        LocalDateTime now) {
         if (itemIds == null || itemIds.isEmpty()) {
             return Collections.emptyMap();
         }
 
-        List<BookingShortDto> pastAndCurrentBookings = bookingRepository.findPastAndCurrentApprovedBookingsShortForItems(itemIds, now);
-        List<BookingShortDto> nextBookings = bookingRepository.findNextApprovedBookingsShortForItems(itemIds, now);
+        List<BookingShortDto> pastAndCurrentBookings =
+            bookingRepository.findPastAndCurrentApprovedBookingsShortForItems(
+            itemIds, now);
+        List<BookingShortDto> nextBookings =
+            bookingRepository.findNextApprovedBookingsShortForItems(
+            itemIds, now);
 
         Map<Long, BookingShortDto> lastBookingsMap = pastAndCurrentBookings.stream()
             .collect(Collectors.groupingBy(
-                BookingShortDto::getItemId,
-                Collectors.collectingAndThen(Collectors.toList(), list -> list.isEmpty() ? null : list.getFirst())
+                BookingShortDto::getItemId, Collectors.collectingAndThen(Collectors.toList(),
+                    list -> list.isEmpty() ? null : list.getFirst())
             ));
 
         Map<Long, BookingShortDto> nextBookingsMap = nextBookings.stream()
             .collect(Collectors.groupingBy(
-                BookingShortDto::getItemId,
-                Collectors.collectingAndThen(Collectors.toList(), list -> list.isEmpty() ? null : list.getFirst())
+                BookingShortDto::getItemId, Collectors.collectingAndThen(Collectors.toList(),
+                    list -> list.isEmpty() ? null : list.getFirst())
             ));
 
         Map<Long, LastNextBookingPair> result = new HashMap<>();
@@ -114,8 +124,22 @@ public class ItemServiceImpl implements ItemService {
             return new UserNotFoundException(
                 "User with id " + userId + " not found");
         });
+
         Item item = itemMapper.mapToItem(newItemDto);
         item.setOwner(owner);
+
+        if (newItemDto.getRequestId() != null) {
+            log.debug("Linking item to request {}", newItemDto.getRequestId());
+            ItemRequest request = itemRequestRepository.findById(newItemDto.getRequestId())
+                .orElseThrow(() -> {
+                    log.warn("ItemRequest with id {} not found when saving item",
+                        newItemDto.getRequestId());
+                    return new ItemRequestNotFoundException(
+                        "ItemRequest with id " + newItemDto.getRequestId() + " not found");
+                });
+            item.setRequest(request);
+        }
+
         Item savedItem = itemRepository.save(item);
         log.debug("Saved new item: {}", savedItem);
         return itemMapper.mapToDto(savedItem);
@@ -148,8 +172,10 @@ public class ItemServiceImpl implements ItemService {
         if (item.getOwner().getId().equals(userId)) {
             log.debug("User {} is owner of item {}. Fetching booking info.", userId, itemId);
             LocalDateTime now = LocalDateTime.now();
-            Map<Long, LastNextBookingPair> bookingInfoMap = getLastAndNextBookingsForItems(Collections.singletonList(itemId), now);
-            LastNextBookingPair bookingPair = bookingInfoMap.getOrDefault(itemId, new LastNextBookingPair(null, null));
+            Map<Long, LastNextBookingPair> bookingInfoMap = getLastAndNextBookingsForItems(
+                Collections.singletonList(itemId), now);
+            LastNextBookingPair bookingPair = bookingInfoMap.getOrDefault(itemId,
+                new LastNextBookingPair(null, null));
             itemDto.setLastBooking(bookingPair.lastBooking());
             itemDto.setNextBooking(bookingPair.nextBooking());
         } else {
@@ -183,8 +209,8 @@ public class ItemServiceImpl implements ItemService {
             throw new UserNotFoundException(
                 "User with id " + userId + " not found");
         }
-        List<ItemDto> items = itemRepository.findByOwnerId(userId).stream().map(itemMapper::mapToDto)
-            .toList();
+        List<ItemDto> items = itemRepository.findByOwnerId(userId).stream()
+            .map(itemMapper::mapToDto).toList();
         log.debug("Fetched {} items for user with id {}", items.size(), userId);
         return items;
     }
@@ -240,13 +266,22 @@ public class ItemServiceImpl implements ItemService {
             return new ItemNotFoundException(
                 "Item with id " + itemId + " not found");
         });
-        List<BookingShortDto> bookings = bookingRepository.findPastAndCurrentApprovedBookingsShortForItems(
+
+        List<BookingShortDto> bookings =
+            bookingRepository.findPastAndCurrentApprovedBookingsShortForItems(
             List.of(itemId), LocalDateTime.now());
-        if (bookings.stream().noneMatch(b -> b.getBookerId().equals(userId))) {
-            log.warn("User with id {} did not book item with id {}", userId, itemId);
-            throw new IllegalArgumentException(
-                "User with id " + userId + " did not book item with id " + itemId);
+        boolean userBookedItem = bookings.stream().anyMatch(b -> b.getBookerId().equals(userId));
+
+        if (!userBookedItem) {
+            log.warn(
+                "User {} cannot comment on item {} because they haven't completed a booking for "
+                    + "it.",
+                userId, itemId);
+            throw new BookingBadRequestException(
+                "User " + userId + " cannot comment on item " + itemId
+                    + " as they haven't booked it or the booking is not approved/completed.");
         }
+
         Comment comment = commentMapper.mapToComment(newCommentDto);
         comment.setItem(item);
         comment.setAuthor(author);
