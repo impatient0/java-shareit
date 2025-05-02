@@ -81,10 +81,12 @@ class UserServiceImplTest {
 
         List<UserDto> result = userService.getAllUsers();
 
-        assertThat(result, is(notNullValue()));
-        assertThat(result, hasSize(2));
-        assertThat(result.get(0), equalTo(userDto1));
-        assertThat(result.get(1), equalTo(userDto2));
+        assertThat("Result list should not be null", result, is(notNullValue()));
+        assertThat("Result list should contain exactly 2 users", result, hasSize(2));
+        assertThat("First user in the result list should be the expected userDto1", result.get(0),
+            equalTo(userDto1));
+        assertThat("Second user in the result list should be the expected userDto2", result.get(1),
+            equalTo(userDto2));
         verify(userRepository, times(1)).findAll();
         verify(userMapper, times(1)).mapToDto(user1);
         verify(userMapper, times(1)).mapToDto(user2);
@@ -97,8 +99,8 @@ class UserServiceImplTest {
 
         List<UserDto> result = userService.getAllUsers();
 
-        assertThat(result, is(notNullValue()));
-        assertThat(result, is(empty()));
+        assertThat("Result list should not be null", result, is(notNullValue()));
+        assertThat("Result list should be empty", result, is(empty()));
         verify(userRepository, times(1)).findAll();
         verify(userMapper, never()).mapToDto(any(User.class));
     }
@@ -124,8 +126,8 @@ class UserServiceImplTest {
 
         UserDto result = userService.saveUser(newUserDto);
 
-        assertThat(result, is(notNullValue()));
-        assertThat(result, equalTo(savedUserDto));
+        assertThat("Saved user DTO should not be null", result, is(notNullValue()));
+        assertThat("Saved user DTO should match the expected DTO", result, equalTo(savedUserDto));
         verify(userMapper, times(1)).mapToUser(newUserDto);
         verify(userRepository, times(1)).existsByEmail(newUserDto.getEmail());
         verify(userRepository, times(1)).save(
@@ -143,10 +145,13 @@ class UserServiceImplTest {
         when(userMapper.mapToUser(newUserDto)).thenReturn(userToSave);
         when(userRepository.existsByEmail(newUserDto.getEmail())).thenReturn(true);
         EmailAlreadyExistsException exception = assertThrows(EmailAlreadyExistsException.class,
-            () -> userService.saveUser(newUserDto));
+            () -> userService.saveUser(newUserDto),
+            "Should throw EmailAlreadyExistsException when email already exists");
 
-        assertThat(exception.getMessage(), containsString("already exists"));
-        assertThat(exception.getMessage(), containsString(newUserDto.getEmail()));
+        assertThat("Exception message should contain 'already exists'", exception.getMessage(),
+            containsString("already exists"));
+        assertThat("Exception message should contain the conflicting email", exception.getMessage(),
+            containsString(newUserDto.getEmail()));
 
         verify(userMapper, times(1)).mapToUser(newUserDto);
         verify(userRepository, times(1)).existsByEmail(newUserDto.getEmail());
@@ -163,8 +168,8 @@ class UserServiceImplTest {
 
         UserDto result = userService.getById(userId);
 
-        assertThat(result, is(notNullValue()));
-        assertThat(result, equalTo(userDto1));
+        assertThat("Found user DTO should not be null", result, is(notNullValue()));
+        assertThat("Found user DTO should match the expected userDto1", result, equalTo(userDto1));
         verify(userRepository, times(1)).findById(userId);
         verify(userMapper, times(1)).mapToDto(user1);
     }
@@ -175,10 +180,13 @@ class UserServiceImplTest {
         Long userId = 99L;
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
         UserNotFoundException exception = assertThrows(UserNotFoundException.class,
-            () -> userService.getById(userId));
+            () -> userService.getById(userId),
+            "Should throw UserNotFoundException when user is not found");
 
-        assertThat(exception.getMessage(), containsString("not found"));
-        assertThat(exception.getMessage(), containsString(String.valueOf(userId)));
+        assertThat("Exception message should contain 'not found'", exception.getMessage(),
+            containsString("not found"));
+        assertThat("Exception message should contain the user ID", exception.getMessage(),
+            containsString(String.valueOf(userId)));
 
         verify(userRepository, times(1)).findById(userId);
         verify(userMapper, never()).mapToDto(any(User.class));
@@ -205,8 +213,9 @@ class UserServiceImplTest {
 
         UserDto result = userService.update(updateUserDto, userId);
 
-        assertThat(result, is(notNullValue()));
-        assertThat(result, equalTo(updatedUserResultDto));
+        assertThat("Updated user DTO should not be null", result, is(notNullValue()));
+        assertThat("Updated user DTO should match the expected DTO", result,
+            equalTo(updatedUserResultDto));
         verify(userRepository, times(1)).findById(userId);
         verify(userRepository, times(1)).existsByEmail(updateUserDto.getEmail());
         verify(userMapper, times(1)).updateUserFields(updateUserDto, existingUser);
@@ -235,7 +244,8 @@ class UserServiceImplTest {
 
         UserDto result = userService.update(nameOnlyUpdateDto, userId);
 
-        assertThat(result, equalTo(resultDto));
+        assertThat("Updated user DTO should match the expected DTO with only name changed", result,
+            equalTo(resultDto));
         verify(userRepository, times(1)).findById(userId);
         verify(userRepository, never()).existsByEmail(anyString());
         verify(userMapper, times(1)).updateUserFields(nameOnlyUpdateDto, existingUser);
@@ -265,7 +275,8 @@ class UserServiceImplTest {
 
         UserDto result = userService.update(sameEmailUpdateDto, userId);
 
-        assertThat(result, equalTo(resultDto));
+        assertThat("Updated user DTO should match the expected DTO when email is unchanged", result,
+            equalTo(resultDto));
         verify(userRepository, times(1)).findById(userId);
         verify(userRepository, never()).existsByEmail(anyString());
         verify(userMapper, times(1)).updateUserFields(sameEmailUpdateDto, existingUser);
@@ -283,10 +294,13 @@ class UserServiceImplTest {
         when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
         when(userRepository.existsByEmail(conflictingEmailDto.getEmail())).thenReturn(true);
         EmailAlreadyExistsException exception = assertThrows(EmailAlreadyExistsException.class,
-            () -> userService.update(conflictingEmailDto, userId));
+            () -> userService.update(conflictingEmailDto, userId),
+            "Should throw EmailAlreadyExistsException when new email already exists");
 
-        assertThat(exception.getMessage(), containsString("already exists"));
-        assertThat(exception.getMessage(), containsString(conflictingEmailDto.getEmail()));
+        assertThat("Exception message should contain 'already exists'", exception.getMessage(),
+            containsString("already exists"));
+        assertThat("Exception message should contain the conflicting email", exception.getMessage(),
+            containsString(conflictingEmailDto.getEmail()));
 
         verify(userRepository, times(1)).findById(userId);
         verify(userRepository, times(1)).existsByEmail(conflictingEmailDto.getEmail());
@@ -301,10 +315,13 @@ class UserServiceImplTest {
         Long userId = 99L;
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
         UserNotFoundException exception = assertThrows(UserNotFoundException.class,
-            () -> userService.update(updateUserDto, userId));
+            () -> userService.update(updateUserDto, userId),
+            "Should throw UserNotFoundException when user is not found");
 
-        assertThat(exception.getMessage(), containsString("not found"));
-        assertThat(exception.getMessage(), containsString(String.valueOf(userId)));
+        assertThat("Exception message should contain 'not found'", exception.getMessage(),
+            containsString("not found"));
+        assertThat("Exception message should contain the user ID", exception.getMessage(),
+            containsString(String.valueOf(userId)));
 
         verify(userRepository, times(1)).findById(userId);
         verify(userRepository, never()).existsByEmail(anyString());
@@ -318,7 +335,8 @@ class UserServiceImplTest {
     void delete_whenCalled_shouldCallRepositoryDeleteById() {
         Long userId = user1.getId();
 
-        assertDoesNotThrow(() -> userService.delete(userId));
+        assertDoesNotThrow(() -> userService.delete(userId),
+            "Should not throw an exception when deleting a user");
 
         verify(userRepository, times(1)).deleteById(userId);
     }

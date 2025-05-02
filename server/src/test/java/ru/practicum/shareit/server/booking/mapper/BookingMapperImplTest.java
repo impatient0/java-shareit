@@ -164,7 +164,9 @@ class BookingMapperImplTest {
             Booking booking = bookingMapper.mapToBooking(newBookingDto);
 
             assertThat("Mapped Booking entity should not be null", booking, is(notNullValue()));
-            assertThat("Mapped Booking entity should have dates from DTO, default status, and null other properties", booking,
+            assertThat(
+                "Mapped Booking entity should have dates from DTO, default status, and null other"
+                    + " properties", booking,
                 allOf(
                     hasProperty("startDate", equalTo(testStart)),
                     hasProperty("endDate", equalTo(testEnd)),
@@ -185,7 +187,9 @@ class BookingMapperImplTest {
             Booking booking = bookingMapper.mapToBooking(newBookingDto);
 
             assertThat("Mapped Booking entity should not be null", booking, is(notNullValue()));
-            assertThat("Mapped Booking entity should have null dates, default status, and null other properties", booking,
+            assertThat(
+                "Mapped Booking entity should have null dates, default status, and null other "
+                    + "properties", booking,
                 allOf(
                     hasProperty("startDate", is(nullValue())),
                     hasProperty("endDate", is(nullValue())),

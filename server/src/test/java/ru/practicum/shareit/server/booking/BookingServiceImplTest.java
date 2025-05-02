@@ -174,8 +174,9 @@ class BookingServiceImplTest {
 
             List<BookingDto> result = bookingService.getAllBookings();
 
-            assertThat(result, hasSize(2));
-            assertThat(result, containsInAnyOrder(bookingDtoWaiting, bookingDtoApproved));
+            assertThat("Should return a list containing all bookings", result, hasSize(2));
+            assertThat("The list should contain the expected booking DTOs", result,
+                containsInAnyOrder(bookingDtoWaiting, bookingDtoApproved));
             verify(bookingRepository).findAll();
             verify(bookingMapper, times(2)).mapToDto(any(Booking.class));
         }
@@ -187,7 +188,8 @@ class BookingServiceImplTest {
 
             List<BookingDto> result = bookingService.getAllBookings();
 
-            assertThat(result, is(empty()));
+            assertThat("Should return an empty list when no bookings are found", result,
+                is(empty()));
             verify(bookingRepository).findAll();
             verify(bookingMapper, never()).mapToDto(any());
         }
@@ -222,15 +224,19 @@ class BookingServiceImplTest {
 
             BookingDto result = bookingService.saveBooking(newBookingDtoValid, bookerId);
 
-            assertThat(result, equalTo(bookingDtoWaiting));
+            assertThat("The returned BookingDto should match the expected DTO", result,
+                equalTo(bookingDtoWaiting));
             verify(userRepository).findById(bookerId);
             verify(itemRepository).findById(itemAvailableId);
             verify(bookingMapper).mapToBooking(newBookingDtoValid);
             verify(bookingRepository).save(bookingArgumentCaptor.capture());
             Booking capturedBooking = bookingArgumentCaptor.getValue();
-            assertThat(capturedBooking.getBooker(), equalTo(booker));
-            assertThat(capturedBooking.getItem(), equalTo(itemAvailable));
-            assertThat(capturedBooking.getStatus(), equalTo(BookingStatus.WAITING));
+            assertThat("Saved booking should have the correct booker", capturedBooking.getBooker(),
+                equalTo(booker));
+            assertThat("Saved booking should have the correct item", capturedBooking.getItem(),
+                equalTo(itemAvailable));
+            assertThat("Saved booking should have WAITING status", capturedBooking.getStatus(),
+                equalTo(BookingStatus.WAITING));
             verify(bookingMapper).mapToDto(savedBooking);
         }
 
@@ -240,7 +246,8 @@ class BookingServiceImplTest {
             when(userRepository.findById(bookerId)).thenReturn(Optional.empty());
 
             assertThrows(UserNotFoundException.class,
-                () -> bookingService.saveBooking(newBookingDtoValid, bookerId));
+                () -> bookingService.saveBooking(newBookingDtoValid, bookerId),
+                "Should throw UserNotFoundException when booker ID does not exist");
 
             verify(userRepository).findById(bookerId);
             verifyNoInteractions(itemRepository, bookingMapper, bookingRepository);
@@ -254,7 +261,8 @@ class BookingServiceImplTest {
                 Optional.empty());
 
             assertThrows(ItemNotFoundException.class,
-                () -> bookingService.saveBooking(newBookingDtoValid, bookerId));
+                () -> bookingService.saveBooking(newBookingDtoValid, bookerId),
+                "Should throw ItemNotFoundException when item ID does not exist");
 
             verify(userRepository).findById(bookerId);
             verify(itemRepository).findById(itemAvailableId);
@@ -271,7 +279,8 @@ class BookingServiceImplTest {
                 Optional.of(itemOwnedByBooker));
 
             assertThrows(BookingBadRequestException.class,
-                () -> bookingService.saveBooking(ownerBookingDto, bookerId));
+                () -> bookingService.saveBooking(ownerBookingDto, bookerId),
+                "Should throw BookingBadRequestException when booker is the item owner");
 
             verify(userRepository).findById(bookerId);
             verify(itemRepository).findById(itemOwnedByBookerId);
@@ -289,7 +298,8 @@ class BookingServiceImplTest {
                 Optional.of(itemNotAvailable));
 
             assertThrows(BookingBadRequestException.class,
-                () -> bookingService.saveBooking(bookingUnavailableDto, bookerId));
+                () -> bookingService.saveBooking(bookingUnavailableDto, bookerId),
+                "Should throw BookingBadRequestException when item is not available");
 
             verify(userRepository).findById(bookerId);
             verify(itemRepository).findById(itemNotAvailableId);
@@ -303,7 +313,8 @@ class BookingServiceImplTest {
             when(itemRepository.findById(itemAvailableId)).thenReturn(Optional.of(itemAvailable));
 
             assertThrows(BookingBadRequestException.class,
-                () -> bookingService.saveBooking(newBookingDtoStartInPast, bookerId));
+                () -> bookingService.saveBooking(newBookingDtoStartInPast, bookerId),
+                "Should throw BookingBadRequestException when booking start time is in the past");
 
             verify(userRepository).findById(bookerId);
             verify(itemRepository).findById(itemAvailableId);
@@ -319,7 +330,9 @@ class BookingServiceImplTest {
             when(itemRepository.findById(itemAvailableId)).thenReturn(Optional.of(itemAvailable));
 
             assertThrows(BookingBadRequestException.class,
-                () -> bookingService.saveBooking(newBookingDtoEndBeforeStart, bookerId));
+                () -> bookingService.saveBooking(newBookingDtoEndBeforeStart, bookerId),
+                "Should throw BookingBadRequestException when booking end time is not after start"
+                    + " time");
 
             verify(userRepository).findById(bookerId);
             verify(itemRepository).findById(itemAvailableId);
@@ -341,7 +354,8 @@ class BookingServiceImplTest {
 
             BookingDto result = bookingService.getById(bookerId, bookingWaitingId);
 
-            assertThat(result, equalTo(bookingDtoWaiting));
+            assertThat("Should return the booking DTO when requested by the booker", result,
+                equalTo(bookingDtoWaiting));
             verify(userRepository).findById(bookerId);
             verify(bookingRepository).findById(bookingWaitingId);
             verify(bookingMapper).mapToDto(bookingWaiting);
@@ -357,7 +371,8 @@ class BookingServiceImplTest {
 
             BookingDto result = bookingService.getById(ownerId, bookingWaitingId);
 
-            assertThat(result, equalTo(bookingDtoWaiting));
+            assertThat("Should return the booking DTO when requested by the owner", result,
+                equalTo(bookingDtoWaiting));
             verify(userRepository).findById(ownerId);
             verify(bookingRepository).findById(bookingWaitingId);
             verify(bookingMapper).mapToDto(bookingWaiting);
@@ -369,7 +384,8 @@ class BookingServiceImplTest {
             when(userRepository.findById(bookerId)).thenReturn(Optional.empty());
 
             assertThrows(UserNotFoundException.class,
-                () -> bookingService.getById(bookerId, bookingWaitingId));
+                () -> bookingService.getById(bookerId, bookingWaitingId),
+                "Should throw UserNotFoundException when requesting user is not found");
 
             verify(userRepository).findById(bookerId);
             verifyNoInteractions(bookingRepository, bookingMapper);
@@ -382,7 +398,8 @@ class BookingServiceImplTest {
             when(bookingRepository.findById(bookingWaitingId)).thenReturn(Optional.empty());
 
             assertThrows(BookingNotFoundException.class,
-                () -> bookingService.getById(bookerId, bookingWaitingId));
+                () -> bookingService.getById(bookerId, bookingWaitingId),
+                "Should throw BookingNotFoundException when booking is not found");
 
             verify(userRepository).findById(bookerId);
             verify(bookingRepository).findById(bookingWaitingId);
@@ -400,7 +417,8 @@ class BookingServiceImplTest {
                 Optional.of(bookingWaiting));
 
             assertThrows(AccessDeniedException.class,
-                () -> bookingService.getById(unrelatedUser.getId(), bookingWaitingId));
+                () -> bookingService.getById(unrelatedUser.getId(), bookingWaitingId),
+                "Should throw AccessDeniedException when user is not the booker or owner");
 
             verify(userRepository).findById(unrelatedUser.getId());
             verify(bookingRepository).findById(bookingWaitingId);
@@ -421,11 +439,13 @@ class BookingServiceImplTest {
 
             BookingDto result = bookingService.approveBooking(bookingWaitingId, ownerId, true);
 
-            assertThat(result.getStatus(), equalTo(BookingStatus.APPROVED.toString()));
+            assertThat("Booking status should be APPROVED after owner approves", result.getStatus(),
+                equalTo(BookingStatus.APPROVED.toString()));
             verify(bookingRepository).findById(bookingWaitingId);
             verify(bookingRepository).save(bookingArgumentCaptor.capture());
             Booking savedBooking = bookingArgumentCaptor.getValue();
-            assertThat(savedBooking.getStatus(), equalTo(BookingStatus.APPROVED));
+            assertThat("Saved booking status in repository should be APPROVED",
+                savedBooking.getStatus(), equalTo(BookingStatus.APPROVED));
             verify(bookingMapper).mapToDto(savedBooking);
         }
 
@@ -440,11 +460,13 @@ class BookingServiceImplTest {
 
             BookingDto result = bookingService.approveBooking(bookingWaitingId, ownerId, false);
 
-            assertThat(result.getStatus(), equalTo(BookingStatus.REJECTED.toString()));
+            assertThat("Booking status should be REJECTED after owner rejects", result.getStatus(),
+                equalTo(BookingStatus.REJECTED.toString()));
             verify(bookingRepository).findById(bookingWaitingId);
             verify(bookingRepository).save(bookingArgumentCaptor.capture());
             Booking savedBooking = bookingArgumentCaptor.getValue();
-            assertThat(savedBooking.getStatus(), equalTo(BookingStatus.REJECTED));
+            assertThat("Saved booking status in repository should be REJECTED",
+                savedBooking.getStatus(), equalTo(BookingStatus.REJECTED));
             verify(bookingMapper).mapToDto(savedBooking);
         }
 
@@ -454,7 +476,8 @@ class BookingServiceImplTest {
             when(bookingRepository.findById(bookingWaitingId)).thenReturn(Optional.empty());
 
             assertThrows(BookingNotFoundException.class,
-                () -> bookingService.approveBooking(bookingWaitingId, ownerId, true));
+                () -> bookingService.approveBooking(bookingWaitingId, ownerId, true),
+                "Should throw BookingNotFoundException when booking is not found");
 
             verify(bookingRepository).findById(bookingWaitingId);
             verifyNoInteractions(bookingMapper);
@@ -468,7 +491,8 @@ class BookingServiceImplTest {
                 Optional.of(bookingWaiting));
 
             assertThrows(AccessDeniedException.class,
-                () -> bookingService.approveBooking(bookingWaitingId, bookerId, true));
+                () -> bookingService.approveBooking(bookingWaitingId, bookerId, true),
+                "Should throw AccessDeniedException when user is not the owner of the item");
 
             verify(bookingRepository).findById(bookingWaitingId);
             verifyNoInteractions(bookingMapper);
@@ -487,7 +511,8 @@ class BookingServiceImplTest {
             when(bookingRepository.findById(bookingWaitingId)).thenReturn(
                 Optional.of(bookingWaiting));
 
-            assertDoesNotThrow(() -> bookingService.delete(bookingWaitingId, bookerId));
+            assertDoesNotThrow(() -> bookingService.delete(bookingWaitingId, bookerId),
+                "Should not throw an exception when booker deletes their booking");
 
             verify(userRepository).findById(bookerId);
             verify(bookingRepository).findById(bookingWaitingId);
@@ -500,7 +525,8 @@ class BookingServiceImplTest {
             when(userRepository.findById(bookerId)).thenReturn(Optional.empty());
 
             assertThrows(UserNotFoundException.class,
-                () -> bookingService.delete(bookingWaitingId, bookerId));
+                () -> bookingService.delete(bookingWaitingId, bookerId),
+                "Should throw UserNotFoundException when user is not found");
 
             verify(userRepository).findById(bookerId);
             verifyNoInteractions(bookingRepository);
@@ -513,7 +539,8 @@ class BookingServiceImplTest {
             when(bookingRepository.findById(bookingWaitingId)).thenReturn(Optional.empty());
 
             assertThrows(BookingNotFoundException.class,
-                () -> bookingService.delete(bookingWaitingId, bookerId));
+                () -> bookingService.delete(bookingWaitingId, bookerId),
+                "Should throw BookingNotFoundException when booking is not found");
 
             verify(userRepository).findById(bookerId);
             verify(bookingRepository).findById(bookingWaitingId);
@@ -528,7 +555,8 @@ class BookingServiceImplTest {
                 Optional.of(bookingWaiting));
 
             assertThrows(AccessDeniedException.class,
-                () -> bookingService.delete(bookingWaitingId, ownerId));
+                () -> bookingService.delete(bookingWaitingId, ownerId),
+                "Should throw AccessDeniedException when user is not the booker");
 
             verify(userRepository).findById(ownerId);
             verify(bookingRepository).findById(bookingWaitingId);
@@ -558,16 +586,20 @@ class BookingServiceImplTest {
             List<BookingDto> result = bookingService.getBookingsByBooker(bookerId,
                 BookingState.WAITING, from, size);
 
-            assertThat(result, hasSize(1));
-            assertThat(result.getFirst(), equalTo(bookingDtoWaiting));
+            assertThat("Should return a list with one booking DTO", result, hasSize(1));
+            assertThat("The returned booking DTO should be the expected one", result.getFirst(),
+                equalTo(bookingDtoWaiting));
             verify(userRepository).findById(bookerId);
             verify(bookingRepository).findBookingsByBookerAndState(eq(bookerId),
                 eq(BookingState.WAITING.name()), timeArgumentCaptor.capture(),
                 pageableArgumentCaptor.capture());
             Pageable capturedPageable = pageableArgumentCaptor.getValue();
-            assertThat(capturedPageable.getPageNumber(), equalTo(from / size));
-            assertThat(capturedPageable.getPageSize(), equalTo(size));
-            assertThat(capturedPageable.getSort(), equalTo(defaultSort));
+            assertThat("Captured page number should be correct", capturedPageable.getPageNumber(),
+                equalTo(from / size));
+            assertThat("Captured page size should be correct", capturedPageable.getPageSize(),
+                equalTo(size));
+            assertThat("Captured sort should be correct", capturedPageable.getSort(),
+                equalTo(defaultSort));
             verify(bookingMapper).mapToDto(bookingWaiting);
         }
 
@@ -585,16 +617,20 @@ class BookingServiceImplTest {
             List<BookingDto> result = bookingService.getBookingsByOwner(ownerId,
                 BookingState.WAITING, from, size);
 
-            assertThat(result, hasSize(1));
-            assertThat(result.getFirst(), equalTo(bookingDtoWaiting));
+            assertThat("Should return a list with one booking DTO", result, hasSize(1));
+            assertThat("The returned booking DTO should be the expected one", result.getFirst(),
+                equalTo(bookingDtoWaiting));
             verify(userRepository).findById(ownerId);
             verify(bookingRepository).findBookingsByItemOwnerAndState(eq(ownerId),
                 eq(BookingState.WAITING.name()), timeArgumentCaptor.capture(),
                 pageableArgumentCaptor.capture());
             Pageable capturedPageable = pageableArgumentCaptor.getValue();
-            assertThat(capturedPageable.getPageNumber(), equalTo(from / size));
-            assertThat(capturedPageable.getPageSize(), equalTo(size));
-            assertThat(capturedPageable.getSort(), equalTo(defaultSort));
+            assertThat("Captured page number should be correct", capturedPageable.getPageNumber(),
+                equalTo(from / size));
+            assertThat("Captured page size should be correct", capturedPageable.getPageSize(),
+                equalTo(size));
+            assertThat("Captured sort should be correct", capturedPageable.getSort(),
+                equalTo(defaultSort));
             verify(bookingMapper).mapToDto(bookingWaiting);
         }
 
@@ -626,7 +662,8 @@ class BookingServiceImplTest {
         void getBookingsByBooker_whenUserNotFound_shouldThrowUserNotFoundException() {
             when(userRepository.findById(bookerId)).thenReturn(Optional.empty());
             assertThrows(UserNotFoundException.class,
-                () -> bookingService.getBookingsByBooker(bookerId, BookingState.ALL, from, size));
+                () -> bookingService.getBookingsByBooker(bookerId, BookingState.ALL, from, size),
+                "Should throw UserNotFoundException when booker is not found");
             verifyNoInteractions(bookingRepository, bookingMapper);
         }
 
@@ -635,7 +672,8 @@ class BookingServiceImplTest {
         void getBookingsByOwner_whenUserNotFound_shouldThrowUserNotFoundException() {
             when(userRepository.findById(ownerId)).thenReturn(Optional.empty());
             assertThrows(UserNotFoundException.class,
-                () -> bookingService.getBookingsByOwner(ownerId, BookingState.ALL, from, size));
+                () -> bookingService.getBookingsByOwner(ownerId, BookingState.ALL, from, size),
+                "Should throw UserNotFoundException when owner is not found");
             verifyNoInteractions(bookingRepository, bookingMapper);
         }
 
@@ -651,7 +689,8 @@ class BookingServiceImplTest {
             List<BookingDto> result = bookingService.getBookingsByBooker(bookerId, BookingState.ALL,
                 from, size);
 
-            assertThat(result, is(empty()));
+            assertThat("Should return an empty list when no bookings match the criteria", result,
+                is(empty()));
             verify(bookingMapper, never()).mapToDto(any());
         }
     }
