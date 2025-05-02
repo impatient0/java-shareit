@@ -1,6 +1,5 @@
-# Spring Boot Server Configuration
 server:
-  port: 8080 # Port the gateway will listen on
+  port: 8080
 
 spring:
   application:
@@ -15,6 +14,15 @@ spring:
 
 shareit-server:
   url: http://server:9090
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
 
 logging:
   level:

@@ -1,4 +1,4 @@
-package ru.practicum.shareit.server.request.mapper; // New package for request mappers
+package ru.practicum.shareit.server.request.mapper;
 
 import ru.practicum.shareit.common.dto.request.ItemRequestDto;
 import ru.practicum.shareit.common.dto.request.NewItemRequestDto;

@@ -4,7 +4,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.common.dto.item.ItemDto;
-import ru.practicum.shareit.common.dto.item.ItemShortDto; // <-- Import new DTO
+import ru.practicum.shareit.common.dto.item.ItemShortDto;
 import ru.practicum.shareit.common.dto.item.ItemWithBookingInfoDto;
 import ru.practicum.shareit.common.dto.item.NewItemDto;
 import ru.practicum.shareit.common.dto.item.UpdateItemDto;

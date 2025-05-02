@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.common.dto.request.ItemRequestDto;
 import ru.practicum.shareit.common.dto.request.NewItemRequestDto;
-import ru.practicum.shareit.server.item.mapper.ItemMapper; // Dependency
+import ru.practicum.shareit.server.item.mapper.ItemMapper;
 import ru.practicum.shareit.server.request.ItemRequest;
 
 @Component
