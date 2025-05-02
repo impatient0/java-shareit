@@ -158,10 +158,12 @@ class BookingRepositoryTest {
         Page<Booking> result = bookingRepository.findBookingsByBookerAndState(booker1.getId(),
             "ALL", now, pageable);
 
-        assertThat(result.getContent(), hasSize(4));
-        assertThat(result.getContent(),
+        assertThat("Result content size should be 4 for ALL state for booker1", result.getContent(),
+            hasSize(4));
+        assertThat("Result content should contain all bookings for booker1", result.getContent(),
             containsInAnyOrder(booking1Past, booking2Current, booking3Future, booking4Rejected));
-        assertThat(result.getTotalElements(), equalTo(4L));
+        assertThat("Total elements should be 4 for ALL state for booker1",
+            result.getTotalElements(), equalTo(4L));
     }
 
     @Test
@@ -171,8 +173,10 @@ class BookingRepositoryTest {
         Page<Booking> result = bookingRepository.findBookingsByBookerAndState(booker1.getId(),
             "CURRENT", now, pageable);
 
-        assertThat(result.getContent(), hasSize(1));
-        assertThat(result.getContent().getFirst(), equalTo(booking2Current));
+        assertThat("Result content size should be 1 for CURRENT state for booker1",
+            result.getContent(), hasSize(1));
+        assertThat("Result content should contain the current booking (booking2Current)",
+            result.getContent().getFirst(), equalTo(booking2Current));
     }
 
     @Test
@@ -182,8 +186,10 @@ class BookingRepositoryTest {
         Page<Booking> result = bookingRepository.findBookingsByBookerAndState(booker1.getId(),
             "PAST", now, pageable);
 
-        assertThat(result.getContent(), hasSize(1));
-        assertThat(result.getContent().getFirst(), equalTo(booking1Past));
+        assertThat("Result content size should be 1 for PAST state for booker1",
+            result.getContent(), hasSize(1));
+        assertThat("Result content should contain the past booking (booking1Past)",
+            result.getContent().getFirst(), equalTo(booking1Past));
     }
 
     @Test
@@ -193,8 +199,11 @@ class BookingRepositoryTest {
         Page<Booking> result = bookingRepository.findBookingsByBookerAndState(booker1.getId(),
             "FUTURE", now, pageable);
 
-        assertThat(result.getContent(), hasSize(2));
-        assertThat(result.getContent(), containsInAnyOrder(booking3Future, booking4Rejected));
+        assertThat("Result content size should be 2 for FUTURE state for booker1",
+            result.getContent(), hasSize(2));
+        assertThat(
+            "Result content should contain the future bookings (booking3Future, booking4Rejected)",
+            result.getContent(), containsInAnyOrder(booking3Future, booking4Rejected));
     }
 
     @Test
@@ -204,8 +213,10 @@ class BookingRepositoryTest {
         Page<Booking> result = bookingRepository.findBookingsByBookerAndState(booker1.getId(),
             "WAITING", now, pageable);
 
-        assertThat(result.getContent(), hasSize(1));
-        assertThat(result.getContent().getFirst(), equalTo(booking3Future));
+        assertThat("Result content size should be 1 for WAITING state for booker1",
+            result.getContent(), hasSize(1));
+        assertThat("Result content should contain the waiting booking (booking3Future)",
+            result.getContent().getFirst(), equalTo(booking3Future));
     }
 
     @Test
@@ -215,8 +226,10 @@ class BookingRepositoryTest {
         Page<Booking> result = bookingRepository.findBookingsByBookerAndState(booker1.getId(),
             "REJECTED", now, pageable);
 
-        assertThat(result.getContent(), hasSize(1));
-        assertThat(result.getContent().getFirst(), equalTo(booking4Rejected));
+        assertThat("Result content size should be 1 for REJECTED state for booker1",
+            result.getContent(), hasSize(1));
+        assertThat("Result content should contain the rejected booking (booking4Rejected)",
+            result.getContent().getFirst(), equalTo(booking4Rejected));
     }
 
     @Test
@@ -226,11 +239,18 @@ class BookingRepositoryTest {
         Page<Booking> result = bookingRepository.findBookingsByBookerAndState(booker1.getId(),
             "ALL", now, pageable);
 
-        assertThat(result.getContent(), hasSize(2));
-        assertThat(result.getContent().get(0).getStatus(), equalTo(BookingStatus.REJECTED));
-        assertThat(result.getContent().get(1).getStatus(), equalTo(BookingStatus.WAITING));
-        assertThat(result.getTotalPages(), equalTo(2));
-        assertThat(result.getTotalElements(), equalTo(4L));
+        assertThat("Result content size should be 2 for paginated result (page 0, size 2)",
+            result.getContent(), hasSize(2));
+        assertThat(
+            "First element in paginated result should be booking4Rejected based on descending sort",
+            result.getContent().get(0).getStatus(), equalTo(BookingStatus.REJECTED));
+        assertThat(
+            "Second element in paginated result should be booking3Future based on descending sort",
+            result.getContent().get(1).getStatus(), equalTo(BookingStatus.WAITING));
+        assertThat("Total pages should be 2 for 4 elements with page size 2",
+            result.getTotalPages(), equalTo(2));
+        assertThat("Total elements should be 4 for ALL state for booker1",
+            result.getTotalElements(), equalTo(4L));
     }
 
     @Test
@@ -241,11 +261,14 @@ class BookingRepositoryTest {
         Page<Booking> result = bookingRepository.findBookingsByItemOwnerAndState(owner.getId(),
             "ALL", now, pageable);
 
-        assertThat(result.getContent(), hasSize(5));
-        assertThat(result.getContent(),
+        assertThat("Result content size should be 5 for ALL state for owner", result.getContent(),
+            hasSize(5));
+        assertThat("Result content should contain all bookings for owner's items",
+            result.getContent(),
             containsInAnyOrder(booking1Past, booking2Current, booking3Future, booking4Rejected,
                 booking5OtherUser));
-        assertThat(result.getTotalElements(), equalTo(5L));
+        assertThat("Total elements should be 5 for ALL state for owner", result.getTotalElements(),
+            equalTo(5L));
     }
 
     @Test
@@ -256,8 +279,10 @@ class BookingRepositoryTest {
         Page<Booking> result = bookingRepository.findBookingsByItemOwnerAndState(owner.getId(),
             "WAITING", now, pageable);
 
-        assertThat(result.getContent(), hasSize(1));
-        assertThat(result.getContent().getFirst(), equalTo(booking3Future));
+        assertThat("Result content size should be 1 for WAITING state for owner",
+            result.getContent(), hasSize(1));
+        assertThat("Result content should contain the waiting booking (booking3Future) for owner",
+            result.getContent().getFirst(), equalTo(booking3Future));
     }
 
     @Test
@@ -268,8 +293,12 @@ class BookingRepositoryTest {
         Page<Booking> result = bookingRepository.findBookingsByItemOwnerAndState(owner.getId(),
             "FUTURE", now, pageable);
 
-        assertThat(result.getContent(), hasSize(3));
-        assertThat(result.getContent(),
+        assertThat("Result content size should be 3 for FUTURE state for owner",
+            result.getContent(), hasSize(3));
+        assertThat(
+            "Result content should contain the future bookings (booking3Future, booking4Rejected,"
+                + " booking5OtherUser) for owner",
+            result.getContent(),
             containsInAnyOrder(booking3Future, booking4Rejected, booking5OtherUser));
     }
 
@@ -280,8 +309,12 @@ class BookingRepositoryTest {
         Page<Booking> result = bookingRepository.findBookingsByItemOwnerAndState(booker1.getId(),
             "WAITING", now, pageable);
 
-        assertThat(result.getContent(), hasSize(1));
-        assertThat(result.getContent().getFirst(), equalTo(booking6OwnerItem));
+        assertThat(
+            "Result content size should be 1 for WAITING state for booker1 (as owner of item2)",
+            result.getContent(), hasSize(1));
+        assertThat(
+            "Result content should contain booking6OwnerItem for booker1 (as owner of item2)",
+            result.getContent().getFirst(), equalTo(booking6OwnerItem));
     }
 
     @Test
@@ -290,17 +323,23 @@ class BookingRepositoryTest {
     void findPastCurrentApproved_shouldReturnCorrectDtos() {
         List<BookingShortDto> result =
             bookingRepository.findPastAndCurrentApprovedBookingsShortForItems(
-            List.of(item1.getId()), now);
+                List.of(item1.getId()), now);
 
-        assertThat(result, hasSize(2));
-        assertThat(result.get(0).getId(), equalTo(booking2Current.getId()));
-        assertThat(result.get(1).getId(), equalTo(booking1Past.getId()));
+        assertThat("Should return 2 past/current approved bookings for item1", result, hasSize(2));
+        assertThat("First booking should be booking2Current based on default ordering",
+            result.get(0).getId(), equalTo(booking2Current.getId()));
+        assertThat("Second booking should be booking1Past based on default ordering",
+            result.get(1).getId(), equalTo(booking1Past.getId()));
         BookingShortDto dto = result.stream().filter(d -> d.getId().equals(booking2Current.getId()))
             .findFirst().orElseThrow();
-        assertThat(dto.getBookerId(), equalTo(booker1.getId()));
-        assertThat(dto.getItemId(), equalTo(item1.getId()));
-        assertThat(dto.getStart(), equalTo(booking2Current.getStartDate()));
-        assertThat(dto.getEnd(), equalTo(booking2Current.getEndDate()));
+        assertThat("Booker ID in DTO should match booker1's ID", dto.getBookerId(),
+            equalTo(booker1.getId()));
+        assertThat("Item ID in DTO should match item1's ID", dto.getItemId(),
+            equalTo(item1.getId()));
+        assertThat("Start date in DTO should match booking2Current's start date", dto.getStart(),
+            equalTo(booking2Current.getStartDate()));
+        assertThat("End date in DTO should match booking2Current's end date", dto.getEnd(),
+            equalTo(booking2Current.getEndDate()));
     }
 
     @Test
@@ -309,12 +348,15 @@ class BookingRepositoryTest {
     void findPastCurrentApproved_shouldIgnoreFutureAndNonApproved() {
         List<BookingShortDto> result =
             bookingRepository.findPastAndCurrentApprovedBookingsShortForItems(
-            List.of(item1.getId()), now);
+                List.of(item1.getId()), now);
 
-        assertThat(result, hasSize(2));
-        assertTrue(result.stream().noneMatch(dto -> dto.getId().equals(booking3Future.getId())));
-        assertTrue(result.stream().noneMatch(dto -> dto.getId().equals(booking4Rejected.getId())));
-        assertTrue(result.stream().noneMatch(dto -> dto.getId().equals(booking5OtherUser.getId())));
+        assertThat("Should return only the 2 past/current approved bookings", result, hasSize(2));
+        assertTrue(result.stream().noneMatch(dto -> dto.getId().equals(booking3Future.getId())),
+            "Result should not contain the future booking");
+        assertTrue(result.stream().noneMatch(dto -> dto.getId().equals(booking4Rejected.getId())),
+            "Result should not contain the rejected booking");
+        assertTrue(result.stream().noneMatch(dto -> dto.getId().equals(booking5OtherUser.getId())),
+            "Result should not contain approved booking for another user");
     }
 
     @Test
@@ -322,11 +364,14 @@ class BookingRepositoryTest {
     void findPastCurrentApproved_whenMultipleItems_shouldReturnCorrectDtos() {
         List<BookingShortDto> result =
             bookingRepository.findPastAndCurrentApprovedBookingsShortForItems(
-            List.of(item1.getId(), item2.getId()), now);
+                List.of(item1.getId(), item2.getId()), now);
 
-        assertThat(result, hasSize(2));
-        assertThat(result.get(0).getId(), equalTo(booking2Current.getId()));
-        assertThat(result.get(1).getId(), equalTo(booking1Past.getId()));
+        assertThat("Should return 2 past/current approved bookings across multiple items", result,
+            hasSize(2));
+        assertThat("First booking should be booking2Current (from item1)", result.get(0).getId(),
+            equalTo(booking2Current.getId()));
+        assertThat("Second booking should be booking1Past (from item1)", result.get(1).getId(),
+            equalTo(booking1Past.getId()));
     }
 
     @Test
@@ -335,13 +380,18 @@ class BookingRepositoryTest {
         List<BookingShortDto> result = bookingRepository.findNextApprovedBookingsShortForItems(
             List.of(item1.getId()), now);
 
-        assertThat(result, hasSize(1));
-        assertThat(result.getFirst().getId(), equalTo(booking5OtherUser.getId()));
+        assertThat("Should return 1 next approved booking for item1", result, hasSize(1));
+        assertThat("The next approved booking should be booking5OtherUser",
+            result.getFirst().getId(), equalTo(booking5OtherUser.getId()));
         BookingShortDto dto = result.getFirst();
-        assertThat(dto.getBookerId(), equalTo(booker2.getId()));
-        assertThat(dto.getItemId(), equalTo(item1.getId()));
-        assertThat(dto.getStart(), equalTo(booking5OtherUser.getStartDate()));
-        assertThat(dto.getEnd(), equalTo(booking5OtherUser.getEndDate()));
+        assertThat("Booker ID in DTO should match booker2's ID", dto.getBookerId(),
+            equalTo(booker2.getId()));
+        assertThat("Item ID in DTO should match item1's ID", dto.getItemId(),
+            equalTo(item1.getId()));
+        assertThat("Start date in DTO should match booking5OtherUser's start date", dto.getStart(),
+            equalTo(booking5OtherUser.getStartDate()));
+        assertThat("End date in DTO should match booking5OtherUser's end date", dto.getEnd(),
+            equalTo(booking5OtherUser.getEndDate()));
     }
 
     @Test
@@ -350,11 +400,15 @@ class BookingRepositoryTest {
         List<BookingShortDto> result = bookingRepository.findNextApprovedBookingsShortForItems(
             List.of(item1.getId()), now);
 
-        assertThat(result, hasSize(1));
-        assertTrue(result.stream().noneMatch(dto -> dto.getId().equals(booking1Past.getId())));
-        assertTrue(result.stream().noneMatch(dto -> dto.getId().equals(booking2Current.getId())));
-        assertTrue(result.stream().noneMatch(dto -> dto.getId().equals(booking3Future.getId())));
-        assertTrue(result.stream().noneMatch(dto -> dto.getId().equals(booking4Rejected.getId())));
+        assertThat("Should return only the 1 next approved booking", result, hasSize(1));
+        assertTrue(result.stream().noneMatch(dto -> dto.getId().equals(booking1Past.getId())),
+            "Result should not contain the past booking");
+        assertTrue(result.stream().noneMatch(dto -> dto.getId().equals(booking2Current.getId())),
+            "Result should not contain the current booking");
+        assertTrue(result.stream().noneMatch(dto -> dto.getId().equals(booking3Future.getId())),
+            "Result should not contain the waiting future booking");
+        assertTrue(result.stream().noneMatch(dto -> dto.getId().equals(booking4Rejected.getId())),
+            "Result should not contain the rejected future booking");
     }
 
     @Test
@@ -363,8 +417,10 @@ class BookingRepositoryTest {
         List<BookingShortDto> result = bookingRepository.findNextApprovedBookingsShortForItems(
             List.of(item1.getId(), item2.getId()), now);
 
-        assertThat(result, hasSize(1));
-        assertThat(result.getFirst().getId(), equalTo(booking5OtherUser.getId()));
+        assertThat("Should return 1 next approved booking across multiple items", result,
+            hasSize(1));
+        assertThat("The next approved booking should be booking5OtherUser (from item1)",
+            result.getFirst().getId(), equalTo(booking5OtherUser.getId()));
     }
 
     @Test
@@ -381,8 +437,10 @@ class BookingRepositoryTest {
         List<BookingShortDto> result = bookingRepository.findNextApprovedBookingsShortForItems(
             List.of(item1.getId()), now);
 
-        assertThat(result, hasSize(2));
-        assertThat(result.get(0).getId(), equalTo(booking5OtherUser.getId()));
-        assertThat(result.get(1).getId(), equalTo(anotherFutureApproved.getId()));
+        assertThat("Should return 2 next approved bookings", result, hasSize(2));
+        assertThat("First booking should be booking5OtherUser (start date +5 days)",
+            result.get(0).getId(), equalTo(booking5OtherUser.getId()));
+        assertThat("Second booking should be anotherFutureApproved (start date +10 days)",
+            result.get(1).getId(), equalTo(anotherFutureApproved.getId()));
     }
 }

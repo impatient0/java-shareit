@@ -42,7 +42,8 @@ class ItemRequestRepositoryTest {
     private ItemRequestRepository itemRequestRepository;
 
     @Container
-    private static final PostgreSQLContainer<?> database = new PostgreSQLContainer<>(DockerImageName.parse("postgres:16"));
+    private static final PostgreSQLContainer<?> database = new PostgreSQLContainer<>(
+        DockerImageName.parse("postgres:16"));
 
     @DynamicPropertySource
     static void databaseProperties(DynamicPropertyRegistry registry) {
@@ -145,40 +146,49 @@ class ItemRequestRepositoryTest {
     }
 
     @Test
-    @DisplayName("findByRequestorIdOrderByCreatedDesc should return user's requests ordered by creation desc")
+    @DisplayName("findByRequestorIdOrderByCreatedDesc should return user's requests ordered by "
+        + "creation desc")
     void findByRequestorId_shouldReturnOrderedRequests() {
-        List<ItemRequest> results = itemRequestRepository.findByRequestorIdOrderByCreatedDesc(requestor1.getId());
+        List<ItemRequest> results = itemRequestRepository.findByRequestorIdOrderByCreatedDesc(
+            requestor1.getId());
 
-        assertThat(results, hasSize(3));
-        assertThat(results.get(0), equalTo(request4NoItems));
-        assertThat(results.get(1), equalTo(request2));
-        assertThat(results.get(2), equalTo(request1));
-        assertThat(results.get(0).getItems(), is(empty()));
-        assertThat(results.get(1).getItems(), hasSize(2));
-        assertThat(results.get(2).getItems(), hasSize(1));
+        assertThat("Should return exactly 3 requests for requestor1", results, hasSize(3));
+        assertThat("First request should be the newest (request4NoItems)", results.get(0),
+            equalTo(request4NoItems));
+        assertThat("Second request should be request2", results.get(1), equalTo(request2));
+        assertThat("Third request should be the oldest (request1)", results.get(2),
+            equalTo(request1));
+        assertThat("Request4NoItems should have an empty list of items", results.get(0).getItems(),
+            is(empty()));
+        assertThat("Request2 should have 2 items", results.get(1).getItems(), hasSize(2));
+        assertThat("Request1 should have 1 item", results.get(2).getItems(), hasSize(1));
     }
 
     @Test
-    @DisplayName("findByRequestorIdOrderByCreatedDesc should return empty list for user with no requests")
+    @DisplayName("findByRequestorIdOrderByCreatedDesc should return empty list for user with no "
+        + "requests")
     void findByRequestorId_whenUserHasNoRequests_shouldReturnEmptyList() {
         User requestor3 = new User();
         requestor3.setName("Requestor Three");
         requestor3.setEmail("req3@example.com");
         requestor3 = entityManager.persistAndFlush(requestor3);
 
-        List<ItemRequest> results = itemRequestRepository.findByRequestorIdOrderByCreatedDesc(requestor3.getId());
+        List<ItemRequest> results = itemRequestRepository.findByRequestorIdOrderByCreatedDesc(
+            requestor3.getId());
 
-        assertThat(results, is(empty()));
+        assertThat("Should return an empty list for a user with no requests", results, is(empty()));
     }
 
     @Test
-    @DisplayName("findByRequestorIdOrderByCreatedDesc should return empty list for non-existent user")
+    @DisplayName("findByRequestorIdOrderByCreatedDesc should return empty list for non-existent "
+        + "user")
     void findByRequestorId_whenUserDoesNotExist_shouldReturnEmptyList() {
         Long nonExistentUserId = 999L;
 
-        List<ItemRequest> results = itemRequestRepository.findByRequestorIdOrderByCreatedDesc(nonExistentUserId);
+        List<ItemRequest> results = itemRequestRepository.findByRequestorIdOrderByCreatedDesc(
+            nonExistentUserId);
 
-        assertThat(results, is(empty()));
+        assertThat("Should return an empty list for a non-existent user ID", results, is(empty()));
     }
 
     @Test
@@ -186,12 +196,17 @@ class ItemRequestRepositoryTest {
     void findAllByRequestorIdNot_shouldExcludeUserRequests() {
         Pageable pageable = PageRequest.of(0, 10, Sort.by("created").descending());
 
-        Page<ItemRequest> results = itemRequestRepository.findAllByRequestorIdNot(requestor1.getId(), pageable);
+        Page<ItemRequest> results = itemRequestRepository.findAllByRequestorIdNot(
+            requestor1.getId(), pageable);
 
-        assertThat(results.getContent(), hasSize(1));
-        assertThat(results.getContent().getFirst(), equalTo(request3));
-        assertThat(results.getContent().getFirst().getItems(), is(empty()));
-        assertThat(results.getTotalElements(), equalTo(1L));
+        assertThat("Page content should contain requests not made by requestor1",
+            results.getContent(), hasSize(1));
+        assertThat("The returned request should be request3 (made by requestor2)",
+            results.getContent().getFirst(), equalTo(request3));
+        assertThat("Request3 should have an empty list of items by default in this query",
+            results.getContent().getFirst().getItems(), is(empty()));
+        assertThat("Total elements should be 1 (only request3)", results.getTotalElements(),
+            equalTo(1L));
     }
 
     @Test
@@ -202,10 +217,13 @@ class ItemRequestRepositoryTest {
         entityManager.flush();
         entityManager.clear();
 
-        Page<ItemRequest> results = itemRequestRepository.findAllByRequestorIdNot(requestor1.getId(), pageable);
+        Page<ItemRequest> results = itemRequestRepository.findAllByRequestorIdNot(
+            requestor1.getId(), pageable);
 
-        assertThat(results.getContent(), is(empty()));
-        assertThat(results.getTotalElements(), equalTo(0L));
+        assertThat("Page content should be empty when no requests are made by other users",
+            results.getContent(), is(empty()));
+        assertThat("Total elements should be 0 when no requests are made by other users",
+            results.getTotalElements(), equalTo(0L));
 
     }
 
@@ -221,42 +239,57 @@ class ItemRequestRepositoryTest {
         entityManager.clear();
 
         Pageable pageable = PageRequest.of(0, 1, Sort.by("created").descending());
-        Page<ItemRequest> resultsPage0 = itemRequestRepository.findAllByRequestorIdNot(requestor1.getId(), pageable);
-        assertThat(resultsPage0.getContent(), hasSize(1));
-        assertThat(resultsPage0.getContent().getFirst(), equalTo(request3));
-        assertThat(resultsPage0.getTotalElements(), equalTo(2L));
-        assertThat(resultsPage0.getTotalPages(), equalTo(2));
+        Page<ItemRequest> resultsPage0 = itemRequestRepository.findAllByRequestorIdNot(
+            requestor1.getId(), pageable);
+        assertThat("First page should contain 1 element", resultsPage0.getContent(), hasSize(1));
+        assertThat("First element should be the newest request by another user (request3)",
+            resultsPage0.getContent().getFirst(), equalTo(request3));
+        assertThat("Total elements across all pages should be 2", resultsPage0.getTotalElements(),
+            equalTo(2L));
+        assertThat("Total pages should be 2 for 2 elements with page size 1",
+            resultsPage0.getTotalPages(), equalTo(2));
         pageable = PageRequest.of(1, 1, Sort.by("created").descending());
-        Page<ItemRequest> resultsPage1 = itemRequestRepository.findAllByRequestorIdNot(requestor1.getId(), pageable);
-        assertThat(resultsPage1.getContent(), hasSize(1));
-        assertThat(resultsPage1.getContent().getFirst().getDescription(), equalTo("Old request by req2"));
-        assertThat(resultsPage1.getTotalElements(), equalTo(2L));
-        assertThat(resultsPage1.getTotalPages(), equalTo(2));
+        Page<ItemRequest> resultsPage1 = itemRequestRepository.findAllByRequestorIdNot(
+            requestor1.getId(), pageable);
+        assertThat("Second page should contain 1 element", resultsPage1.getContent(), hasSize(1));
+        assertThat("Second element should be the older request by another user (request0)",
+            resultsPage1.getContent().getFirst().getDescription(), equalTo("Old request by req2"));
+        assertThat("Total elements across all pages should be 2", resultsPage1.getTotalElements(),
+            equalTo(2L));
+        assertThat("Total pages should be 2 for 2 elements with page size 1",
+            resultsPage1.getTotalPages(), equalTo(2));
     }
 
     @Test
     @DisplayName("findByIdFetchingItems should return request with items fetched")
     void findByIdFetchingItems_whenRequestExistsWithItems_shouldReturnOptionalWithFetchedItems() {
-        Optional<ItemRequest> resultOpt = itemRequestRepository.findByIdFetchingItems(request2.getId());
+        Optional<ItemRequest> resultOpt = itemRequestRepository.findByIdFetchingItems(
+            request2.getId());
 
-        assertTrue(resultOpt.isPresent());
+        assertTrue(resultOpt.isPresent(), "Optional should contain a value when request exists");
         ItemRequest result = resultOpt.get();
-        assertThat(result, equalTo(request2));
-        assertDoesNotThrow(() -> result.getItems().size());
-        assertThat(result.getItems(), hasSize(2));
-        assertThat(result.getItems(), containsInAnyOrder(item2, item3));
+        assertThat("Returned request should be request2", result, equalTo(request2));
+        assertDoesNotThrow(() -> result.getItems().size(),
+            "Accessing items should not throw LazyInitializationException");
+        assertThat("Items list should contain the items associated with request2",
+            result.getItems(), hasSize(2));
+        assertThat("Items list should contain item2 and item3 in any order", result.getItems(),
+            containsInAnyOrder(item2, item3));
     }
 
     @Test
     @DisplayName("findByIdFetchingItems should return request with empty items fetched")
     void findByIdFetchingItems_whenRequestExistsWithoutItems_shouldReturnOptionalWithEmptyFetchedItems() {
-        Optional<ItemRequest> resultOpt = itemRequestRepository.findByIdFetchingItems(request4NoItems.getId());
+        Optional<ItemRequest> resultOpt = itemRequestRepository.findByIdFetchingItems(
+            request4NoItems.getId());
 
-        assertTrue(resultOpt.isPresent());
+        assertTrue(resultOpt.isPresent(), "Optional should contain a value when request exists");
         ItemRequest result = resultOpt.get();
-        assertThat(result, equalTo(request4NoItems));
-        assertDoesNotThrow(() -> result.getItems().size());
-        assertThat(result.getItems(), is(empty()));
+        assertThat("Returned request should be request4NoItems", result, equalTo(request4NoItems));
+        assertDoesNotThrow(() -> result.getItems().size(),
+            "Accessing items should not throw LazyInitializationException");
+        assertThat("Items list should be empty for a request with no associated items",
+            result.getItems(), is(empty()));
     }
 
     @Test
@@ -266,7 +299,7 @@ class ItemRequestRepositoryTest {
 
         Optional<ItemRequest> resultOpt = itemRequestRepository.findByIdFetchingItems(nonExistentId);
 
-        assertTrue(resultOpt.isEmpty());
+        assertTrue(resultOpt.isEmpty(), "Optional should be empty when request is not found by ID");
     }
 
     @Test
@@ -279,7 +312,8 @@ class ItemRequestRepositoryTest {
         assertThrows(DataIntegrityViolationException.class, () -> {
             itemRequestRepository.save(badRequest);
             entityManager.flush();
-        });
+        }, "Should throw DataIntegrityViolationException when saving item request with null "
+            + "description");
     }
 
     @Test
@@ -292,7 +326,8 @@ class ItemRequestRepositoryTest {
         assertThrows(DataIntegrityViolationException.class, () -> {
             itemRequestRepository.save(badRequest);
             entityManager.flush();
-        });
+        }, "Should throw DataIntegrityViolationException when saving item request with null "
+            + "requestor");
     }
 
     @Test
@@ -305,6 +340,7 @@ class ItemRequestRepositoryTest {
         assertThrows(DataIntegrityViolationException.class, () -> {
             itemRequestRepository.save(badRequest);
             entityManager.flush();
-        });
+        }, "Should throw DataIntegrityViolationException when saving item request with null "
+            + "created timestamp");
     }
 }

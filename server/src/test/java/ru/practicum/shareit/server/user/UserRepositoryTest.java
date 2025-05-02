@@ -66,7 +66,7 @@ class UserRepositoryTest {
 
         boolean exists = userRepository.existsByEmail(user1.getEmail());
 
-        assertTrue(exists);
+        assertTrue(exists, "existsByEmail should return true for an existing email");
     }
 
     @Test
@@ -80,7 +80,7 @@ class UserRepositoryTest {
 
         boolean exists = userRepository.existsByEmail(nonExistentEmail);
 
-        assertFalse(exists);
+        assertFalse(exists, "existsByEmail should return false for a non-existent email");
     }
 
     @Test
@@ -89,7 +89,7 @@ class UserRepositoryTest {
 
         boolean exists = userRepository.existsByEmail("any@example.com");
 
-        assertFalse(exists);
+        assertFalse(exists, "existsByEmail should return false when the repository is empty");
     }
 
     @Test
@@ -99,11 +99,13 @@ class UserRepositoryTest {
         User savedUser = userRepository.save(user1);
         entityManager.flush();
 
-        assertNotNull(savedUser.getId());
+        assertNotNull(savedUser.getId(), "Saved user should have an ID assigned after saving");
         User foundUser = entityManager.find(User.class, savedUser.getId());
-        assertNotNull(foundUser);
-        assertThat(foundUser.getEmail(), equalTo(user1.getEmail()));
-        assertThat(foundUser.getName(), equalTo(user1.getName()));
+        assertNotNull(foundUser, "User should be found in the database after saving");
+        assertThat("Saved user's email should match the original email", foundUser.getEmail(),
+            equalTo(user1.getEmail()));
+        assertThat("Saved user's name should match the original name", foundUser.getName(),
+            equalTo(user1.getName()));
     }
 
     @Test
@@ -132,7 +134,7 @@ class UserRepositoryTest {
         assertThrows(DataIntegrityViolationException.class, () -> {
             userRepository.save(userWithNullEmail);
             entityManager.flush();
-        }, "Should throw DataIntegrityViolationException for null email");
+        }, "Should throw DataIntegrityViolationException when saving user with null email");
     }
 
     @Test
@@ -145,7 +147,7 @@ class UserRepositoryTest {
         assertThrows(DataIntegrityViolationException.class, () -> {
             userRepository.save(userWithNullName);
             entityManager.flush();
-        }, "Should throw DataIntegrityViolationException for null name");
+        }, "Should throw DataIntegrityViolationException when saving user with null name");
     }
 
     @Test
@@ -155,9 +157,12 @@ class UserRepositoryTest {
 
         Optional<User> foundUserOpt = userRepository.findById(persistedUser.getId());
 
-        assertTrue(foundUserOpt.isPresent());
-        assertThat(foundUserOpt.get().getId(), equalTo(persistedUser.getId()));
-        assertThat(foundUserOpt.get().getEmail(), equalTo(user1.getEmail()));
+        assertTrue(foundUserOpt.isPresent(),
+            "Optional should contain a user when found by existing ID");
+        assertThat("Found user's ID should match the persisted user's ID",
+            foundUserOpt.get().getId(), equalTo(persistedUser.getId()));
+        assertThat("Found user's email should match the persisted user's email",
+            foundUserOpt.get().getEmail(), equalTo(user1.getEmail()));
     }
 
     @Test
@@ -167,6 +172,6 @@ class UserRepositoryTest {
 
         Optional<User> foundUserOpt = userRepository.findById(nonExistentId);
 
-        assertTrue(foundUserOpt.isEmpty());
+        assertTrue(foundUserOpt.isEmpty(), "Optional should be empty when user is not found by ID");
     }
 }

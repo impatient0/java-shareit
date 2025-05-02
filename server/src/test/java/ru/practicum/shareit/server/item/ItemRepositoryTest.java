@@ -40,7 +40,8 @@ class ItemRepositoryTest {
     private ItemRepository itemRepository;
 
     @Container
-    private static final PostgreSQLContainer<?> database = new PostgreSQLContainer<>(DockerImageName.parse("postgres:16"));
+    private static final PostgreSQLContainer<?> database = new PostgreSQLContainer<>(
+        DockerImageName.parse("postgres:16"));
 
     @DynamicPropertySource
     static void databaseProperties(DynamicPropertyRegistry registry) {
@@ -104,11 +105,12 @@ class ItemRepositoryTest {
     void findByOwnerId_whenOwnerHasMultipleItems_shouldReturnAllItems() {
         List<Item> foundItems = itemRepository.findByOwnerId(owner1.getId());
 
-        assertThat(foundItems, hasSize(3));
-        assertThat(foundItems,
+        assertThat("Should return 3 items for owner1", foundItems, hasSize(3));
+        assertThat("Should contain the specific items belonging to owner1", foundItems,
             containsInAnyOrder(item1Owner1, item2Owner1, item4Owner1Unavailable));
         assertTrue(
-            foundItems.stream().allMatch(item -> item.getOwner().getId().equals(owner1.getId())));
+            foundItems.stream().allMatch(item -> item.getOwner().getId().equals(owner1.getId())),
+            "All returned items should belong to owner1");
     }
 
     @Test
@@ -116,10 +118,12 @@ class ItemRepositoryTest {
     void findByOwnerId_whenMultipleOwnersExist_shouldReturnOnlyOwner1Items() {
         List<Item> foundItems = itemRepository.findByOwnerId(owner1.getId());
 
-        assertThat(foundItems, hasSize(3));
-        assertThat(foundItems,
+        assertThat("Should return 3 items for owner1 even with other owners present", foundItems,
+            hasSize(3));
+        assertThat("Should contain the specific items belonging to owner1", foundItems,
             containsInAnyOrder(item1Owner1, item2Owner1, item4Owner1Unavailable));
-        assertFalse(foundItems.contains(item3Owner2));
+        assertFalse(foundItems.contains(item3Owner2),
+            "Should not contain items belonging to other owners (owner2's item)");
     }
 
 
@@ -133,7 +137,8 @@ class ItemRepositoryTest {
 
         List<Item> foundItems = itemRepository.findByOwnerId(owner3.getId());
 
-        assertThat(foundItems, is(empty()));
+        assertThat("Should return an empty list for an owner with no items", foundItems,
+            is(empty()));
     }
 
     @Test
@@ -143,7 +148,8 @@ class ItemRepositoryTest {
 
         List<Item> foundItems = itemRepository.findByOwnerId(nonExistentOwnerId);
 
-        assertThat(foundItems, is(empty()));
+        assertThat("Should return an empty list for a non-existent owner ID", foundItems,
+            is(empty()));
     }
 
     @Test
@@ -151,8 +157,9 @@ class ItemRepositoryTest {
     void search_whenTextMatchesName_shouldReturnAvailableItems() {
         List<Item> foundItems = itemRepository.search("dRilL");
 
-        assertThat(foundItems, hasSize(1));
-        assertThat(foundItems.getFirst(), equalTo(item1Owner1));
+        assertThat("Should return exactly 1 item matching the name", foundItems, hasSize(1));
+        assertThat("The found item should be item1Owner1", foundItems.getFirst(),
+            equalTo(item1Owner1));
     }
 
     @Test
@@ -160,8 +167,9 @@ class ItemRepositoryTest {
     void search_whenTextMatchesDescription_shouldReturnAvailableItems() {
         List<Item> foundItems = itemRepository.search("aLuMinUm");
 
-        assertThat(foundItems, hasSize(1));
-        assertThat(foundItems.getFirst(), equalTo(item2Owner1));
+        assertThat("Should return exactly 1 item matching the description", foundItems, hasSize(1));
+        assertThat("The found item should be item2Owner1", foundItems.getFirst(),
+            equalTo(item2Owner1));
     }
 
     @Test
@@ -169,8 +177,10 @@ class ItemRepositoryTest {
     void search_whenTextMatchesPartial_shouldReturnAvailableItems() {
         List<Item> foundItems = itemRepository.search("drive");
 
-        assertThat(foundItems, hasSize(1));
-        assertThat(foundItems.getFirst(), equalTo(item3Owner2));
+        assertThat("Should return exactly 1 item matching the partial text 'drive'", foundItems,
+            hasSize(1));
+        assertThat("The found item should be item3Owner2", foundItems.getFirst(),
+            equalTo(item3Owner2));
     }
 
 
@@ -179,8 +189,9 @@ class ItemRepositoryTest {
     void search_whenTextMatchesMultiple_shouldReturnAllMatchingAvailableItems() {
         List<Item> foundItems = itemRepository.search("er");
 
-        assertThat(foundItems, hasSize(3));
-        assertThat(foundItems, containsInAnyOrder(item1Owner1, item2Owner1, item3Owner2));
+        assertThat("Should return all 3 available items matching 'er'", foundItems, hasSize(3));
+        assertThat("Should contain item1Owner1, item2Owner1, and item3Owner2", foundItems,
+            containsInAnyOrder(item1Owner1, item2Owner1, item3Owner2));
     }
 
     @Test
@@ -188,7 +199,8 @@ class ItemRepositoryTest {
     void search_whenTextMatchesUnavailableItem_shouldNotReturnIt() {
         List<Item> foundItems = itemRepository.search("sPraYer");
 
-        assertThat(foundItems, is(empty()));
+        assertThat("Should return an empty list when text only matches an unavailable item",
+            foundItems, is(empty()));
     }
 
 
@@ -197,16 +209,18 @@ class ItemRepositoryTest {
     void search_whenTextMatchesNothing_shouldReturnEmptyList() {
         List<Item> foundItems = itemRepository.search("nonexistentkeyword");
 
-        assertThat(foundItems, is(empty()));
+        assertThat("Should return an empty list when text matches nothing", foundItems,
+            is(empty()));
     }
 
     @Test
-    @DisplayName("search should return empty list when text is empty")
-    void search_whenTextIsEmpty_shouldReturnEmptyList() {
+    @DisplayName("search should return all available items when text is empty")
+    void search_whenTextIsEmpty_shouldReturnAllAvailableItems() {
         List<Item> foundItems = itemRepository.search("");
 
-        assertThat(foundItems, hasSize(3));
-        assertThat(foundItems, containsInAnyOrder(item1Owner1, item2Owner1, item3Owner2));
+        assertThat("Should return all available items when text is empty", foundItems, hasSize(3));
+        assertThat("Should contain item1Owner1, item2Owner1, and item3Owner2 when text is empty",
+            foundItems, containsInAnyOrder(item1Owner1, item2Owner1, item3Owner2));
     }
 
     @Test
@@ -221,7 +235,7 @@ class ItemRepositoryTest {
         assertThrows(DataIntegrityViolationException.class, () -> {
             itemRepository.save(itemWithNullName);
             entityManager.flush();
-        });
+        }, "Should throw DataIntegrityViolationException when saving item with null name");
     }
 
     @Test
@@ -236,7 +250,7 @@ class ItemRepositoryTest {
         assertThrows(DataIntegrityViolationException.class, () -> {
             itemRepository.save(itemWithNullDesc);
             entityManager.flush();
-        });
+        }, "Should throw DataIntegrityViolationException when saving item with null description");
     }
 
     @Test
@@ -251,7 +265,7 @@ class ItemRepositoryTest {
         assertThrows(DataIntegrityViolationException.class, () -> {
             itemRepository.save(itemWithNullAvail);
             entityManager.flush();
-        });
+        }, "Should throw DataIntegrityViolationException when saving item with null availability");
     }
 
     @Test
@@ -266,6 +280,6 @@ class ItemRepositoryTest {
         assertThrows(DataIntegrityViolationException.class, () -> {
             itemRepository.save(itemWithNullOwner);
             entityManager.flush();
-        });
+        }, "Should throw DataIntegrityViolationException when saving item with null owner");
     }
 }
