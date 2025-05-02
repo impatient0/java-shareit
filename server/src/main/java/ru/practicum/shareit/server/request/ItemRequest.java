@@ -1,7 +1,6 @@
 package ru.practicum.shareit.server.request;
 
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -37,8 +36,8 @@ public class ItemRequest {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "text", nullable = false)
-    private String text;
+    @Column(name = "description", nullable = false)
+    private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "requestor_id", referencedColumnName = "id", nullable = false)
@@ -49,7 +48,7 @@ public class ItemRequest {
     private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "request", fetch = FetchType.LAZY)
-    private Set<Item> responses = new HashSet<>();
+    private Set<Item> items = new HashSet<>();
 
     @Override
     public boolean equals(Object o) {
@@ -72,7 +71,7 @@ public class ItemRequest {
     public String toString() {
         return "ItemRequest{" +
             "id=" + id +
-            ", text='" + text + '\'' +
+            ", description='" + description + '\'' +
             ", createdAt=" + createdAt +
             '}';
     }
