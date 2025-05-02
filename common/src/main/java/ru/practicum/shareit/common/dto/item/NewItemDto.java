@@ -13,4 +13,5 @@ public class NewItemDto {
     private String description;
     @NotNull(message = "Item status must be set")
     private Boolean available;
+    private Long requestId;
 }
