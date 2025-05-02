@@ -1,6 +1,7 @@
 package ru.practicum.shareit.server.user.mapper;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -36,12 +37,14 @@ class UserMapperImplTest {
 
         UserDto userDto = userMapper.mapToDto(user);
 
-        assertThat("Mapped DTO should not be null", userDto, is(notNullValue()));
-        assertThat("Mapped DTO should have correct ID", userDto, hasProperty("id", equalTo(1L)));
-        assertThat("Mapped DTO should have correct name", userDto,
-            hasProperty("name", equalTo("Test User")));
-        assertThat("Mapped DTO should have correct email", userDto,
-            hasProperty("email", equalTo("test@example.com")));
+        assertThat("Mapped UserDto should not be null", userDto, is(notNullValue()));
+        assertThat("Mapped UserDto should have correct properties", userDto,
+            allOf(
+                hasProperty("id", equalTo(1L)),
+                hasProperty("name", equalTo("Test User")),
+                hasProperty("email", equalTo("test@example.com"))
+            )
+        );
     }
 
     @Test
@@ -51,13 +54,14 @@ class UserMapperImplTest {
 
         User user = userMapper.mapToUser(newUserDto);
 
-        assertThat("Mapped User should not be null", user, is(notNullValue()));
-        assertThat("Mapped User ID should be null (not set by mapper)", user,
-            hasProperty("id", is(nullValue())));
-        assertThat("Mapped User should have correct name", user,
-            hasProperty("name", equalTo("New User")));
-        assertThat("Mapped User should have correct email", user,
-            hasProperty("email", equalTo("new@example.com")));
+        assertThat("Mapped User entity should not be null", user, is(notNullValue()));
+        assertThat("Mapped User entity should have name and email from DTO and null ID", user,
+            allOf(
+                hasProperty("id", is(nullValue())),
+                hasProperty("name", equalTo("New User")),
+                hasProperty("email", equalTo("new@example.com"))
+            )
+        );
     }
 
     @Test
@@ -72,13 +76,15 @@ class UserMapperImplTest {
 
         User updatedUser = userMapper.updateUserFields(updateUserDto, existingUser);
 
-        assertThat("Should return the same user instance", updatedUser,
-            is(sameInstance(existingUser)));
-        assertThat("User ID should remain unchanged", updatedUser, hasProperty("id", equalTo(1L)));
-        assertThat("User name should be updated", updatedUser,
-            hasProperty("name", equalTo("New Name")));
-        assertThat("User email should be updated", updatedUser,
-            hasProperty("email", equalTo("new@example.com")));
+        assertThat("updateUserFields should return the same user instance that was passed",
+            updatedUser, is(sameInstance(existingUser)));
+        assertThat("Updated user should have name and email updated, ID unchanged", updatedUser,
+            allOf(
+                hasProperty("id", equalTo(1L)),
+                hasProperty("name", equalTo("New Name")),
+                hasProperty("email", equalTo("new@example.com"))
+            )
+        );
     }
 
     @Test
@@ -93,13 +99,16 @@ class UserMapperImplTest {
 
         User updatedUser = userMapper.updateUserFields(updateUserDto, existingUser);
 
-        assertThat("Should return the same user instance", updatedUser,
-            is(sameInstance(existingUser)));
-        assertThat("User ID should remain unchanged", updatedUser, hasProperty("id", equalTo(1L)));
-        assertThat("User name should be updated", updatedUser,
-            hasProperty("name", equalTo("New Name")));
-        assertThat("User email should remain unchanged", updatedUser,
-            hasProperty("email", equalTo("old@example.com")));
+        assertThat("updateUserFields should return the same user instance that was passed",
+            updatedUser, is(sameInstance(existingUser)));
+        assertThat("Updated user should have name updated, email unchanged, ID unchanged",
+            updatedUser,
+            allOf(
+                hasProperty("id", equalTo(1L)),
+                hasProperty("name", equalTo("New Name")),
+                hasProperty("email", equalTo("old@example.com"))
+            )
+        );
     }
 
     @Test
@@ -114,13 +123,15 @@ class UserMapperImplTest {
 
         User updatedUser = userMapper.updateUserFields(updateUserDto, existingUser);
 
-        assertThat("Should return the same user instance", updatedUser,
-            is(sameInstance(existingUser)));
-        assertThat("User ID should remain unchanged", updatedUser, hasProperty("id", equalTo(1L)));
-        assertThat("User name should remain unchanged", updatedUser,
-            hasProperty("name", equalTo("Old Name")));
-        assertThat("User email should be updated", updatedUser,
-            hasProperty("email", equalTo("new@example.com")));
+        assertThat("updateUserFields should return the same user instance that was passed",
+            updatedUser, is(sameInstance(existingUser)));
+        assertThat("Updated user should have email updated, name unchanged, ID unchanged",
+            updatedUser, allOf(
+                hasProperty("id", equalTo(1L)),
+                hasProperty("name", equalTo("Old Name")),
+                hasProperty("email", equalTo("new@example.com"))
+            )
+        );
     }
 
     @Test
@@ -135,13 +146,16 @@ class UserMapperImplTest {
 
         User updatedUser = userMapper.updateUserFields(updateUserDto, existingUser);
 
-        assertThat("Should return the same user instance", updatedUser,
-            is(sameInstance(existingUser)));
-        assertThat("User ID should remain unchanged", updatedUser, hasProperty("id", equalTo(1L)));
-        assertThat("User name should remain unchanged", updatedUser,
-            hasProperty("name", equalTo("Old Name")));
-        assertThat("User email should remain unchanged", updatedUser,
-            hasProperty("email", equalTo("old@example.com")));
+        assertThat("updateUserFields should return the same user instance that was passed",
+            updatedUser, is(sameInstance(existingUser)));
+        assertThat("Updated user fields should remain unchanged when DTO fields are null",
+            updatedUser,
+            allOf(
+                hasProperty("id", equalTo(1L)),
+                hasProperty("name", equalTo("Old Name")),
+                hasProperty("email", equalTo("old@example.com"))
+            )
+        );
     }
 
     @Test
@@ -157,12 +171,15 @@ class UserMapperImplTest {
 
         User updatedUser = userMapper.updateUserFields(updateUserDto, existingUser);
 
-        assertThat("Should return the same user instance", updatedUser,
-            is(sameInstance(existingUser)));
-        assertThat("User ID should remain unchanged", updatedUser, hasProperty("id", equalTo(1L)));
-        assertThat("User name should be updated to empty string", updatedUser,
-            hasProperty("name", equalTo("")));
-        assertThat("User email should be updated to empty string", updatedUser,
-            hasProperty("email", equalTo("")));
+        assertThat("updateUserFields should return the same user instance that was passed",
+            updatedUser, is(sameInstance(existingUser)));
+        assertThat("Updated user should have name and email updated to empty strings, ID unchanged",
+            updatedUser,
+            allOf(
+                hasProperty("id", equalTo(1L)),
+                hasProperty("name", equalTo("")),
+                hasProperty("email", equalTo(""))
+            )
+        );
     }
 }

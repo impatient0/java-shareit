@@ -1,6 +1,7 @@
 package ru.practicum.shareit.server.item.mapper;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -59,15 +60,15 @@ class CommentMapperImplTest {
     void mapToDto_whenCommentIsValid_shouldReturnCorrectCommentDto() {
         CommentDto commentDto = commentMapper.mapToDto(testComment);
 
-        assertThat("Mapped DTO should not be null", commentDto, is(notNullValue()));
-        assertThat("Mapped DTO should have correct ID", commentDto,
-            hasProperty("id", equalTo(100L)));
-        assertThat("Mapped DTO should have correct text", commentDto,
-            hasProperty("text", equalTo("This is a test comment.")));
-        assertThat("Mapped DTO should have correct author name", commentDto,
-            hasProperty("authorName", equalTo("Author Name")));
-        assertThat("Mapped DTO should have correct creation timestamp as String", commentDto,
-            hasProperty("created", equalTo(testTimestamp.toString())));
+        assertThat("Mapped CommentDto should not be null", commentDto, is(notNullValue()));
+        assertThat("Mapped CommentDto should have correct properties from Comment", commentDto,
+            allOf(
+                hasProperty("id", equalTo(100L)),
+                hasProperty("text", equalTo("This is a test comment.")),
+                hasProperty("authorName", equalTo("Author Name")),
+                hasProperty("createdAt", equalTo(testTimestamp.toString()))
+            )
+        );
     }
 
     @Test
@@ -78,16 +79,17 @@ class CommentMapperImplTest {
 
         Comment comment = commentMapper.mapToComment(newCommentDto);
 
-        assertThat("Mapped Comment should not be null", comment, is(notNullValue()));
-        assertThat("Mapped Comment should have correct text", comment,
-            hasProperty("text", equalTo("New comment text.")));
-        assertThat("Mapped Comment ID should be null", comment, hasProperty("id", is(nullValue())));
-        assertThat("Mapped Comment Item should be null", comment,
-            hasProperty("item", is(nullValue())));
-        assertThat("Mapped Comment Author should be null", comment,
-            hasProperty("author", is(nullValue())));
-        assertThat("Mapped Comment CreatedAt should be null", comment,
-            hasProperty("createdAt", is(nullValue())));
+        assertThat("Mapped Comment entity should not be null", comment, is(notNullValue()));
+        assertThat("Mapped Comment entity should have text from DTO and null other properties",
+            comment,
+            allOf(
+                hasProperty("text", equalTo("New comment text.")),
+                hasProperty("id", is(nullValue())),
+                hasProperty("item", is(nullValue())),
+                hasProperty("author", is(nullValue())),
+                hasProperty("createdAt", is(nullValue()))
+            )
+        );
     }
 
     @Test
@@ -98,8 +100,8 @@ class CommentMapperImplTest {
 
         Comment comment = commentMapper.mapToComment(newCommentDto);
 
-        assertThat("Mapped Comment should not be null", comment, is(notNullValue()));
-        assertThat("Mapped Comment should have empty text", comment,
+        assertThat("Mapped Comment entity should not be null", comment, is(notNullValue()));
+        assertThat("Mapped Comment entity should have empty text when DTO text is empty", comment,
             hasProperty("text", equalTo("")));
     }
 
@@ -111,8 +113,8 @@ class CommentMapperImplTest {
 
         Comment comment = commentMapper.mapToComment(newCommentDto);
 
-        assertThat("Mapped Comment should not be null", comment, is(notNullValue()));
-        assertThat("Mapped Comment should have null text", comment,
+        assertThat("Mapped Comment entity should not be null", comment, is(notNullValue()));
+        assertThat("Mapped Comment entity should have null text when DTO text is null", comment,
             hasProperty("text", is(nullValue())));
     }
 }
