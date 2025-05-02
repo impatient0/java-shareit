@@ -1,10 +1,9 @@
 package ru.practicum.shareit.server.item.mapper;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
@@ -12,27 +11,25 @@ import static org.hamcrest.Matchers.sameInstance;
 import static org.hamcrest.beans.HasPropertyWithValue.hasProperty;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
-import java.time.LocalDateTime;
 import java.util.Collections;
-import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ru.practicum.shareit.common.dto.item.CommentDto;
 import ru.practicum.shareit.common.dto.item.ItemDto;
+import ru.practicum.shareit.common.dto.item.ItemShortDto;
 import ru.practicum.shareit.common.dto.item.ItemWithBookingInfoDto;
 import ru.practicum.shareit.common.dto.item.NewItemDto;
 import ru.practicum.shareit.common.dto.item.UpdateItemDto;
 import ru.practicum.shareit.server.item.Comment;
 import ru.practicum.shareit.server.item.Item;
+import ru.practicum.shareit.server.request.ItemRequest;
 import ru.practicum.shareit.server.user.User;
 
 
@@ -48,6 +45,11 @@ class ItemMapperImplTest {
 
     private Item testItem;
     private User testOwner;
+    private ItemRequest testItemRequest;
+
+    private final Long ownerId = 1L;
+    private final Long itemId = 10L;
+    private final Long requestId = 50L;
 
     @BeforeEach
     void setUp() {
@@ -55,6 +57,10 @@ class ItemMapperImplTest {
         testOwner.setId(1L);
         testOwner.setName("Owner Name");
         testOwner.setEmail("owner@example.com");
+
+        testItemRequest = new ItemRequest();
+        testItemRequest.setId(requestId);
+        testItemRequest.setDescription("Need this item");
 
         testItem = new Item();
         testItem.setId(10L);
@@ -65,219 +71,286 @@ class ItemMapperImplTest {
         testItem.setComments(Collections.emptySet());
     }
 
-    @Test
-    @DisplayName("mapToDto should map Item to ItemDto correctly")
-    void mapToDto_whenItemIsValid_shouldReturnCorrectItemDto() {
 
-        ItemDto itemDto = itemMapper.mapToDto(testItem);
+    @Nested
+    @DisplayName("mapToDto Tests")
+    class MapToDtoTests {
 
-        assertThat("Mapped DTO should not be null", itemDto, is(notNullValue()));
-        assertThat("Mapped DTO should have correct ID", itemDto, hasProperty("id", equalTo(10L)));
-        assertThat("Mapped DTO should have correct name", itemDto,
-            hasProperty("name", equalTo("Test Item")));
-        assertThat("Mapped DTO should have correct description", itemDto,
-            hasProperty("description", equalTo("Test Description")));
-        assertThat("Mapped DTO should have correct availability", itemDto,
-            hasProperty("available", equalTo(true)));
+        @Test
+        @DisplayName("mapToDto should map Item to ItemDto correctly")
+        void mapToDto_whenItemIsValid_shouldReturnCorrectItemDto() {
+
+            ItemDto itemDto = itemMapper.mapToDto(testItem);
+
+            assertThat("Mapped ItemDto should not be null", itemDto, is(notNullValue()));
+            assertThat("Mapped ItemDto should have correct properties", itemDto,
+                allOf(
+                    hasProperty("id", equalTo(itemId)),
+                    hasProperty("name", equalTo("Test Item")),
+                    hasProperty("description", equalTo("Test Description")),
+                    hasProperty("available", equalTo(true))
+                )
+            );
+        }
     }
 
-    @Test
-    @DisplayName("mapToItemWithBookingInfoDto should map Item with no comments correctly")
-    void mapToItemWithBookingInfoDto_whenItemHasNoComments_shouldReturnDtoWithEmptyComments() {
+    @Nested
+    @DisplayName("mapToItemWithBookingInfoDto Tests")
+    class MapToItemWithBookingInfoDtoTests {
 
-        ItemWithBookingInfoDto resultDto = itemMapper.mapToItemWithBookingInfoDto(testItem);
+        @Test
+        @DisplayName("mapToItemWithBookingInfoDto should map Item with no comments correctly")
+        void mapToItemWithBookingInfoDto_whenItemHasNoComments_shouldReturnDtoWithEmptyComments() {
+            ItemWithBookingInfoDto resultDto = itemMapper.mapToItemWithBookingInfoDto(testItem);
 
-        assertThat("Mapped DTO should not be null", resultDto, is(notNullValue()));
-        assertThat("Mapped DTO should have correct ID", resultDto, hasProperty("id", equalTo(10L)));
-        assertThat("Mapped DTO should have correct name", resultDto,
-            hasProperty("name", equalTo("Test Item")));
-        assertThat("Mapped DTO should have correct description", resultDto,
-            hasProperty("description", equalTo("Test Description")));
-        assertThat("Mapped DTO should have correct availability", resultDto,
-            hasProperty("available", equalTo(true)));
-        assertThat("Mapped DTO lastBooking should be null", resultDto,
-            hasProperty("lastBooking", is(nullValue())));
-        assertThat("Mapped DTO nextBooking should be null", resultDto,
-            hasProperty("nextBooking", is(nullValue())));
-        assertThat("Mapped DTO comments should be an empty set", resultDto.getComments(),
-            is(empty()));
-        assertThat("CommentMapper should not be called", true);
-        verify(commentMapper, never()).mapToDto(any(Comment.class));
-    }
+            assertThat("Mapped ItemWithBookingInfoDto should not be null", resultDto,
+                is(notNullValue()));
+            assertThat(
+                "Mapped ItemWithBookingInfoDto should have correct properties and null bookings",
+                resultDto,
+                allOf(
+                    hasProperty("id", equalTo(itemId)),
+                    hasProperty("name", equalTo("Test Item")),
+                    hasProperty("description", equalTo("Test Description")),
+                    hasProperty("available", equalTo(true)),
+                    hasProperty("lastBooking", is(nullValue())),
+                    hasProperty("nextBooking", is(nullValue()))
+                )
+            );
+            assertThat("Mapped ItemWithBookingInfoDto comments list should be empty",
+                resultDto.getComments(), is(empty()));
 
-    @Test
-    @DisplayName("mapToItemWithBookingInfoDto should map Item with comments correctly")
-    void mapToItemWithBookingInfoDto_whenItemHasComments_shouldMapCommentsUsingCommentMapper() {
-        Comment comment1 = new Comment();
-        comment1.setId(101L);
-        comment1.setText("Comment 1 text");
-        comment1.setItem(testItem);
-        comment1.setAuthor(testOwner);
-        comment1.setCreatedAt(LocalDateTime.now().minusDays(1));
+            verify(commentMapper, never()).mapToDto(any(Comment.class));
+        }
 
-        Comment comment2 = new Comment();
-        comment2.setId(102L);
-        comment2.setText("Comment 2 text");
-        comment2.setItem(testItem);
-        comment2.setAuthor(testOwner);
-        comment2.setCreatedAt(LocalDateTime.now());
+        @Nested
+        @DisplayName("mapToItem Tests")
+        class MapToItemTests {
 
-        testItem.setComments(Set.of(comment1, comment2));
+            @Test
+            @DisplayName("mapToItem should map NewItemDto to Item correctly")
+            void mapToItem_whenNewItemDtoIsValid_shouldReturnCorrectItem() {
+                NewItemDto newItemDto = new NewItemDto();
+                newItemDto.setName("New Item Name");
+                newItemDto.setDescription("New Item Description");
+                newItemDto.setAvailable(true);
+                newItemDto.setRequestId(null);
 
-        CommentDto commentDto1 = new CommentDto(101L, "Comment 1 text", 10L, "Owner Name",
-            LocalDateTime.now().toString());
-        CommentDto commentDto2 = new CommentDto(102L, "Comment 2 text", 10L, "Owner Name",
-            LocalDateTime.now().toString());
+                Item item = itemMapper.mapToItem(newItemDto);
 
-        when(commentMapper.mapToDto(comment1)).thenReturn(commentDto1);
-        when(commentMapper.mapToDto(comment2)).thenReturn(commentDto2);
+                assertThat("Mapped Item should not be null", item, is(notNullValue()));
+                assertThat("Mapped Item should have correct properties from DTO and default values",
+                    item,
+                    allOf(
+                        hasProperty("id", is(nullValue())),
+                        hasProperty("name", equalTo("New Item Name")),
+                        hasProperty("description", equalTo("New Item Description")),
+                        hasProperty("available", equalTo(true)),
+                        hasProperty("owner", is(nullValue())),
+                        hasProperty("request", is(nullValue()))
+                    )
+                );
+                assertThat("Mapped Item comments collection should be empty", item.getComments(),
+                    is(empty()));
+            }
+        }
 
-        ItemWithBookingInfoDto resultDto = itemMapper.mapToItemWithBookingInfoDto(testItem);
+        @Nested
+        @DisplayName("updateItemFields Tests")
+        class UpdateItemFieldsTests {
 
-        assertThat("Mapped DTO should not be null", resultDto, is(notNullValue()));
-        assertThat("Mapped DTO should have correct ID", resultDto, hasProperty("id", equalTo(10L)));
-        assertThat("Mapped DTO should have correct name", resultDto,
-            hasProperty("name", equalTo("Test Item")));
-        assertThat("Mapped DTO should have correct description", resultDto,
-            hasProperty("description", equalTo("Test Description")));
-        assertThat("Mapped DTO should have correct availability", resultDto,
-            hasProperty("available", equalTo(true)));
-        assertThat("Mapped DTO lastBooking should be null", resultDto,
-            hasProperty("lastBooking", is(nullValue())));
-        assertThat("Mapped DTO nextBooking should be null", resultDto,
-            hasProperty("nextBooking", is(nullValue())));
-        assertThat("Mapped DTO comments set should not be null", resultDto.getComments(),
-            is(notNullValue()));
-        assertThat("Mapped DTO comments set should have correct size", resultDto.getComments(),
-            hasSize(2));
-        assertThat("Mapped DTO comments set should contain mapped DTOs", resultDto.getComments(),
-            containsInAnyOrder(commentDto1, commentDto2));
+            @Test
+            @DisplayName("updateItemFields should update all fields when DTO provides all")
+            void updateItemFields_whenDtoHasAllFields_shouldUpdateAllFields() {
+                UpdateItemDto updateDto = new UpdateItemDto("Updated Name", "Updated Description",
+                    false);
 
-        verify(commentMapper, times(1)).mapToDto(comment1);
-        verify(commentMapper, times(1)).mapToDto(comment2);
-    }
+                Item updatedItem = itemMapper.updateItemFields(updateDto, testItem);
 
-    @Test
-    @DisplayName("mapToItem should map NewItemDto to Item correctly")
-    void mapToItem_whenNewItemDtoIsValid_shouldReturnCorrectItem() {
-        NewItemDto newItemDto = new NewItemDto();
-        newItemDto.setName("New Item Name");
-        newItemDto.setDescription("New Item Description");
-        newItemDto.setAvailable(true);
+                assertThat("updateItemFields should return the same item instance that was passed",
+                    updatedItem, is(sameInstance(testItem)));
+                assertThat(
+                    "Updated Item should have all fields updated from DTO, except immutable ones",
+                    updatedItem,
+                    allOf(
+                        hasProperty("id", equalTo(itemId)),
+                        hasProperty("name", equalTo("Updated Name")),
+                        hasProperty("description", equalTo("Updated Description")),
+                        hasProperty("available", equalTo(false)),
+                        hasProperty("owner", sameInstance(testOwner)),
+                        hasProperty("request", is(nullValue()))
+                    )
+                );
+            }
 
-        Item item = itemMapper.mapToItem(newItemDto);
+            @Test
+            @DisplayName("updateItemFields should update only name when DTO provides only name")
+            void updateItemFields_whenDtoHasOnlyName_shouldUpdateOnlyName() {
+                UpdateItemDto updateDto = new UpdateItemDto("Updated Name", null, null);
 
-        assertThat("Mapped Item should not be null", item, is(notNullValue()));
-        assertThat("Mapped Item ID should be null (not set by mapper)", item,
-            hasProperty("id", is(nullValue())));
-        assertThat("Mapped Item name should be correct", item,
-            hasProperty("name", equalTo("New Item Name")));
-        assertThat("Mapped Item description should be correct", item,
-            hasProperty("description", equalTo("New Item Description")));
-        assertThat("Mapped Item availability should be correct", item,
-            hasProperty("available", equalTo(true)));
-        assertThat("Mapped Item owner should be null", item, hasProperty("owner", is(nullValue())));
-        assertThat("Mapped Item comments should be empty", item.getComments(), is(empty()));
-    }
+                Item updatedItem = itemMapper.updateItemFields(updateDto, testItem);
 
-    @Test
-    @DisplayName("updateItemFields should update all fields when DTO provides all")
-    void updateItemFields_whenDtoHasAllFields_shouldUpdateAllFields() {
-        UpdateItemDto updateDto = new UpdateItemDto("Updated Name", "Updated Description", false);
+                assertThat("updateItemFields should return the same item instance that was passed",
+                    updatedItem, is(sameInstance(testItem)));
+                assertThat("Updated Item should have name updated, other fields unchanged",
+                    updatedItem,
+                    allOf(
+                        hasProperty("id", equalTo(itemId)),
+                        hasProperty("name", equalTo("Updated Name")),
+                        hasProperty("description", equalTo("Test Description")),
+                        hasProperty("available", equalTo(true))
+                    )
+                );
+            }
 
-        Item updatedItem = itemMapper.updateItemFields(updateDto, testItem);
+            @Test
+            @DisplayName("updateItemFields should update only description when DTO provides only "
+                + "description")
+            void updateItemFields_whenDtoHasOnlyDescription_shouldUpdateOnlyDescription() {
+                UpdateItemDto updateDto = new UpdateItemDto(null, "Updated Description", null);
 
-        assertThat("Should return the same item instance", updatedItem, is(sameInstance(testItem)));
-        assertThat("Item ID should remain unchanged", updatedItem, hasProperty("id", equalTo(10L)));
-        assertThat("Item name should be updated", updatedItem,
-            hasProperty("name", equalTo("Updated Name")));
-        assertThat("Item description should be updated", updatedItem,
-            hasProperty("description", equalTo("Updated Description")));
-        assertThat("Item availability should be updated", updatedItem,
-            hasProperty("available", equalTo(false)));
-        assertThat("Item owner should remain unchanged", updatedItem,
-            hasProperty("owner", sameInstance(testOwner)));
-    }
+                Item updatedItem = itemMapper.updateItemFields(updateDto, testItem);
 
-    @Test
-    @DisplayName("updateItemFields should update only name when DTO provides only name")
-    void updateItemFields_whenDtoHasOnlyName_shouldUpdateOnlyName() {
-        UpdateItemDto updateDto = new UpdateItemDto("Updated Name", null, null);
+                assertThat("updateItemFields should return the same item instance that was passed",
+                    updatedItem, is(sameInstance(testItem)));
+                assertThat("Updated Item should have description updated, other fields unchanged",
+                    updatedItem,
+                    allOf(
+                        hasProperty("id", equalTo(itemId)),
+                        hasProperty("name", equalTo("Test Item")),
+                        hasProperty("description", equalTo("Updated Description")),
+                        hasProperty("available", equalTo(true))
+                    )
+                );
+            }
 
-        Item updatedItem = itemMapper.updateItemFields(updateDto, testItem);
+            @Test
+            @DisplayName("updateItemFields should update only availability when DTO provides only "
+                + "availability")
+            void updateItemFields_whenDtoHasOnlyAvailability_shouldUpdateOnlyAvailability() {
+                UpdateItemDto updateDto = new UpdateItemDto(null, null, false);
 
-        assertThat("Should return the same item instance", updatedItem, is(sameInstance(testItem)));
-        assertThat("Item name should be updated", updatedItem,
-            hasProperty("name", equalTo("Updated Name")));
-        assertThat("Item description should remain unchanged", updatedItem,
-            hasProperty("description", equalTo("Test Description")));
-        assertThat("Item availability should remain unchanged", updatedItem,
-            hasProperty("available", equalTo(true)));
-    }
+                Item updatedItem = itemMapper.updateItemFields(updateDto, testItem);
 
-    @Test
-    @DisplayName(
-        "updateItemFields should update only description when DTO provides only " + "description")
-    void updateItemFields_whenDtoHasOnlyDescription_shouldUpdateOnlyDescription() {
-        UpdateItemDto updateDto = new UpdateItemDto(null, "Updated Description", null);
+                assertThat("updateItemFields should return the same item instance that was passed",
+                    updatedItem, is(sameInstance(testItem)));
+                assertThat("Updated Item should have availability updated, other fields unchanged",
+                    updatedItem,
+                    allOf(
+                        hasProperty("id", equalTo(itemId)),
+                        hasProperty("name", equalTo("Test Item")),
+                        hasProperty("description", equalTo("Test Description")),
+                        hasProperty("available", equalTo(false))
+                    )
+                );
+            }
 
-        Item updatedItem = itemMapper.updateItemFields(updateDto, testItem);
+            @Test
+            @DisplayName("updateItemFields should not update fields when DTO provides null for them")
+            void updateItemFields_whenDtoHasNullFields_shouldNotUpdateFields() {
+                UpdateItemDto updateDto = new UpdateItemDto(null, null, null);
 
-        assertThat("Should return the same item instance", updatedItem, is(sameInstance(testItem)));
-        assertThat("Item name should remain unchanged", updatedItem,
-            hasProperty("name", equalTo("Test Item")));
-        assertThat("Item description should be updated", updatedItem,
-            hasProperty("description", equalTo("Updated Description")));
-        assertThat("Item availability should remain unchanged", updatedItem,
-            hasProperty("available", equalTo(true)));
-    }
+                Item updatedItem = itemMapper.updateItemFields(updateDto, testItem);
 
-    @Test
-    @DisplayName(
-        "updateItemFields should update only availability when DTO provides only " + "availability")
-    void updateItemFields_whenDtoHasOnlyAvailability_shouldUpdateOnlyAvailability() {
-        UpdateItemDto updateDto = new UpdateItemDto(null, null, false);
+                assertThat("updateItemFields should return the same item instance that was passed",
+                    updatedItem, is(sameInstance(testItem)));
+                assertThat("Updated Item fields should remain unchanged when DTO fields are null",
+                    updatedItem,
+                    allOf(
+                        hasProperty("id", equalTo(itemId)),
+                        hasProperty("name", equalTo("Test Item")),
+                        hasProperty("description", equalTo("Test Description")),
+                        hasProperty("available", equalTo(true))
+                    )
+                );
+            }
 
-        Item updatedItem = itemMapper.updateItemFields(updateDto, testItem);
+            @Test
+            @DisplayName("updateItemFields should handle empty string updates for name and description")
+            void updateItemFields_whenDtoHasEmptyStrings_shouldUpdateFieldsWithEmptyStrings() {
+                UpdateItemDto updateDto = new UpdateItemDto("", "", null);
 
-        assertThat("Should return the same item instance", updatedItem, is(sameInstance(testItem)));
-        assertThat("Item name should remain unchanged", updatedItem,
-            hasProperty("name", equalTo("Test Item")));
-        assertThat("Item description should remain unchanged", updatedItem,
-            hasProperty("description", equalTo("Test Description")));
-        assertThat("Item availability should be updated", updatedItem,
-            hasProperty("available", equalTo(false)));
-    }
+                Item updatedItem = itemMapper.updateItemFields(updateDto, testItem);
 
-    @Test
-    @DisplayName("updateItemFields should not update fields when DTO provides null for them")
-    void updateItemFields_whenDtoHasNullFields_shouldNotUpdateFields() {
-        UpdateItemDto updateDto = new UpdateItemDto(null, null, null);
+                assertThat("updateItemFields should return the same item instance that was passed",
+                    updatedItem, is(sameInstance(testItem)));
+                assertThat("Updated Item should have name and description updated to empty strings",
+                    updatedItem,
+                    allOf(
+                        hasProperty("id", equalTo(itemId)),
+                        hasProperty("name", equalTo("")),
+                        hasProperty("description", equalTo("")),
+                        hasProperty("available", equalTo(true))
+                    )
+                );
+            }
+        }
 
-        Item updatedItem = itemMapper.updateItemFields(updateDto, testItem);
+        @Nested
+        @DisplayName("mapToShortDto Tests")
+        class MapToShortDtoTests {
 
-        assertThat("Should return the same item instance", updatedItem, is(sameInstance(testItem)));
-        assertThat("Item name should remain unchanged", updatedItem,
-            hasProperty("name", equalTo("Test Item")));
-        assertThat("Item description should remain unchanged", updatedItem,
-            hasProperty("description", equalTo("Test Description")));
-        assertThat("Item availability should remain unchanged", updatedItem,
-            hasProperty("available", equalTo(true)));
-    }
+            @Test
+            @DisplayName("mapToShortDto should map Item with Request correctly")
+            void mapToShortDto_whenItemHasRequest_shouldReturnCorrectShortDto() {
+                testItem.setRequest(testItemRequest);
 
-    @Test
-    @DisplayName("updateItemFields should handle empty string updates for name and description")
-    void updateUserFields_whenDtoHasEmptyStrings_shouldUpdateFieldsWithEmptyStrings() {
-        UpdateItemDto updateDto = new UpdateItemDto("", "", null);
+                ItemShortDto shortDto = itemMapper.mapToShortDto(testItem);
 
-        Item updatedItem = itemMapper.updateItemFields(updateDto, testItem);
+                assertThat("Mapped ItemShortDto should not be null", shortDto, is(notNullValue()));
+                assertThat("Mapped ItemShortDto should have correct properties including requestId",
+                    shortDto,
+                    allOf(
+                        hasProperty("id", equalTo(itemId)),
+                        hasProperty("name", equalTo("Test Item")),
+                        hasProperty("description", equalTo("Test Description")),
+                        hasProperty("available", equalTo(true)),
+                        hasProperty("ownerId", equalTo(ownerId)),
+                        hasProperty("requestId", equalTo(requestId))
+                    )
+                );
+            }
 
-        assertThat("Should return the same item instance", updatedItem, is(sameInstance(testItem)));
-        assertThat("Item name should be updated to empty string", updatedItem,
-            hasProperty("name", equalTo("")));
-        assertThat("Item description should be updated to empty string", updatedItem,
-            hasProperty("description", equalTo("")));
-        assertThat("Item availability should remain unchanged", updatedItem,
-            hasProperty("available", equalTo(true)));
+            @Test
+            @DisplayName("mapToShortDto should map Item without Request correctly")
+            void mapToShortDto_whenItemHasNoRequest_shouldReturnDtoWithNullRequestId() {
+                ItemShortDto shortDto = itemMapper.mapToShortDto(testItem);
+
+                assertThat("Mapped ItemShortDto should not be null", shortDto, is(notNullValue()));
+                assertThat("Mapped ItemShortDto should have correct properties and null requestId",
+                    shortDto,
+                    allOf(
+                        hasProperty("id", equalTo(itemId)),
+                        hasProperty("name", equalTo("Test Item")),
+                        hasProperty("description", equalTo("Test Description")),
+                        hasProperty("available", equalTo(true)),
+                        hasProperty("ownerId", equalTo(ownerId)),
+                        hasProperty("requestId", is(nullValue()))
+                    )
+                );
+            }
+
+            @Test
+            @DisplayName("mapToShortDto should handle null Owner (if possible)")
+            void mapToShortDto_whenOwnerIsNull_shouldReturnDtoWithNullOwnerId() {
+                testItem.setOwner(null);
+
+                ItemShortDto shortDto = itemMapper.mapToShortDto(testItem);
+
+                assertThat("Mapped ItemShortDto should not be null", shortDto, is(notNullValue()));
+                assertThat("Mapped ItemShortDto should have null ownerId when item owner is null",
+                    shortDto,
+                    allOf(
+                        hasProperty("id", equalTo(itemId)),
+                        hasProperty("name", equalTo("Test Item")),
+                        hasProperty("description", equalTo("Test Description")),
+                        hasProperty("available", equalTo(true)),
+                        hasProperty("ownerId", is(nullValue()))
+                    )
+                );
+                assertThat("Mapped ItemShortDto requestId should be null when item request is null",
+                    shortDto, hasProperty("requestId", is(nullValue())));
+            }
+        }
     }
 }
