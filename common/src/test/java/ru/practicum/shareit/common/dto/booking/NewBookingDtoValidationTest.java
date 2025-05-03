@@ -16,7 +16,7 @@ import static org.hamcrest.Matchers.*;
 import static org.hamcrest.beans.HasPropertyWithValue.hasProperty;
 
 @DisplayName("NewBookingDto Validation Tests")
-class NewBookingDtoTest {
+class NewBookingDtoValidationTest {
 
     private Validator validator;
 

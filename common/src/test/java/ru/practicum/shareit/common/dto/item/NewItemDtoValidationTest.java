@@ -20,7 +20,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 @DisplayName("NewItemDto Validation Tests")
-class NewItemDtoTest {
+class NewItemDtoValidationTest {
 
     private Validator validator;
 

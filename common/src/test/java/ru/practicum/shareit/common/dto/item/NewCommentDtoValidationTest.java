@@ -19,7 +19,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 @DisplayName("NewCommentDto Validation Tests")
-class NewCommentDtoTest {
+class NewCommentDtoValidationTest {
 
     private Validator validator;
 
